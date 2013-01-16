@@ -36,8 +36,8 @@ module SafeYAML
 
     def transform_value(value)
       if value.is_a?(String)
-        if value.match(/^:\s+$/)
-          return value.to_sym
+        if value.match(/^:\w+$/)
+          return value[1..-1].to_sym
 
         elsif value.match(/^\d+$/)
           return value.to_i

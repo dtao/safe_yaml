@@ -9,6 +9,7 @@ describe YAML do
         foo:
           number: 1
           string: Hello, there!
+          symbol: :blah
           sequence:
             - hi
             - bye
@@ -18,6 +19,7 @@ describe YAML do
         "foo" => {
           "number" => 1,
           "string" => "Hello, there!",
+          "symbol" => :blah,
           "sequence" => ["hi", "bye"]
         }
       }
