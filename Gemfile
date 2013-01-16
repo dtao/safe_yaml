@@ -1,5 +1,7 @@
 source :rubygems
 
+gemspec
+
 group :development do
   gem "heredoc_unindent"
   gem "rake"
