@@ -5,28 +5,104 @@ require "handler"
 describe SafeYAML::Handler do
   let(:handler) { SafeYAML::Handler.new }
   let(:parser) { Psych::Parser.new(handler) }
+  let(:result) { handler.result }
 
-  describe "basic usage" do
-    it "will construct simple hashes or arrays from maps and sequences" do
-      parser.parse <<-YAML.unindent
-        foo:
-          - bar
-          - baz
-      YAML
-
-      handler.result.should == { "foo" => ["bar", "baz"] }
-    end
+  def parse(yaml)
+    parser.parse(yaml.unindent)
   end
 
-  describe "more complex usage" do
-    it "deals just fine with nested maps" do
-      parser.parse <<-YAML.unindent
-        foo:
-          bar:
-            marco: polo
-      YAML
+  it "translates most values to strings" do
+    parser.parse "key: value"
+    result.should == { "key" => "value" }
+  end
 
-      handler.result.should == { "foo" => { "bar" => { "marco" => "polo" } } }
-    end
+  it "translates values starting with ':' to symbols" do
+    parser.parse ":key: value"
+    result.should == { :key => "value" }
+  end
+
+  it "translates valid integral numbers to integers" do
+    parser.parse "integer: 1"
+    result.should == { "integer" => 1 }
+  end
+
+  it "translates valid decimal numbers to floats" do
+    parser.parse "float: 3.14"
+    result.should == { "float" => 3.14 }
+  end
+
+  it "applies the same transformations to values as to keys" do
+    parse <<-YAML
+      string: value
+      symbol: :value
+      integer: 1
+      float: 3.14
+    YAML
+
+    result.should == {
+      "string" => "value",
+      "symbol" => :value,
+      "integer" => 1,
+      "float" => 3.14
+    }
+  end
+
+  it "translates sequences to arrays" do
+    parse <<-YAML
+      - foo
+      - bar
+      - baz
+    YAML
+
+    result.should == ["foo", "bar", "baz"]
+  end
+
+  it "applies the same transformations to elements in sequences as to all values" do
+    parse <<-YAML
+      - string
+      - :symbol
+      - 1
+      - 3.14
+    YAML
+
+    result.should == ["string", :symbol, 1, 3.14]
+  end
+
+  it "translates maps to hashes" do
+    parse <<-YAML
+      foo: blah
+      bar: glah
+      baz: flah
+    YAML
+
+    result.should == {
+      "foo" => "blah",
+      "bar" => "glah",
+      "baz" => "flah"
+    }
+  end
+
+  it "applies the same transformations to values in hashes as to all values" do
+    parse <<-YAML
+      foo: :symbol
+      bar: 1
+      baz: 3.14
+    YAML
+
+    result.should == {
+      "foo" => :symbol,
+      "bar" => 1,
+      "baz" => 3.14
+    }
+  end
+
+  it "deals just fine with nested maps" do
+    parse <<-YAML
+      foo:
+        bar:
+          marco: polo
+    YAML
+
+    result.should == { "foo" => { "bar" => { "marco" => "polo" } } }
   end
 end

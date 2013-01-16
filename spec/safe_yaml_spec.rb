@@ -9,9 +9,11 @@ describe YAML do
   end
 
   describe "load" do
-    it "allows exploits through objects defined in YAML w/ !ruby/hash" do
-      YAML.load "--- !ruby/hash:ExploitableBackDoor\nfoo: bar\n"
-      ExploitableBackDoor.should be_exploited
+    if RUBY_VERSION >= "1.9.3"
+      it "allows exploits through objects defined in YAML w/ !ruby/hash" do
+        YAML.load "--- !ruby/hash:ExploitableBackDoor\nfoo: bar\n"
+        ExploitableBackDoor.should be_exploited
+      end
     end
 
     it "allows exploits through objects defined in YAML w/ !ruby/object" do

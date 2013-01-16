@@ -1,4 +1,4 @@
-require "psych"
+require "yaml"
 
 module SafeYAML
   class Handler < Psych::Handler
