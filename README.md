@@ -27,7 +27,7 @@ If your application were to contain code like this and use `YAML.load` anywhere 
     > --- !ruby/hash:ExploitableMap
     > "foo; end; puts %(I'm in yr system!); def bar": "baz"
     > EOYAML
-    => nil
+    => "--- !ruby/hash:ExploitableMap\n\"foo; end; puts %(I'm in yr system!); def bar\": \"baz\"\n"
     
     > YAML.load(yaml)
     I'm in yr system!
