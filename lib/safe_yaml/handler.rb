@@ -1,3 +1,4 @@
+require "psych"
 require "yaml"
 
 module SafeYAML
