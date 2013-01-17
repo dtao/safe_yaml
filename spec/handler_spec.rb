@@ -31,6 +31,27 @@ describe SafeYAML::Handler do
     result.should == { "float" => 3.14 }
   end
 
+  it "translates valid true/false values to booleans" do
+    parser.parse <<-YAML
+      - yes
+      - true
+      - no
+      - false
+    YAML
+
+    result.should == [true, true, false, false]
+  end
+
+  it "translates valid nulls to nil" do
+    parser.parse <<-YAML
+      - 
+      - ~
+      - null
+    YAML
+
+    result.should == [nil] * 3
+  end
+
   it "applies the same transformations to values as to keys" do
     parse <<-YAML
       string: value

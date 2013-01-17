@@ -2,6 +2,18 @@ require "yaml"
 
 module SafeYAML
   class Handler < Psych::Handler
+    PREDEFINED_VALUES = {
+      ""      => nil,
+      "~"     => nil,
+      "null"  => nil,
+      "yes"   => true,
+      "on"    => true,
+      "true"  => true,
+      "no"    => false,
+      "off"   => false,
+      "false" => false
+    }.freeze
+
     def initialize
       @anchors = {}
       @stack = []
@@ -41,7 +53,10 @@ module SafeYAML
 
     def transform_value(value)
       if value.is_a?(String)
-        if value.match(/^:\w+$/)
+        if PREDEFINED_VALUES.include?(value.downcase)
+          return PREDEFINED_VALUES[value.downcase]
+
+        elsif value.match(/^:\w+$/)
           return value[1..-1].to_sym
 
         elsif value.match(/^\d+$/)
