@@ -21,7 +21,7 @@ class ExploitableMap
 end
 ```
 
-If your application were to contain code like this and use `YAML.load` anywhere on user input, an attacker could craft a YAML string to arbitrary execute any code on your servers:
+If your application were to contain code like this and use `YAML.load` anywhere on user input, an attacker could craft a YAML string to execute any code (yes, including `system("unix command")`) on your servers:
 
     > yaml = <<-EOYAML
     > --- !ruby/hash:ExploitableMap
