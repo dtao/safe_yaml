@@ -13,5 +13,6 @@ Gem::Specification.new do |gem|
   gem.files         = `git ls-files`.split($\)
   gem.test_files    = gem.files.grep(%r{^spec/})
   gem.require_paths = ["lib"]
-  gem.dependencies  = ["psych"]
+
+  gem.add_dependency("psych")
 end
