@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path("../lib/version", __FILE__)
+require File.join(File.dirname(__FILE__), "lib", "safe_yaml", "version")
 
 Gem::Specification.new do |gem|
   gem.name          = "safe_yaml"

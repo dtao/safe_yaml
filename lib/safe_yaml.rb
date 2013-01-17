@@ -1,5 +1,5 @@
-require "yaml"
-require "handler"
+require "safe_yaml/handler"
+require "safe_yaml/version"
 
 module YAML
   def self.safe_load(yaml)
