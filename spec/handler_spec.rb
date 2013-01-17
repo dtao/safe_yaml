@@ -1,6 +1,6 @@
 require File.join(File.dirname(__FILE__), "spec_helper")
 
-require "handler"
+require "safe_yaml/handler"
 
 describe SafeYAML::Handler do
   let(:handler) { SafeYAML::Handler.new }
@@ -104,5 +104,15 @@ describe SafeYAML::Handler do
     YAML
 
     result.should == { "foo" => { "bar" => { "marco" => "polo" } } }
+  end
+
+  it "deals just fine with aliases and anchors" do
+    parse <<-YAML
+      - &id001 {}
+      - *id001
+      - *id001
+    YAML
+
+    result.should == [{}, {}, {}]
   end
 end

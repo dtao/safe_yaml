@@ -3,6 +3,7 @@ require "yaml"
 module SafeYAML
   class Handler < Psych::Handler
     def initialize
+      @anchors = {}
       @stack = []
     end
 
@@ -10,7 +11,11 @@ module SafeYAML
       @result
     end
 
-    def add_to_current_structure(value)
+    def add_to_current_structure(value, anchor=nil)
+      value = transform_value(value)
+
+      @anchors[anchor] = value if anchor
+
       if @result.nil?
         @result = value
         @current_structure = @result
@@ -19,13 +24,13 @@ module SafeYAML
 
       case @current_structure
       when Array
-        @current_structure.push(transform_value(value))
+        @current_structure.push(value)
 
       when Hash
         if @current_key.nil?
-          @current_key = transform_value(value)
+          @current_key = value
         else
-          @current_structure[@current_key] = transform_value(value)
+          @current_structure[@current_key] = value
           @current_key = nil
         end
 
@@ -50,37 +55,44 @@ module SafeYAML
       value
     end
 
+    def end_current_structure
+      @stack.pop
+      @current_structure = @stack.last
+    end
+
     def streaming?
       false
     end
 
     # event handlers
-    def scalar(value, anchor, tag, plain, quoted, style)
-      add_to_current_structure(value)
+    def alias(anchor)
+      add_to_current_structure(@anchors[anchor])
     end
 
-    def start_mapping(*args) # anchor, tag, implicit, style
+    def scalar(value, anchor, tag, plain, quoted, style)
+      add_to_current_structure(value, anchor)
+    end
+
+    def start_mapping(anchor, tag, implicit, style)
       map = {}
-      self.add_to_current_structure(map)
+      self.add_to_current_structure(map, anchor)
       @current_structure = map
       @stack.push(map)
     end
 
     def end_mapping
-      @stack.pop
-      @current_structure = @stack.last
+      self.end_current_structure()
     end
 
-    def start_sequence(*args) # anchor, tag, implicit, style
+    def start_sequence(anchor, tag, implicit, style)
       seq = []
-      self.add_to_current_structure(seq)
+      self.add_to_current_structure(seq, anchor)
       @current_structure = seq
       @stack.push(seq)
     end
 
     def end_sequence
-      @stack.pop
-      @current_structure = @stack.last
+      self.end_current_structure()
     end
   end
 end
