@@ -136,4 +136,37 @@ describe SafeYAML::Handler do
 
     result.should == [{}, {}, {}]
   end
+
+  it "deals just fine with sections" do
+    parse <<-YAML
+      mysql: &mysql
+        adapter: mysql
+        pool: 30
+      login: &login
+        username: dan
+        password: gobbledygook
+      local: &local
+        <<: *mysql
+        <<: *login
+        host: localhost
+    YAML
+
+    result.should == {
+      "mysql" => {
+        "adapter" => "mysql",
+        "pool"    => 30
+      },
+      "login" => {
+        "username" => "dan",
+        "password" => "gobbledygook"
+      },
+      "local" => {
+        "adapter"  => "mysql",
+        "pool"     => 30,
+        "username" => "dan",
+        "password" => "gobbledygook",
+        "host"     => "localhost"
+      }
+    }
+  end
 end

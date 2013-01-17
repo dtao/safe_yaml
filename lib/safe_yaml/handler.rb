@@ -41,8 +41,14 @@ module SafeYAML
       when Hash
         if @current_key.nil?
           @current_key = value
+
         else
-          @current_structure[@current_key] = value
+          if @current_key == "<<"
+            @current_structure.merge!(value)
+          else
+            @current_structure[@current_key] = value
+          end
+
           @current_key = nil
         end
 
