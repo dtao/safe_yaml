@@ -1,20 +1,7 @@
 require "psych"
-require "yaml"
 
 module SafeYAML
-  class Handler < Psych::Handler
-    PREDEFINED_VALUES = {
-      ""      => nil,
-      "~"     => nil,
-      "null"  => nil,
-      "yes"   => true,
-      "on"    => true,
-      "true"  => true,
-      "no"    => false,
-      "off"   => false,
-      "false" => false
-    }.freeze
-
+  class PsychHandler < Psych::Handler
     def initialize
       @anchors = {}
       @stack = []
@@ -25,7 +12,7 @@ module SafeYAML
     end
 
     def add_to_current_structure(value, anchor=nil)
-      value = transform_value(value)
+      value = Transform.to_proper_type(value)
 
       @anchors[anchor] = value if anchor
 
@@ -56,25 +43,6 @@ module SafeYAML
       else
         raise "Don't know how to add to a #{@current_structure.class}!"
       end
-    end
-
-    def transform_value(value)
-      if value.is_a?(String)
-        if PREDEFINED_VALUES.include?(value.downcase)
-          return PREDEFINED_VALUES[value.downcase]
-
-        elsif value.match(/^:\w+$/)
-          return value[1..-1].to_sym
-
-        elsif value.match(/^\d+$/)
-          return value.to_i
-
-        elsif value.match(/^\d+(?:\.\d*)?$/) || value.match(/^\.\d+$/)
-          return value.to_f
-        end
-      end
-
-      value
     end
 
     def end_current_structure

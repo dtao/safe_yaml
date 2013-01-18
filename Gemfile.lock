@@ -1,13 +1,19 @@
 PATH
   remote: .
   specs:
-    safe_yaml (0.1)
+    safe_yaml (0.2.2)
 
 GEM
   remote: http://rubygems.org/
   specs:
+    coderay (1.0.8)
     diff-lcs (1.1.3)
     heredoc_unindent (1.1.2)
+    method_source (0.8.1)
+    pry (0.9.11.2)
+      coderay (~> 1.0.5)
+      method_source (~> 0.8)
+      slop (~> 3.4)
     rake (10.0.3)
     rspec (2.12.0)
       rspec-core (~> 2.12.0)
@@ -17,12 +23,14 @@ GEM
     rspec-expectations (2.12.1)
       diff-lcs (~> 1.1.3)
     rspec-mocks (2.12.1)
+    slop (3.4.3)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   heredoc_unindent
+  pry
   rake
   rspec
   safe_yaml!

@@ -1,7 +1,7 @@
 SafeYAML
 ========
 
-*Parse (simple) YAML safely, without that pesky arbitrary code execution vulnerability.*
+*Parse YAML safely, without that pesky arbitrary code execution vulnerability.*
 
 ***
 
@@ -38,4 +38,4 @@ With `YAML.safe_load`, that attacker would be thwarted:
     > YAML.safe_load(yaml)
     => {"foo; end; puts %(I'm in yr system!); def bar"=>"baz"} 
 
-SafeYAML requires Ruby 1.9.2 or newer. Maybe I'll get around to writing a Syck handler eventually, at which point it could support older versions as well.
+SafeYAML requires Ruby 1.8.7 or newer and works with both [Syck](http://www.ruby-doc.org/stdlib-1.8.7/libdoc/yaml/rdoc/YAML.html) and [Psych](http://github.com/tenderlove/psych).

@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   gem.version       = SafeYAML::VERSION
   gem.authors       = "Dan Tao"
   gem.email         = "daniel.tao@gmail.com"
-  gem.description   = %q{Parse (simple) YAML safely, without that pesky arbitrary code execution vulnerability.}
+  gem.description   = %q{Parse YAML safely, without that pesky arbitrary code execution vulnerability.}
   gem.summary       = %q{SameYAML adds a ::safe_load method to Ruby's built-in YAML module to parse YAML data for only basic types (strings, symbols, numbers, arrays, and hashes).}
   gem.homepage      = "http://github.com/dtao/safe_yaml"
 
@@ -14,5 +14,5 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^spec/})
   gem.require_paths = ["lib"]
 
-  gem.required_ruby_version = ">= 1.9.2"
+  gem.required_ruby_version = ">= 1.8.7"
 end
