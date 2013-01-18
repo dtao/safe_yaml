@@ -16,7 +16,7 @@ module YAML
     def self.safe_load(yaml)
       safe_resolver = SafeYAML::SyckResolver.new
       tree = YAML.parse(yaml)
-      return safe_resolver.resolve_tree(tree)
+      return safe_resolver.resolve_node(tree)
     end
   end
 end

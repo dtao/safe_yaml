@@ -4,17 +4,6 @@ module SafeYAML
       @anchors = {}
     end
 
-    def resolve_tree(tree)
-      case tree.kind
-      when :map
-        return resolve_map(tree.value)
-      when :seq
-        return resolve_seq(tree.value)
-      else
-        raise "Don't know how to resolve a #{tree.kind} tree!"
-      end
-    end
-
     def resolve_node(node)
       case node.kind
       when :map
@@ -23,6 +12,8 @@ module SafeYAML
         return resolve_seq(node.value)
       when :scalar
         return resolve_scalar(node.value)
+      else
+        raise "Don't know how to resolve a '#{node.kind}' node!"
       end
     end
 

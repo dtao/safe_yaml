@@ -9,7 +9,7 @@ if RUBY_VERSION < "1.9.2"
 
     def parse(yaml)
       tree = YAML.parse(yaml.unindent)
-      @result = resolver.resolve_tree(tree)
+      @result = resolver.resolve_node(tree)
     end
 
     include SharedSpecs
