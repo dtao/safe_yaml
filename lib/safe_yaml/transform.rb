@@ -12,18 +12,24 @@ module SafeYAML
       "false" => false
     }.freeze
 
+    SYMBOL_MATCHER = /^:\w+$/.freeze
+
+    INTEGER_MATCHER = /^\d+$/.freeze
+
+    FLOAT_MATCHER = /^(?:\d+(?:\.\d*)?$)|(?:^\.\d+$)/.freeze
+
     def self.to_proper_type(value)
       if value.is_a?(String)
         if PREDEFINED_VALUES.include?(value.downcase)
           return PREDEFINED_VALUES[value.downcase]
 
-        elsif value.match(/^:\w+$/)
+        elsif value.match(SYMBOL_MATCHER)
           return value[1..-1].to_sym
 
-        elsif value.match(/^\d+$/)
+        elsif value.match(INTEGER_MATCHER)
           return value.to_i
 
-        elsif value.match(/^\d+(?:\.\d*)?$/) || value.match(/^\.\d+$/)
+        elsif value.match(FLOAT_MATCHER)
           return value.to_f
         end
       end
