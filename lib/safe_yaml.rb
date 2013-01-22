@@ -24,4 +24,12 @@ module YAML
     # from https://github.com/tenderlove/psych/blob/master/lib/psych.rb#L299
     File.open(filename, 'r:bom|utf-8') { |f| self.safe_load f }
   end
+
+  class << self
+    alias_method :orig_load, :load
+    alias_method :load, :safe_load
+
+    alias_method :orig_load_file, :load_file
+    alias_method :load_file, :safe_load_file
+  end
 end
