@@ -12,6 +12,7 @@ module YAML
     end
 
     def self.orig_load_file(filename)
+      # https://github.com/tenderlove/psych/blob/master/lib/psych.rb#L298-300
       File.open(filename, 'r:bom|utf-8') { |f| self.orig_load f, filename }
     end
 
@@ -23,8 +24,8 @@ module YAML
       return safe_resolver.resolve_node(tree)
     end
 
-    # https://github.com/indeyets/syck/blob/master/ext/ruby/lib/yaml.rb#L133-135
     def self.orig_load_file(filename)
+      # https://github.com/indeyets/syck/blob/master/ext/ruby/lib/yaml.rb#L133-135
       File.open(filename) { |f| self.orig_load f }
     end
   end
