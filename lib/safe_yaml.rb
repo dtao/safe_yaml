@@ -19,4 +19,9 @@ module YAML
       return safe_resolver.resolve_node(tree)
     end
   end
+
+  def self.safe_load_file(filename)
+    # from https://github.com/tenderlove/psych/blob/master/lib/psych.rb#L299
+    File.open(filename, 'r:bom|utf-8') { |f| self.safe_load f }
+  end
 end
