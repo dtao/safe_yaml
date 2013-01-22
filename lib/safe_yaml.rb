@@ -11,6 +11,10 @@ module YAML
       return safe_handler.result
     end
 
+    def self.orig_load_file(filename)
+      File.open(filename, 'r:bom|utf-8') { |f| self.orig_load f, filename }
+    end
+
   else
     require "safe_yaml/syck_resolver"
     def self.safe_load(yaml)
@@ -18,18 +22,15 @@ module YAML
       tree = YAML.parse(yaml)
       return safe_resolver.resolve_node(tree)
     end
-  end
 
-  def self.safe_load_file(filename)
-    # from https://github.com/tenderlove/psych/blob/master/lib/psych.rb#L299
-    File.open(filename, 'r:bom|utf-8') { |f| self.safe_load f, filename }
+    # https://github.com/indeyets/syck/blob/master/ext/ruby/lib/yaml.rb#L133-135
+    def self.orig_load_file(filename)
+      File.open(filename) { |f| self.orig_load f }
+    end
   end
 
   class << self
     alias_method :orig_load, :load
     alias_method :load, :safe_load
-
-    alias_method :orig_load_file, :load_file
-    alias_method :load_file, :safe_load_file
   end
 end
