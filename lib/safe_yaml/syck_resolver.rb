@@ -1,9 +1,5 @@
 module SafeYAML
   class SyckResolver
-    def initialize
-      @anchors = {}
-    end
-
     def resolve_node(node)
       case node.kind
       when :map
