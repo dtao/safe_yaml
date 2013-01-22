@@ -5,9 +5,9 @@ require "safe_yaml/version"
 module YAML
   if RUBY_VERSION >= "1.9.2"
     require "safe_yaml/psych_handler"
-    def self.safe_load(yaml)
+    def self.safe_load(yaml, filename = nil)
       safe_handler = SafeYAML::PsychHandler.new
-      Psych::Parser.new(safe_handler).parse(yaml)
+      Psych::Parser.new(safe_handler).parse(yaml, filename)
       return safe_handler.result
     end
 
@@ -22,7 +22,7 @@ module YAML
 
   def self.safe_load_file(filename)
     # from https://github.com/tenderlove/psych/blob/master/lib/psych.rb#L299
-    File.open(filename, 'r:bom|utf-8') { |f| self.safe_load f }
+    File.open(filename, 'r:bom|utf-8') { |f| self.safe_load f, filename }
   end
 
   class << self
