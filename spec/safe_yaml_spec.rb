@@ -10,14 +10,14 @@ describe YAML do
 
   describe "orig_load" do
     if RUBY_VERSION >= "1.9.3"
-      it "allows exploits through objects defined in YAML w/ !ruby/hash through custom :[]= methods" do
+      it "allows exploits through objects defined in YAML w/ !ruby/hash via custom :[]= methods" do
         backdoor = YAML.orig_load("--- !ruby/hash:ExploitableBackDoor\nfoo: bar\n")
         backdoor.should be_exploited_through_setter
       end
     end
 
     if RUBY_VERSION >= "1.9.2"
-      it "allows exploits through objects defined in YAML w/ !ruby/object through" do
+      it "allows exploits through objects defined in YAML w/ !ruby/object via the :init_with method" do
         backdoor = YAML.orig_load("--- !ruby/object:ExploitableBackDoor\nfoo: bar\n")
         backdoor.should be_exploited_through_init_with
       end
@@ -73,14 +73,14 @@ describe YAML do
 
     it "works for YAML documents with sections" do
       result = YAML.load <<-YAML
-        mysql: &foo
+        mysql: &mysql
           adapter: mysql
           pool: 30
         login: &login
-          username: dan
-          password: gobbledygook
-        local: &local
-          <<: *foo
+          username: user
+          password: password123
+        development: &development
+          <<: *mysql
           <<: *login
           host: localhost
       YAML
@@ -91,14 +91,14 @@ describe YAML do
           "pool"    => 30
         },
         "login" => {
-          "username" => "dan",
-          "password" => "gobbledygook"
+          "username" => "user",
+          "password" => "password123"
         },
-        "local" => {
+        "development" => {
           "adapter"  => "mysql",
           "pool"     => 30,
-          "username" => "dan",
-          "password" => "gobbledygook",
+          "username" => "user",
+          "password" => "password123",
           "host"     => "localhost"
         }
       }
@@ -107,14 +107,14 @@ describe YAML do
 
   describe "orig_load_file" do
     if RUBY_VERSION >= "1.9.3"
-      it "allows exploits through objects defined in YAML w/ !ruby/hash through custom :[]= methods" do
+      it "allows exploits through objects defined in YAML w/ !ruby/hash via custom :[]= methods" do
         backdoor = YAML.orig_load_file "spec/exploit.1.9.3.yaml"
         backdoor.should be_exploited_through_setter
       end
     end
 
     if RUBY_VERSION >= "1.9.2"
-      it "allows exploits through objects defined in YAML w/ !ruby/object through" do
+      it "allows exploits through objects defined in YAML w/ !ruby/object via the :init_with method" do
         backdoor = YAML.orig_load_file "spec/exploit.1.9.2.yaml"
         backdoor.should be_exploited_through_init_with
       end
