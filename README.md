@@ -1,7 +1,7 @@
 SafeYAML
 ========
 
-The **SafeYAML** gem provides an alternative to `YAML.load` suitable for accepting user input in Ruby applications. Unlike `YAML.load`, `YAML.safe_load` will *not* expose apps to arbitrary code execution exploits (such as [the one recently discovered in Rails](http://www.reddit.com/r/netsec/comments/167c11/serious_vulnerability_in_ruby_on_rails_allowing/)).
+The **SafeYAML** gem provides an alternative implementation of `YAML.load` suitable for accepting user input in Ruby applications. Unlike Ruby's built-in implementation of `YAML.load`, SafeYAML's version will not expose apps to arbitrary code execution exploits (such as [the one recently discovered in Rails](http://www.reddit.com/r/netsec/comments/167c11/serious_vulnerability_in_ruby_on_rails_allowing/)).
 
 Installation
 ------------
@@ -41,7 +41,7 @@ class ExploitableClassBuilder
 end
 ```
 
-Now, if you were to use `YAML.load` on user input anywhere in your application, an attacker could make a request with a carefully-crafted YAML string to execute arbitrary code (yes, including `system("unix command")`) on your servers.
+Now, if you were to use `YAML.load` on user input anywhere in your application without the SafeYAML gem installed, an attacker could make a request with a carefully-crafted YAML string to execute arbitrary code (yes, including `system("unix command")`) on your servers.
 
 Observe:
 
@@ -57,13 +57,15 @@ Observe:
 
 With `YAML.safe_load`, that attacker would be thwarted:
 
-    > YAML.safe_load(yaml)
+    > require "safe_yaml"
+    => true
+    > YAML.load(yaml)
     => {"foo; end; puts %(I'm in yr system!); def bar"=>"baz"}
 
 Notes
 -----
 
-The way that SafeYAML works is by restricting the domain of objects that can be deserialized via `YAML.safe_load`. More specifically, only the following types of objects can be deserialized by default:
+The way that SafeYAML works is by restricting the kinds of objects that can be deserialized via `YAML.load`. More specifically, only the following types of objects can be deserialized by default:
 
 - Hashes
 - Arrays
@@ -73,6 +75,8 @@ The way that SafeYAML works is by restricting the domain of objects that can be 
 - Nils
 
 Additionally, symbols will also be deserialized if the `YAML.enable_symbol_parsing` option is set to `true`.
+
+For scenarios where the data to be parsed is from a trusted source and it is still desirable to deserialize arbitrary Ruby objects, the original implementation of `YAML.load` is available as `YAML.orig_load`.
 
 Requirements
 ------------
