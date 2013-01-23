@@ -5,14 +5,26 @@ require "safe_yaml/transform"
 module SharedSpecs
   def self.included(base)
     base.instance_eval do
+      it "translates maps to hashes" do
+        parse <<-YAML
+          potayto: potahto
+          tomayto: tomahto
+        YAML
+
+        result.should == {
+          "potayto" => "potahto",
+          "tomayto" => "tomahto"
+        }
+      end
+
       it "translates most values to strings" do
-        parse "key: value"
-        result.should == { "key" => "value" }
+        parse "string: value"
+        result.should == { "string" => "value" }
       end
 
       it "translates values starting with ':' to symbols" do
-        parse ":key: value"
-        result.should == { :key => "value" }
+        parse "symbol: :value"
+        result.should == { "symbol" => :value }
       end
 
       it "translates valid integral numbers to integers" do
@@ -23,6 +35,16 @@ module SharedSpecs
       it "translates valid decimal numbers to floats" do
         parse "float: 3.14"
         result.should == { "float" => 3.14 }
+      end
+
+      it "translates sequences to arrays" do
+        parse <<-YAML
+          - foo
+          - bar
+          - baz
+        YAML
+
+        result.should == ["foo", "bar", "baz"]
       end
 
       it "translates valid true/false values to booleans" do
@@ -46,69 +68,31 @@ module SharedSpecs
         result.should == [nil] * 3
       end
 
-      it "applies the same transformations to values as to keys" do
+      it "applies the same transformations to keys as to values" do
         parse <<-YAML
-          string: value
-          symbol: :value
-          integer: 1
-          float: 3.14
+          foo: string
+          :bar: symbol
+          1: integer
+          3.14: float
         YAML
 
         result.should == {
-          "string" => "value",
-          "symbol" => :value,
-          "integer" => 1,
-          "float" => 3.14
+          "foo" => "string",
+          :bar  => "symbol",
+          1     => "integer",
+          3.14  => "float"
         }
-      end
-
-      it "translates sequences to arrays" do
-        parse <<-YAML
-          - foo
-          - bar
-          - baz
-        YAML
-
-        result.should == ["foo", "bar", "baz"]
       end
 
       it "applies the same transformations to elements in sequences as to all values" do
         parse <<-YAML
-          - string
-          - :symbol
+          - foo
+          - :bar
           - 1
           - 3.14
         YAML
 
-        result.should == ["string", :symbol, 1, 3.14]
-      end
-
-      it "translates maps to hashes" do
-        parse <<-YAML
-          foo: blah
-          bar: glah
-          baz: flah
-        YAML
-
-        result.should == {
-          "foo" => "blah",
-          "bar" => "glah",
-          "baz" => "flah"
-        }
-      end
-
-      it "applies the same transformations to values in hashes as to all values" do
-        parse <<-YAML
-          foo: :symbol
-          bar: 1
-          baz: 3.14
-        YAML
-
-        result.should == {
-          "foo" => :symbol,
-          "bar" => 1,
-          "baz" => 3.14
-        }
+        result.should == ["foo", :bar, 1, 3.14]
       end
 
       it "deals just fine with nested maps" do
@@ -119,6 +103,20 @@ module SharedSpecs
         YAML
 
         result.should == { "foo" => { "bar" => { "marco" => "polo" } } }
+      end
+
+      it "deals just fine with nested sequences" do
+        parse <<-YAML
+          - foo
+          -
+            - bar1
+            - bar2
+            -
+              - baz1
+              - baz2
+        YAML
+
+        result.should == ["foo", ["bar1", "bar2", ["baz1", "baz2"]]]
       end
     end
   end
