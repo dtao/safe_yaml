@@ -4,6 +4,10 @@ require "safe_yaml"
 require "exploitable_back_door"
 
 describe YAML do
+  before :each do
+    YAML.enable_symbol_parsing = false
+  end
+
   describe "orig_load" do
     if RUBY_VERSION >= "1.9.3"
       it "allows exploits through objects defined in YAML w/ !ruby/hash through custom :[]= methods" do
@@ -51,7 +55,7 @@ describe YAML do
         "foo" => {
           "number" => 1,
           "string" => "Hello, there!",
-          "symbol" => :blah,
+          "symbol" => ":blah",
           "sequence" => ["hi", "bye"]
         }
       }

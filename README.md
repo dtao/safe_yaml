@@ -60,6 +60,20 @@ With `YAML.safe_load`, that attacker would be thwarted:
     > YAML.safe_load(yaml)
     => {"foo; end; puts %(I'm in yr system!); def bar"=>"baz"}
 
+Notes
+-----
+
+The way that SafeYAML works is by restricting the domain of objects that can be deserialized via `YAML.safe_load`. More specifically, only the following types of objects can be deserialized by default:
+
+- Hashes
+- Arrays
+- Strings
+- Numbers
+- Booleans
+- Nils
+
+Additionally, symbols will also be deserialized if the `YAML.enable_symbol_parsing` option is set to `true`.
+
 Requirements
 ------------
 
