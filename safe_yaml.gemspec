@@ -7,7 +7,7 @@ Gem::Specification.new do |gem|
   gem.authors       = "Dan Tao"
   gem.email         = "daniel.tao@gmail.com"
   gem.description   = %q{Parse YAML safely, without that pesky arbitrary code execution vulnerability.}
-  gem.summary       = %q{SameYAML adds a ::safe_load method to Ruby's built-in YAML module to parse YAML data for only basic types (strings, symbols, numbers, arrays, and hashes).}
+  gem.summary       = %q{SameYAML provides an alternative implementation of YAML.load suitable for accepting user input in Ruby applications.}
   gem.homepage      = "http://github.com/dtao/safe_yaml"
 
   gem.files         = `git ls-files`.split($\)
