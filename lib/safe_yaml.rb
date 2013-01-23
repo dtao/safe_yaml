@@ -12,7 +12,7 @@ module YAML
     end
 
     def self.orig_load_file(filename)
-      # https://github.com/tenderlove/psych/blob/master/lib/psych.rb#L298-300
+      # https://github.com/tenderlove/psych/blob/v1.3.2/lib/psych.rb#L296-298
       File.open(filename, 'r:bom|utf-8') { |f| self.orig_load f, filename }
     end
 
@@ -25,7 +25,7 @@ module YAML
     end
 
     def self.orig_load_file(filename)
-      # https://github.com/tenderlove/psych/blob/master/lib/psych.rb#L298-300
+      # https://github.com/tenderlove/psych/blob/v1.2.0/lib/psych.rb#L228-230
       File.open(filename, 'r:bom|utf-8') { |f| self.orig_load f }
     end
 
