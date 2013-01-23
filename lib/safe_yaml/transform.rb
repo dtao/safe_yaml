@@ -1,6 +1,6 @@
 module SafeYAML
   class Transform
-    DEFAULT_OPTIONS = {
+    OPTIONS = {
       :enable_symbol_parsing => false
     }
 
@@ -22,14 +22,12 @@ module SafeYAML
 
     FLOAT_MATCHER = /^(?:\d+(?:\.\d*)?$)|(?:^\.\d+$)/.freeze
 
-    def self.to_proper_type(value, options={})
-      enable_symbol_parsing = options[:enable_symbol_parsing] || DEFAULT_OPTIONS[:enable_symbol_parsing]
-
+    def self.to_proper_type(value)
       if value.is_a?(String)
         if PREDEFINED_VALUES.include?(value.downcase)
           return PREDEFINED_VALUES[value.downcase]
 
-        elsif DEFAULT_OPTIONS[:enable_symbol_parsing] && value.match(SYMBOL_MATCHER)
+        elsif OPTIONS[:enable_symbol_parsing] && value.match(SYMBOL_MATCHER)
           return value[1..-1].to_sym
 
         elsif value.match(INTEGER_MATCHER)

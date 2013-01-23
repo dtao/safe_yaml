@@ -48,11 +48,11 @@ module YAML
     alias_method :load, :safe_load
 
     def enable_symbol_parsing
-      SafeYAML::Transform::DEFAULT_OPTIONS[:enable_symbol_parsing]
+      SafeYAML::Transform::OPTIONS[:enable_symbol_parsing]
     end
 
     def enable_symbol_parsing=(value)
-      SafeYAML::Transform::DEFAULT_OPTIONS[:enable_symbol_parsing] = value
+      SafeYAML::Transform::OPTIONS[:enable_symbol_parsing] = value
     end
   end
 end
