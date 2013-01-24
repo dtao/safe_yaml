@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>SafeYAML by dtao</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">SafeYAML</h1>
+        <p class="header">Parse YAML safely, without that pesky arbitrary code execution vulnerability.</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/dtao/safe_yaml/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/dtao/safe_yaml/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/dtao/safe_yaml">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/dtao">dtao</a></p>
+
+
+      </header>
+      <section>
+        <p>The <strong>SafeYAML</strong> gem provides an alternative implementation of <code>YAML.load</code> suitable for accepting user input in Ruby applications. Unlike Ruby's built-in implementation of <code>YAML.load</code>, SafeYAML's version will not expose apps to arbitrary code execution exploits (such as <a href="http://www.reddit.com/r/netsec/comments/167c11/serious_vulnerability_in_ruby_on_rails_allowing/">the one recently discovered in Rails</a>).</p>
+
+<h2>Installation</h2>
+
+<p>Add this line to your application's Gemfile:</p>
+
+<pre><code>gem "safe_yaml"
+</code></pre>
+
+<p>And then execute:</p>
+
+<pre><code>$ bundle
+</code></pre>
+
+<p>Or install it yourself as:</p>
+
+<pre><code>$ gem install safe_yaml
+</code></pre>
+
+<h2>Usage</h2>
+
+<p>Suppose your application were to contain some code like this:</p>
+
+<div class="highlight"><pre><span class="k">class</span> <span class="nc">ExploitableClassBuilder</span>
+  <span class="k">def</span> <span class="nf">[]=</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="vi">@class</span> <span class="o">||=</span> <span class="no">Class</span><span class="o">.</span><span class="n">new</span>
+
+    <span class="vi">@class</span><span class="o">.</span><span class="n">class_eval</span> <span class="o">&lt;&lt;-</span><span class="no">EOS</span>
+<span class="sh">      def #{key}</span>
+<span class="sh">        #{value}</span>
+<span class="sh">      end</span>
+<span class="no">    EOS</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">create</span>
+    <span class="vi">@class</span><span class="o">.</span><span class="n">new</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+<p>Now, if you were to use <code>YAML.load</code> on user input anywhere in your application without the SafeYAML gem installed, an attacker could make a request with a carefully-crafted YAML string to execute arbitrary code (yes, including <code>system("unix command")</code>) on your servers.</p>
+
+<p>Observe:</p>
+
+<pre><code>&gt; yaml = &lt;&lt;-EOYAML
+&gt; --- !ruby/hash:ExploitableClassBuilder
+&gt; "foo; end; puts %(I'm in yr system!); def bar": "baz"
+&gt; EOYAML
+=&gt; "--- !ruby/hash:ExploitableClassBuilder\n\"foo; end; puts %(I'm in yr system!); def bar\": \"baz\"\n"
+
+&gt; YAML.load(yaml)
+I'm in yr system!
+=&gt; #&lt;ExploitableClassBuilder:0x007fdbbe2e25d8 @class=#&lt;Class:0x007fdbbe2e2510&gt;&gt;
+</code></pre>
+
+<p>With <code>YAML.safe_load</code>, that attacker would be thwarted:</p>
+
+<pre><code>&gt; require "safe_yaml"
+=&gt; true
+&gt; YAML.load(yaml)
+=&gt; {"foo; end; puts %(I'm in yr system!); def bar"=&gt;"baz"}
+</code></pre>
+
+<h2>Notes</h2>
+
+<p>The way that SafeYAML works is by restricting the kinds of objects that can be deserialized via <code>YAML.load</code>. More specifically, only the following types of objects can be deserialized by default:</p>
+
+<ul>
+<li>Hashes</li>
+<li>Arrays</li>
+<li>Strings</li>
+<li>Numbers</li>
+<li>Dates</li>
+<li>Booleans</li>
+<li>Nils</li>
+</ul><p>Additionally, symbols will also be deserialized if the <code>YAML.enable_symbol_parsing</code> option is set to <code>true</code>.</p>
+
+<p>For scenarios where the data to be parsed is from a trusted source and it is still desirable to deserialize arbitrary Ruby objects, the original implementation of <code>YAML.load</code> is available as <code>YAML.orig_load</code>.</p>
+
+<h2>Requirements</h2>
+
+<p>SafeYAML requires Ruby 1.8.7 or newer and works with both <a href="http://www.ruby-doc.org/stdlib-1.8.7/libdoc/yaml/rdoc/YAML.html">Syck</a> and <a href="http://github.com/tenderlove/psych">Psych</a>.</p>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
+</html>
