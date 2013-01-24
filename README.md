@@ -71,6 +71,7 @@ The way that SafeYAML works is by restricting the kinds of objects that can be d
 - Arrays
 - Strings
 - Numbers
+- Dates
 - Booleans
 - Nils
 

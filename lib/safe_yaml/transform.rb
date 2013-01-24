@@ -22,6 +22,8 @@ module SafeYAML
 
     FLOAT_MATCHER = /^(?:\d+(?:\.\d*)?$)|(?:^\.\d+$)/.freeze
 
+    DATE_MATCHER = /^\d{4}\-\d{2}\-\d{2}$/.freeze
+
     def self.to_proper_type(value)
       if value.is_a?(String)
         if PREDEFINED_VALUES.include?(value.downcase)
@@ -35,6 +37,10 @@ module SafeYAML
 
         elsif value.match(FLOAT_MATCHER)
           return value.to_f
+
+        elsif value.match(DATE_MATCHER)
+          date = Date.parse(value) rescue nil
+          return date if date
         end
       end
 

@@ -18,6 +18,16 @@ module SharedSpecs
           }
         end
 
+        it "translates sequences to arrays" do
+          parse <<-YAML
+            - foo
+            - bar
+            - baz
+          YAML
+
+          result.should == ["foo", "bar", "baz"]
+        end
+
         it "translates most values to strings" do
           parse "string: value"
           result.should == { "string" => "value" }
@@ -38,14 +48,9 @@ module SharedSpecs
           result.should == { "float" => 3.14 }
         end
 
-        it "translates sequences to arrays" do
-          parse <<-YAML
-            - foo
-            - bar
-            - baz
-          YAML
-
-          result.should == ["foo", "bar", "baz"]
+        it "translates valid dates" do
+          parse "date: 2013-01-24"
+          result.should == { "date" => Date.parse("2013-01-24") }
         end
 
         it "translates valid true/false values to booleans" do
@@ -75,13 +80,15 @@ module SharedSpecs
             :bar: symbol
             1: integer
             3.14: float
+            2013-01-24: date
           YAML
 
           result.should == {
             "foo"  => "string",
             ":bar" => "symbol",
             1      => "integer",
-            3.14   => "float"
+            3.14   => "float",
+            Date.parse("2013-01-24") => "date"
           }
         end
 
@@ -91,9 +98,10 @@ module SharedSpecs
             - :bar
             - 1
             - 3.14
+            - 2013-01-24
           YAML
 
-          result.should == ["foo", ":bar", 1, 3.14]
+          result.should == ["foo", ":bar", 1, 3.14, Date.parse("2013-01-24")]
         end
 
         it "deals just fine with nested maps" do
@@ -137,13 +145,15 @@ module SharedSpecs
             :bar: symbol
             1: integer
             3.14: float
+            2013-01-24: date
           YAML
 
           result.should == {
             "foo" => "string",
             :bar  => "symbol",
             1     => "integer",
-            3.14  => "float"
+            3.14  => "float",
+            Date.parse("2013-01-24") => "date"
           }
         end
 
@@ -153,9 +163,10 @@ module SharedSpecs
             - :bar
             - 1
             - 3.14
+            - 2013-01-24
           YAML
 
-          result.should == ["foo", :bar, 1, 3.14]
+          result.should == ["foo", :bar, 1, 3.14, Date.parse("2013-01-24")]
         end
       end
     end
