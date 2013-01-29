@@ -30,7 +30,9 @@
 
       </header>
       <section>
-        <p>The <strong>SafeYAML</strong> gem provides an alternative implementation of <code>YAML.load</code> suitable for accepting user input in Ruby applications. Unlike Ruby's built-in implementation of <code>YAML.load</code>, SafeYAML's version will not expose apps to arbitrary code execution exploits (such as <a href="http://www.reddit.com/r/netsec/comments/167c11/serious_vulnerability_in_ruby_on_rails_allowing/">the one recently discovered in Rails</a>).</p>
+        <h1>SafeYAML</h1>
+
+<p>The <strong>SafeYAML</strong> gem provides an alternative implementation of <code>YAML.load</code> suitable for accepting user input in Ruby applications. Unlike Ruby's built-in implementation of <code>YAML.load</code>, SafeYAML's version will not expose apps to arbitrary code execution exploits (such as <a href="http://www.reddit.com/r/netsec/comments/167c11/serious_vulnerability_in_ruby_on_rails_allowing/">the one recently discovered in Rails</a>).</p>
 
 <h2>Installation</h2>
 
@@ -85,7 +87,7 @@ I'm in yr system!
 =&gt; #&lt;ExploitableClassBuilder:0x007fdbbe2e25d8 @class=#&lt;Class:0x007fdbbe2e2510&gt;&gt;
 </code></pre>
 
-<p>With <code>YAML.safe_load</code>, that attacker would be thwarted:</p>
+<p>With SafeYAML, that attacker would be thwarted:</p>
 
 <pre><code>&gt; require "safe_yaml"
 =&gt; true
@@ -103,6 +105,7 @@ I'm in yr system!
 <li>Strings</li>
 <li>Numbers</li>
 <li>Dates</li>
+<li>Times</li>
 <li>Booleans</li>
 <li>Nils</li>
 </ul><p>Additionally, symbols will also be deserialized if the <code>YAML.enable_symbol_parsing</code> option is set to <code>true</code>.</p>
