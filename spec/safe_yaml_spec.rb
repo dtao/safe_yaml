@@ -1,6 +1,5 @@
 require File.join(File.dirname(__FILE__), "spec_helper")
 
-require "safe_yaml"
 require "exploitable_back_door"
 
 describe YAML do

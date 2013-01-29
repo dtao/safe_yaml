@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    safe_yaml (0.4)
+    safe_yaml (0.5.1)
 
 GEM
   remote: http://rubygems.org/

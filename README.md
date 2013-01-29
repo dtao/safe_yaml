@@ -55,7 +55,7 @@ Observe:
     I'm in yr system!
     => #<ExploitableClassBuilder:0x007fdbbe2e25d8 @class=#<Class:0x007fdbbe2e2510>>
 
-With `YAML.safe_load`, that attacker would be thwarted:
+With SafeYAML, that attacker would be thwarted:
 
     > require "safe_yaml"
     => true
@@ -72,6 +72,7 @@ The way that SafeYAML works is by restricting the kinds of objects that can be d
 - Strings
 - Numbers
 - Dates
+- Times
 - Booleans
 - Nils
 

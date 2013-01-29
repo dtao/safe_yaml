@@ -1,4 +1,11 @@
 require "yaml"
+require "safe_yaml/transform/to_boolean"
+require "safe_yaml/transform/to_date"
+require "safe_yaml/transform/to_float"
+require "safe_yaml/transform/to_integer"
+require "safe_yaml/transform/to_nil"
+require "safe_yaml/transform/to_symbol"
+require "safe_yaml/transform/to_time"
 require "safe_yaml/transform"
 require "safe_yaml/version"
 
