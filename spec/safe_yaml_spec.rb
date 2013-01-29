@@ -13,9 +13,7 @@ describe YAML do
         backdoor = YAML.orig_load("--- !ruby/hash:ExploitableBackDoor\nfoo: bar\n")
         backdoor.should be_exploited_through_setter
       end
-    end
 
-    if RUBY_VERSION >= "1.9.2"
       it "allows exploits through objects defined in YAML w/ !ruby/object via the :init_with method" do
         backdoor = YAML.orig_load("--- !ruby/object:ExploitableBackDoor\nfoo: bar\n")
         backdoor.should be_exploited_through_init_with
@@ -110,9 +108,7 @@ describe YAML do
         backdoor = YAML.orig_load_file "spec/exploit.1.9.3.yaml"
         backdoor.should be_exploited_through_setter
       end
-    end
 
-    if RUBY_VERSION >= "1.9.2"
       it "allows exploits through objects defined in YAML w/ !ruby/object via the :init_with method" do
         backdoor = YAML.orig_load_file "spec/exploit.1.9.2.yaml"
         backdoor.should be_exploited_through_init_with

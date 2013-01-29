@@ -1,5 +1,3 @@
-require File.join(File.dirname(__FILE__), "spec_helper")
-
 module SharedSpecs
   def self.included(base)
     base.instance_eval do
@@ -49,11 +47,6 @@ module SharedSpecs
         it "translates valid dates" do
           parse "date: 2013-01-24"
           result.should == { "date" => Date.parse("2013-01-24") }
-        end
-
-        it "translates valid time values" do
-          parse "time: 2013-01-29 05:58:00 -0800"
-          result.should == { "time" => Time.new(2013, 1, 29, 5, 58, 0, "-08:00") }
         end
 
         it "translates valid true/false values to booleans" do
@@ -108,7 +101,6 @@ module SharedSpecs
             1: integer
             3.14: float
             2013-01-24: date
-            2013-01-29 05:58:00 -0800: time
           YAML
 
           result.should == {
@@ -117,7 +109,6 @@ module SharedSpecs
             1      => "integer",
             3.14   => "float",
             Date.parse("2013-01-24") => "date",
-            Time.new(2013, 1, 29, 5, 58, 0, "-08:00") => "time"
           }
         end
 
@@ -128,10 +119,34 @@ module SharedSpecs
             - 1
             - 3.14
             - 2013-01-24
-            - 2013-01-29 05:58:00 -0800
           YAML
 
-          result.should == ["foo", ":bar", 1, 3.14, Date.parse("2013-01-24"), Time.new(2013, 1, 29, 5, 58, 0, "-08:00")]
+          result.should == ["foo", ":bar", 1, 3.14, Date.parse("2013-01-24")]
+        end
+      end
+
+      context "for Ruby version #{RUBY_VERSION}" do
+        if RUBY_VERSION >= "1.9.2"
+          it "translates valid time values" do
+            parse "time: 2013-01-29 05:58:00 -0800"
+            result.should == { "time" => Time.new(2013, 1, 29, 5, 58, 0, "-08:00") }
+          end
+
+          it "applies the same transformation to keys" do
+            parse "2013-01-29 05:58:00 -0800: time"
+            result.should == { Time.new(2013, 1, 29, 5, 58, 0, "-08:00") => "time" }
+          end
+
+          it "applies the same transformation to elements in sequences" do
+            parse "- 2013-01-29 05:58:00 -0800"
+            result.should == [Time.new(2013, 1, 29, 5, 58, 0, "-08:00")]
+          end
+
+        else
+          it "does not deserialize times" do
+            parse "time: 2013-01-29 05:58:00 -0800"
+            result.should == { "time" => "2013-01-29 05:58:00 -0800" }
+          end
         end
       end
 
@@ -145,37 +160,16 @@ module SharedSpecs
           result.should == { "symbol" => :value }
         end
 
-        it "applies the same transformations to keys as to values" do
-          parse <<-YAML
-            foo: string
-            :bar: symbol
-            1: integer
-            3.14: float
-            2013-01-24: date
-            2013-01-29 05:58:00 -0800: time
-          YAML
+        it "applies the same transformation to keys" do
+          parse ":bar: symbol"
 
-          result.should == {
-            "foo" => "string",
-            :bar  => "symbol",
-            1     => "integer",
-            3.14  => "float",
-            Date.parse("2013-01-24") => "date",
-            Time.new(2013, 1, 29, 5, 58, 0, "-08:00") => "time"
-          }
+          result.should == { :bar  => "symbol" }
         end
 
-        it "applies the same transformations to elements in sequences as to all values" do
-          parse <<-YAML
-            - foo
-            - :bar
-            - 1
-            - 3.14
-            - 2013-01-24
-            - 2013-01-29 05:58:00 -0800
-          YAML
+        it "applies the same transformation to elements in sequences" do
+          parse "- :bar"
 
-          result.should == ["foo", :bar, 1, 3.14, Date.parse("2013-01-24"), Time.new(2013, 1, 29, 5, 58, 0, "-08:00")]
+          result.should == [:bar]
         end
       end
     end

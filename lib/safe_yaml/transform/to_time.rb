@@ -8,7 +8,10 @@ module SafeYAML
       def transform?(value)
         return false unless MATCHER.match(value)
         datetime = DateTime.parse(value) rescue nil
-        return !!datetime, datetime.to_time
+        if datetime.respond_to?(:to_time)
+          return true, datetime.to_time
+        end
+        false
       end
     end
   end
