@@ -3,6 +3,14 @@ require File.join(File.dirname(__FILE__), "spec_helper")
 require "exploitable_back_door"
 
 describe YAML do
+  # Essentially stolen from:
+  # https://github.com/rails/rails/blob/3-2-stable/activesupport/lib/active_support/core_ext/kernel/reporting.rb#L10-25
+  def silence_warnings
+    $VERBOSE = nil; yield
+  ensure
+    $VERBOSE = true
+  end
+
   before :each do
     YAML.disable_symbol_parsing!
   end
@@ -143,8 +151,10 @@ describe YAML do
     }
 
     it "issues a warning if the :safe option is not specified" do
-      Kernel.should_receive(:warn)
-      YAML.load(*arguments)
+      silence_warnings do
+        Kernel.should_receive(:warn)
+        YAML.load(*arguments)
+      end
     end
 
     it "doesn't issue a warning as long as the :safe option is specified" do
@@ -153,8 +163,10 @@ describe YAML do
     end
 
     it "defaults to safe mode if the :safe option is omitted" do
-      YAML.should_receive(:safe_load).with(*arguments)
-      YAML.load(*arguments)
+      silence_warnings do
+        YAML.should_receive(:safe_load).with(*arguments)
+        YAML.load(*arguments)
+      end
     end
 
     it "calls #safe_load if the :safe option is set to true" do
@@ -177,8 +189,10 @@ describe YAML do
       end
 
       it "defaults to unsafe mode if the :safe option is omitted" do
-        YAML.should_receive(:unsafe_load).with(*arguments)
-        YAML.load(*arguments)
+        silence_warnings do
+          YAML.should_receive(:unsafe_load).with(*arguments)
+          YAML.load(*arguments)
+        end
       end
 
       it "calls #safe_load if the :safe option is set to true" do
