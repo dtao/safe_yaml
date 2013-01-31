@@ -134,35 +134,37 @@ describe YAML do
   end
 
   describe "load" do
+    let (:arguments) {
+      if RUBY_VERSION >= "1.9.3"
+        ["foo: bar", nil]
+      else
+        ["foo: bar"]
+      end
+    }
+
     it "issues a warning if the :safe option is not specified" do
       Kernel.should_receive(:warn)
-      YAML.load("foo: bar", nil)
+      YAML.load(*arguments)
     end
 
     it "doesn't issue a warning if the :safe option is specified" do
       Kernel.should_not_receive(:warn)
-      YAML.load("foo: bar", nil, :safe => true)
+      YAML.load(*arguments, :safe => true)
     end
 
     it "defaults to safe mode if the :safe option is omitted" do
-      args = ["foo: bar"]
-      args << nil if RUBY_VERSION >= "1.9.3"
-      YAML.should_receive(:safe_load).with(*args)
-      YAML.load("foo: bar")
+      YAML.should_receive(:safe_load).with(*arguments)
+      YAML.load(*arguments, :safe => true)
     end
 
     it "calls #safe_load if the :safe option is set to true" do
-      args = ["foo: bar"]
-      args << nil if RUBY_VERSION >= "1.9.3"
-      YAML.should_receive(:safe_load).with(*args)
-      YAML.load(*args, :safe => true)
+      YAML.should_receive(:safe_load).with(*arguments)
+      YAML.load(*arguments, :safe => true)
     end
 
     it "calls #unsafe_load if the :safe option is set to false" do
-      args = ["foo: bar"]
-      args << nil if RUBY_VERSION >= "1.9.3"
-      YAML.should_receive(:unsafe_load).with(*args)
-      YAML.load(*args, :safe => false)
+      YAML.should_receive(:unsafe_load).with(*arguments)
+      YAML.load(*arguments, :safe => false)
     end
   end
 end
