@@ -1,9 +1,5 @@
 module SafeYAML
   class Transform
-    OPTIONS = {
-      :enable_symbol_parsing => false
-    }
-
     TRANSFORMERS = [
       Transform::ToSymbol.new,
       Transform::ToInteger.new,

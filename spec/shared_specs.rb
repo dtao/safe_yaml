@@ -152,7 +152,7 @@ module SharedSpecs
 
       context "with symbol parsing enabled" do
         before :each do
-          YAML.enable_symbol_parsing = true
+          YAML.enable_symbol_parsing!
         end
 
         it "translates values starting with ':' to symbols" do

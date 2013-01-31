@@ -4,7 +4,7 @@ require "exploitable_back_door"
 
 describe YAML do
   before :each do
-    YAML.enable_symbol_parsing = false
+    YAML.disable_symbol_parsing!
   end
 
   describe "unsafe_load" do
@@ -147,14 +147,14 @@ describe YAML do
       YAML.load(*arguments)
     end
 
-    it "doesn't issue a warning if the :safe option is specified" do
+    it "doesn't issue a warning as long as the :safe option is specified" do
       Kernel.should_not_receive(:warn)
       YAML.load(*(arguments + [{:safe => true}]))
     end
 
     it "defaults to safe mode if the :safe option is omitted" do
       YAML.should_receive(:safe_load).with(*arguments)
-      YAML.load(*(arguments + [{:safe => true}]))
+      YAML.load(*arguments)
     end
 
     it "calls #safe_load if the :safe option is set to true" do
@@ -165,6 +165,26 @@ describe YAML do
     it "calls #unsafe_load if the :safe option is set to false" do
       YAML.should_receive(:unsafe_load).with(*arguments)
       YAML.load(*(arguments + [{:safe => false}]))
+    end
+
+    context "with arbitrary object deserialization enabled by default" do
+      before :each do
+        YAML.enable_arbitrary_object_deserialization!
+      end
+
+      after :each do
+        YAML.disable_arbitrary_object_deserialization!
+      end
+
+      it "defaults to unsafe mode if the :safe option is omitted" do
+        YAML.should_receive(:unsafe_load).with(*arguments)
+        YAML.load(*arguments)
+      end
+
+      it "calls #safe_load if the :safe option is set to true" do
+        YAML.should_receive(:safe_load).with(*arguments)
+        YAML.load(*(arguments + [{:safe => true}]))
+      end
     end
   end
 end

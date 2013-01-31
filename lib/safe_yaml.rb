@@ -9,13 +9,21 @@ require "safe_yaml/transform/to_time"
 require "safe_yaml/transform"
 require "safe_yaml/version"
 
+module SafeYAML
+  OPTIONS = {
+    :enable_symbol_parsing => false,
+    :enable_arbitrary_object_deserialization => false
+  }
+end
+
 module YAML
   def self.load_with_options(yaml, options={})
     safe_mode = options[:safe]
 
     if safe_mode.nil?
-      Kernel.warn "Called 'load' without the :safe option -- defaulting to safe mode."
-      safe_mode = true
+      mode = SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization] ? "unsafe" : "safe"
+      Kernel.warn "Called 'load' without the :safe option -- defaulting to #{mode} mode."
+      safe_mode = !SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization]
     end
 
     arguments = [yaml]
@@ -95,12 +103,28 @@ module YAML
       alias_method :load, :load_with_options
     end
 
-    def enable_symbol_parsing
-      SafeYAML::Transform::OPTIONS[:enable_symbol_parsing]
+    def enable_symbol_parsing?
+      SafeYAML::OPTIONS[:enable_symbol_parsing]
     end
 
-    def enable_symbol_parsing=(value)
-      SafeYAML::Transform::OPTIONS[:enable_symbol_parsing] = value
+    def enable_symbol_parsing!
+      SafeYAML::OPTIONS[:enable_symbol_parsing] = true
+    end
+
+    def disable_symbol_parsing!
+      SafeYAML::OPTIONS[:enable_symbol_parsing] = false
+    end
+
+    def enable_arbitrary_object_deserialization?
+      SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization]
+    end
+
+    def enable_arbitrary_object_deserialization!
+      SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization] = true
+    end
+
+    def disable_arbitrary_object_deserialization!
+      SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization] = false
     end
   end
 end
