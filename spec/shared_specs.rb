@@ -155,6 +155,10 @@ module SharedSpecs
           YAML.enable_symbol_parsing!
         end
 
+        after :each do
+          YAML.disable_symbol_parsing!
+        end
+
         it "translates values starting with ':' to symbols" do
           parse "symbol: :value"
           result.should == { "symbol" => :value }

@@ -203,34 +203,57 @@ describe YAML do
   end
 
   describe "load_file" do
+    let(:filename) { "spec/exploit.1.9.2.yaml" } # doesn't really matter
+
     it "issues a warning if the :safe option is omitted" do
       silence_warnings do
         Kernel.should_receive(:warn)
-        YAML.load_file("spec/exploit.1.9.2.yaml")
+        YAML.load_file(filename)
       end
     end
 
     it "doesn't issue a warning as long as the :safe option is specified" do
       Kernel.should_not_receive(:warn)
-      YAML.load_file("spec/exploit.1.9.2.yaml", :safe => true)
+      YAML.load_file(filename, :safe => true)
     end
-
 
     it "defaults to safe mode if the :safe option is omitted" do
       silence_warnings do
-        YAML.should_receive(:safe_load_file).with("spec/exploit.1.9.2.yaml")
-        YAML.load_file("spec/exploit.1.9.2.yaml")
+        YAML.should_receive(:safe_load_file).with(filename)
+        YAML.load_file(filename)
       end
     end
 
     it "calls #safe_load_file if the :safe option is set to true" do
-      YAML.should_receive(:safe_load_file).with("spec/exploit.1.9.2.yaml")
-      YAML.load_file("spec/exploit.1.9.2.yaml", :safe => true)
+      YAML.should_receive(:safe_load_file).with(filename)
+      YAML.load_file(filename, :safe => true)
     end
 
     it "calls #unsafe_load_file if the :safe option is set to false" do
-      YAML.should_receive(:unsafe_load_file).with("spec/exploit.1.9.2.yaml")
-      YAML.load_file("spec/exploit.1.9.2.yaml", :safe => false)
+      YAML.should_receive(:unsafe_load_file).with(filename)
+      YAML.load_file(filename, :safe => false)
+    end
+
+    context "with arbitrary object deserialization enabled by default" do
+      before :each do
+        YAML.enable_arbitrary_object_deserialization!
+      end
+
+      after :each do
+        YAML.disable_arbitrary_object_deserialization!
+      end
+
+      it "defaults to unsafe mode if the :safe option is omitted" do
+        silence_warnings do
+          YAML.should_receive(:unsafe_load_file).with(filename)
+          YAML.load_file(filename)
+        end
+      end
+
+      it "calls #safe_load if the :safe option is set to true" do
+        YAML.should_receive(:safe_load_file).with(filename)
+        YAML.load_file(filename, :safe => true)
+      end
     end
   end
 end
