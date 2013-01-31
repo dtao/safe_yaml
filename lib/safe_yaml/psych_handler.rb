@@ -5,6 +5,8 @@ module SafeYAML
     def initialize
       @anchors = {}
       @stack = []
+      @current_key = nil
+      @result = nil
     end
 
     def result
