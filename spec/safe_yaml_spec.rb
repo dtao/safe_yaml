@@ -149,22 +149,22 @@ describe YAML do
 
     it "doesn't issue a warning if the :safe option is specified" do
       Kernel.should_not_receive(:warn)
-      YAML.load(*arguments, :safe => true)
+      YAML.load(*(arguments + [{:safe => true}]))
     end
 
     it "defaults to safe mode if the :safe option is omitted" do
       YAML.should_receive(:safe_load).with(*arguments)
-      YAML.load(*arguments, :safe => true)
+      YAML.load(*(arguments + [{:safe => true}]))
     end
 
     it "calls #safe_load if the :safe option is set to true" do
       YAML.should_receive(:safe_load).with(*arguments)
-      YAML.load(*arguments, :safe => true)
+      YAML.load(*(arguments + [{:safe => true}]))
     end
 
     it "calls #unsafe_load if the :safe option is set to false" do
       YAML.should_receive(:unsafe_load).with(*arguments)
-      YAML.load(*arguments, :safe => false)
+      YAML.load(*(arguments + [{:safe => false}]))
     end
   end
 end
