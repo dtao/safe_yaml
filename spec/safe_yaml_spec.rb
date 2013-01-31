@@ -150,7 +150,7 @@ describe YAML do
       end
     }
 
-    it "issues a warning if the :safe option is not specified" do
+    it "issues a warning if the :safe option is omitted" do
       silence_warnings do
         Kernel.should_receive(:warn)
         YAML.load(*arguments)
@@ -199,6 +199,38 @@ describe YAML do
         YAML.should_receive(:safe_load).with(*arguments)
         YAML.load(*(arguments + [{:safe => true}]))
       end
+    end
+  end
+
+  describe "load_file" do
+    it "issues a warning if the :safe option is omitted" do
+      silence_warnings do
+        Kernel.should_receive(:warn)
+        YAML.load_file("spec/exploit.1.9.2.yaml")
+      end
+    end
+
+    it "doesn't issue a warning as long as the :safe option is specified" do
+      Kernel.should_not_receive(:warn)
+      YAML.load_file("spec/exploit.1.9.2.yaml", :safe => true)
+    end
+
+
+    it "defaults to safe mode if the :safe option is omitted" do
+      silence_warnings do
+        YAML.should_receive(:safe_load_file).with("spec/exploit.1.9.2.yaml")
+        YAML.load_file("spec/exploit.1.9.2.yaml")
+      end
+    end
+
+    it "calls #safe_load_file if the :safe option is set to true" do
+      YAML.should_receive(:safe_load_file).with("spec/exploit.1.9.2.yaml")
+      YAML.load_file("spec/exploit.1.9.2.yaml", :safe => true)
+    end
+
+    it "calls #unsafe_load_file if the :safe option is set to false" do
+      YAML.should_receive(:unsafe_load_file).with("spec/exploit.1.9.2.yaml")
+      YAML.load_file("spec/exploit.1.9.2.yaml", :safe => false)
     end
   end
 end
