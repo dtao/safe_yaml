@@ -1,7 +1,7 @@
 module SafeYAML
   class Transform
     class ToInteger
-      MATCHER = /^\d+$/.freeze
+      MATCHER = /\A\d+\Z/.freeze
 
       def transform?(value)
         return false unless MATCHER.match(value)
