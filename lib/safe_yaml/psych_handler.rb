@@ -13,8 +13,8 @@ module SafeYAML
       @result
     end
 
-    def add_to_current_structure(value, anchor=nil)
-      value = Transform.to_proper_type(value)
+    def add_to_current_structure(value, anchor=nil, quoted=nil)
+      value = Transform.to_proper_type(value, quoted)
 
       @anchors[anchor] = value if anchor
 
@@ -62,7 +62,7 @@ module SafeYAML
     end
 
     def scalar(value, anchor, tag, plain, quoted, style)
-      add_to_current_structure(value, anchor)
+      add_to_current_structure(value, anchor, quoted)
     end
 
     def start_mapping(anchor, tag, implicit, style)

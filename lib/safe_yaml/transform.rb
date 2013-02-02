@@ -10,7 +10,9 @@ module SafeYAML
       Transform::ToTime.new
     ]
 
-    def self.to_proper_type(value)
+    def self.to_proper_type(value, quoted=false)
+      return value if quoted
+
       if value.is_a?(String)
         TRANSFORMERS.each do |transformer|
           success, transformed_value = transformer.transform?(value)

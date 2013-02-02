@@ -70,6 +70,11 @@ module SharedSpecs
           result.should == [nil] * 3
         end
 
+        it "translates quoted empty strings to strings (not nil)" do
+          parse "foo: ''"
+          result.should == { "foo" => "" }
+        end
+
         it "deals just fine with nested maps" do
           parse <<-YAML
             foo:
@@ -166,13 +171,11 @@ module SharedSpecs
 
         it "applies the same transformation to keys" do
           parse ":bar: symbol"
-
           result.should == { :bar  => "symbol" }
         end
 
         it "applies the same transformation to elements in sequences" do
           parse "- :bar"
-
           result.should == [:bar]
         end
       end
