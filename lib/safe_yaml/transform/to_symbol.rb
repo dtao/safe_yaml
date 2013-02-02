@@ -1,7 +1,7 @@
 module SafeYAML
   class Transform
     class ToSymbol
-      MATCHER = /^:\w+$/.freeze
+      MATCHER = /\A:\w+\Z/.freeze
 
       def transform?(value)
         return false unless SafeYAML::OPTIONS[:enable_symbol_parsing] && MATCHER.match(value)
