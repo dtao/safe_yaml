@@ -10,3 +10,6 @@ rake spec
 
 rvm use 1.9.3@safe_yaml
 rake spec
+
+rvm use 2.0.0@safe_yaml
+rake spec

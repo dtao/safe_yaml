@@ -137,14 +137,17 @@ module SharedSpecs
             result.should == { "time" => Time.new(2013, 1, 29, 5, 58, 0, "-08:00") }
           end
 
-          it "applies the same transformation to keys" do
-            parse "2013-01-29 05:58:00 -0800: time"
-            result.should == { Time.new(2013, 1, 29, 5, 58, 0, "-08:00") => "time" }
-          end
-
           it "applies the same transformation to elements in sequences" do
             parse "- 2013-01-29 05:58:00 -0800"
             result.should == [Time.new(2013, 1, 29, 5, 58, 0, "-08:00")]
+          end
+
+          # On Ruby 2.0.0-rc1, even YAML.load overflows the stack on this input.
+          if RUBY_VERSION != "2.0.0"
+            it "applies the same transformation to keys" do
+              parse "2013-01-29 05:58:00 -0800: time"
+              result.should == { Time.new(2013, 1, 29, 5, 58, 0, "-08:00") => "time" }
+            end
           end
 
         else
