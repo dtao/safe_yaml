@@ -106,3 +106,8 @@ Requirements
 ------------
 
 SafeYAML requires Ruby 1.8.7 or newer and works with both [Syck](http://www.ruby-doc.org/stdlib-1.8.7/libdoc/yaml/rdoc/YAML.html) and [Psych](http://github.com/tenderlove/psych).
+
+Code Status
+-------------
+
+[![Build Status](https://secure.travis-ci.org/dtao/safe_yaml.png)](http://travis-ci.org/dtao/safe_yaml)
