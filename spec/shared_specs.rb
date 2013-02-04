@@ -75,6 +75,32 @@ module SharedSpecs
           result.should == { "foo" => "" }
         end
 
+        it "does not specially parse any double-quoted strings" do
+          parse <<-YAML
+            - "1"
+            - "3.14"
+            - "true"
+            - "false"
+            - "2013-02-03"
+            - "2013-02-03 16:27:00 -0600"
+          YAML
+
+          result.should == ["1", "3.14", "true", "false", "2013-02-03", "2013-02-03 16:27:00 -0600"]
+        end
+
+        it "does not specially parse any single-quoted strings" do
+          parse <<-YAML
+            - '1'
+            - '3.14'
+            - 'true'
+            - 'false'
+            - '2013-02-03'
+            - '2013-02-03 16:27:00 -0600'
+          YAML
+
+          result.should == ["1", "3.14", "true", "false", "2013-02-03", "2013-02-03 16:27:00 -0600"]
+        end
+
         it "deals just fine with nested maps" do
           parse <<-YAML
             foo:
