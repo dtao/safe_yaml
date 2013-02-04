@@ -75,6 +75,11 @@ module SharedSpecs
           result.should == { "foo" => "" }
         end
 
+        it "correctly reverse-translates strings encoded via #to_yaml" do
+          parse "5.10".to_yaml
+          result.should == "5.10"
+        end
+
         it "does not specially parse any double-quoted strings" do
           parse <<-YAML
             - "1"
