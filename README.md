@@ -1,6 +1,8 @@
 SafeYAML
 ========
 
+[![Build Status](https://travis-ci.org/dtao/safe_yaml.png)](http://travis-ci.org/dtao/safe_yaml)
+
 The **SafeYAML** gem provides an alternative implementation of `YAML.load` suitable for accepting user input in Ruby applications. Unlike Ruby's built-in implementation of `YAML.load`, SafeYAML's version will not expose apps to arbitrary code execution exploits (such as [the one recently discovered in Rails](http://www.reddit.com/r/netsec/comments/167c11/serious_vulnerability_in_ruby_on_rails_allowing/) (or [this one](http://www.h-online.com/open/news/item/Rails-developers-close-another-extremely-critical-flaw-1793511.html))).
 
 Installation
@@ -99,17 +101,21 @@ The way that SafeYAML works is by restricting the kinds of objects that can be d
 
 Additionally, deserialization of symbols can be enabled by calling `YAML.enable_symbol_parsing!`.
 
+Known Issues
+------------
+
+Also note that some Ruby libraries, particularly those requiring inter-process communication, leverage YAML's object deserialization functionality and therefore may break or otherwise be impacted by SafeYAML. The following list includes known instances of SafeYAML's interaction with other Ruby gems:
+
+- **Guard**: Uses YAML as a serialization format for notifications. The data serialized uses symbol keys, so calling `YAML.enable_symbol_parsing!` is necessary to allow Guard to work.
+
+The above list will grow over time, as more issues are discovered.
+
 Caveat
 ------
 
-Obviously this gem is quite young, and so the API may (read: will) change in future versions. The goal of the gem is to make it as easy as possible to protect existing applications from object deserialization exploits. Any and all feedback is more than welcome.
+This gem is quite young, and so the API may (read: *will*) change in future versions. The goal of the gem is to make it as easy as possible to protect existing applications from object deserialization exploits. Any and all feedback is more than welcome.
 
 Requirements
 ------------
 
 SafeYAML requires Ruby 1.8.7 or newer and works with both [Syck](http://www.ruby-doc.org/stdlib-1.8.7/libdoc/yaml/rdoc/YAML.html) and [Psych](http://github.com/tenderlove/psych).
-
-Code Status
--------------
-
-[![Build Status](https://secure.travis-ci.org/dtao/safe_yaml.png)](http://travis-ci.org/dtao/safe_yaml)
