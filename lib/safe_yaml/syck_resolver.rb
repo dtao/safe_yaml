@@ -3,15 +3,15 @@ module SafeYAML
     QUOTE_STYLES = [:quote1, :quote2]
 
     def resolve_node(node)
-      case node.kind
-      when :map
+      case node.value
+      when Hash
         return resolve_map(node)
-      when :seq
+      when Array
         return resolve_seq(node)
-      when :scalar
+      when String
         return resolve_scalar(node)
       else
-        raise "Don't know how to resolve a '#{node.kind}' node!"
+        raise "Don't know how to resolve this node: #{node.inspect}"
       end
     end
 
