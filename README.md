@@ -50,7 +50,7 @@ Observe:
     > "foo; end; puts %(I'm in yr system!); def bar": "baz"
     > EOYAML
     => "--- !ruby/hash:ExploitableClassBuilder\n\"foo; end; puts %(I'm in yr system!); def bar\": \"baz\"\n"
-    
+
     > YAML.load(yaml)
     I'm in yr system!
     => #<ExploitableClassBuilder:0x007fdbbe2e25d8 @class=#<Class:0x007fdbbe2e2510>>
@@ -80,6 +80,8 @@ By default, when you require the safe_yaml gem in your project, `YAML.load` is p
     YAML.load(yaml, :safe => false) # calls unsafe_load
 
 The default behavior can be switched to unsafe loading by calling `YAML.enable_arbitrary_object_deserialization!`. In this case, the `:safe` flag still has the same effect, but the defaults are reversed (so calling `YAML.load` will have the same behavior as if the safe_yaml gem weren't required).
+
+This gem will also warn you whenever you use `YAML.load` without specifying the `:safe` option. If you do not want to see these messages in your logs, you can say `SafeYAML::OPTIONS[:suppress_warnings] = true` in an initializer.
 
 Notes
 -----
