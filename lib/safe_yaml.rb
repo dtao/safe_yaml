@@ -12,7 +12,8 @@ require "safe_yaml/version"
 module SafeYAML
   OPTIONS = {
     :enable_symbol_parsing => false,
-    :enable_arbitrary_object_deserialization => false
+    :enable_arbitrary_object_deserialization => false,
+    :suppress_warnings => false
   }
 end
 
@@ -131,7 +132,7 @@ module YAML
 
     if safe_mode.nil?
       mode = SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization] ? "unsafe" : "safe"
-      Kernel.warn "Called '#{method}' without the :safe option -- defaulting to #{mode} mode."
+      Kernel.warn "Called '#{method}' without the :safe option -- defaulting to #{mode} mode." unless SafeYAML::OPTIONS[:suppress_warnings]
       safe_mode = !SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization]
     end
 
