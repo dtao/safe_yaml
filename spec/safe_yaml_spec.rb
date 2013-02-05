@@ -150,6 +150,17 @@ describe YAML do
       end
     }
 
+    context "with :suppress_warnings set to true" do
+      before :each do SafeYAML::OPTIONS[:suppress_warnings] = true; end
+      after :each do SafeYAML::OPTIONS[:suppress_warnings] = false; end
+
+      it "doesn't issue a warning if :suppress_warnings option is set to true" do
+        SafeYAML::OPTIONS[:suppress_warnings] = true
+        Kernel.should_not_receive(:warn)
+        YAML.load(*arguments)
+      end
+    end
+
     it "issues a warning if the :safe option is omitted" do
       silence_warnings do
         Kernel.should_receive(:warn)
