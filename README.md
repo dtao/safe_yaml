@@ -106,7 +106,8 @@ Known Issues
 
 Also note that some Ruby libraries, particularly those requiring inter-process communication, leverage YAML's object deserialization functionality and therefore may break or otherwise be impacted by SafeYAML. The following list includes known instances of SafeYAML's interaction with other Ruby gems:
 
-- **Guard**: Uses YAML as a serialization format for notifications. The data serialized uses symbol keys, so calling `YAML.enable_symbol_parsing!` is necessary to allow Guard to work.
+- **Guard**: Uses YAML as a serialization format for notifications. The data serialized uses symbolic keys, so calling `YAML.enable_symbol_parsing!` is necessary to allow Guard to work.
+- **sidekiq**: Uses a YAML configiuration file with symbolic keys, so calling `YAML.enable_symbol_parsing!` should allow it to work.
 
 The above list will grow over time, as more issues are discovered.
 
