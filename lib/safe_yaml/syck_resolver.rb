@@ -19,12 +19,17 @@ module SafeYAML
       map = node.value
 
       hash = {}
+
+      # Take the "<<" key nodes first, as these are meant to approximate a form of inheritance.
+      inheritors = map.keys.select { |node| resolve_node(node) == "<<" }
+      inheritors.each do |key|
+        value_node = map.delete(key)
+        hash.merge!(resolve_node(value_node))
+      end
+
+      # All that's left should be normal (non-"<<") nodes.
       map.each do |key_node, value_node|
-        if resolve_node(key_node) == "<<"
-          hash.merge!(resolve_node(value_node))
-        else
-          hash[resolve_node(key_node)] = resolve_node(value_node)
-        end
+        hash[resolve_node(key_node)] = resolve_node(value_node)
       end
 
       return hash
@@ -32,7 +37,6 @@ module SafeYAML
 
     def resolve_seq(node)
       seq = node.value
-
       seq.map { |node| resolve_node(node) }
     end
 

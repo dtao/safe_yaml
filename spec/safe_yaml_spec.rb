@@ -108,6 +108,29 @@ describe YAML do
         }
       }
     end
+
+    it "correctly prefers explicitly defined values over default values from included sections" do
+      # Repeating this test 100 times to increase the likelihood of running into an issue caused by
+      # non-deterministic hash key enumeration.
+      100.times do
+        result = YAML.safe_load <<-YAML
+          defaults: &defaults
+            foo: foo
+            bar: bar
+            baz: baz
+          custom:
+            <<: *defaults
+            bar: custom_bar
+            baz: custom_baz
+        YAML
+
+        result["custom"].should == {
+          "foo" => "foo",
+          "bar" => "custom_bar",
+          "baz" => "custom_baz"
+        }
+      end
+    end
   end
 
   describe "unsafe_load_file" do
