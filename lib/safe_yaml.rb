@@ -38,11 +38,16 @@ module YAML
     load_with_options(yaml, options.merge(:filename => filename))
   end
 
-  if RUBY_VERSION >= "1.9.3"
+  if RUBY_VERSION >= "1.9.2"
     require "safe_yaml/psych_handler"
     def self.safe_load(yaml, filename=nil)
       safe_handler = SafeYAML::PsychHandler.new
-      Psych::Parser.new(safe_handler).parse(yaml, filename)
+      parser = Psych::Parser.new(safe_handler)
+      if parser.method(:parse).arity == 1
+        parser.parse(yaml)
+      else
+        parser.parse(yaml, filename)
+      end
       return safe_handler.result
     end
 
@@ -54,24 +59,6 @@ module YAML
       # https://github.com/tenderlove/psych/blob/v1.3.2/lib/psych.rb#L296-298
       File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load f, filename }
     end
-
-  elsif RUBY_VERSION == "1.9.2"
-    require "safe_yaml/psych_handler"
-    def self.safe_load(yaml)
-      safe_handler = SafeYAML::PsychHandler.new
-      Psych::Parser.new(safe_handler).parse(yaml)
-      return safe_handler.result
-    end
-
-    def self.safe_load_file(filename)
-      File.open(filename, 'r:bom|utf-8') { |f| self.safe_load f }
-    end
-
-    def self.unsafe_load_file(filename)
-      # https://github.com/tenderlove/psych/blob/v1.2.0/lib/psych.rb#L228-230
-      File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load f }
-    end
-
   else
     require "safe_yaml/syck_resolver"
     def self.safe_load(yaml)
