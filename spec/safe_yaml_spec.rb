@@ -76,6 +76,30 @@ describe YAML do
       result.should == [{}, {}, {}]
     end
 
+    it "works for YAML documents with binary tagged keys" do
+      result = YAML.safe_load <<-YAML
+        ? !!binary >
+          Zm9v
+        : "bar"
+        ? !!binary >
+          YmFy
+        : "baz"
+      YAML
+
+      result.should == {"foo" => "bar", "bar" => "baz"}
+    end
+
+    it "works for YAML documents with binary tagged values" do
+      result = YAML.safe_load <<-YAML
+        "foo": !!binary >
+          YmFy
+        "bar": !!binary >
+          YmF6
+      YAML
+
+      result.should == {"foo" => "bar", "bar" => "baz"}
+    end
+
     it "works for YAML documents with sections" do
       result = YAML.safe_load <<-YAML
         mysql: &mysql
