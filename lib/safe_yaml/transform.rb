@@ -1,3 +1,5 @@
+require 'base64'
+
 module SafeYAML
   class Transform
     TRANSFORMERS = [
@@ -26,6 +28,8 @@ module SafeYAML
     def self.to_proper_type(value, quoted=false,tag=nil)
       case tag
       when "tag:yaml.org,2002:binary"
+        return Base64.decode64(value)
+      when "x-private:binary"
         return Base64.decode64(value)
       else
         return self.to_guessed_type(value, quoted)
