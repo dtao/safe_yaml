@@ -18,11 +18,13 @@ module SafeYAML
 end
 
 module YAML
+  MULTI_ARGUMENT_PSYCH =  RUBY_VERSION >= "1.9.2" && Psych::Parser.instance_method(:parse).arity != 1
+  
   def self.load_with_options(yaml, options={})
     safe_mode = safe_mode_from_options("load", options)
 
     arguments = [yaml]
-    if RUBY_VERSION >= "1.9.2" && Psych::Parser.instance_method(:parse).arity != 1
+    if MULTI_ARGUMENT_PSYCH
       arguments << options[:filename]
     end
 
@@ -84,7 +86,7 @@ module YAML
   class << self
     alias_method :unsafe_load, :load
 
-    if RUBY_VERSION >= "1.9.3"
+    if MULTI_ARGUMENT_PSYCH
       alias_method :load, :load_with_filename_and_options
     else
       alias_method :load, :load_with_options
