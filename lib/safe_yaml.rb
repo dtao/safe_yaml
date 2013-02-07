@@ -18,11 +18,13 @@ module SafeYAML
 end
 
 module YAML
+  MULTI_ARGUMENT_PSYCH =  RUBY_VERSION >= "1.9.2" && Psych::Parser.instance_method(:parse).arity != 1
+  
   def self.load_with_options(yaml, options={})
     safe_mode = safe_mode_from_options("load", options)
 
     arguments = [yaml]
-    if RUBY_VERSION >= "1.9.3"
+    if MULTI_ARGUMENT_PSYCH
       arguments << options[:filename]
     end
 
@@ -38,11 +40,16 @@ module YAML
     load_with_options(yaml, options.merge(:filename => filename))
   end
 
-  if RUBY_VERSION >= "1.9.3"
+  if RUBY_VERSION >= "1.9.2"
     require "safe_yaml/psych_handler"
     def self.safe_load(yaml, filename=nil)
       safe_handler = SafeYAML::PsychHandler.new
-      Psych::Parser.new(safe_handler).parse(yaml, filename)
+      parser = Psych::Parser.new(safe_handler)
+      if parser.method(:parse).arity == 1
+        parser.parse(yaml)
+      else
+        parser.parse(yaml, filename)
+      end
       return safe_handler.result
     end
 
@@ -52,26 +59,12 @@ module YAML
 
     def self.unsafe_load_file(filename)
       # https://github.com/tenderlove/psych/blob/v1.3.2/lib/psych.rb#L296-298
-      File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load f, filename }
+      if method(:unsafe_load).arity == 1
+        File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load f }
+      else
+        File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load f, filename }
+      end
     end
-
-  elsif RUBY_VERSION == "1.9.2"
-    require "safe_yaml/psych_handler"
-    def self.safe_load(yaml)
-      safe_handler = SafeYAML::PsychHandler.new
-      Psych::Parser.new(safe_handler).parse(yaml)
-      return safe_handler.result
-    end
-
-    def self.safe_load_file(filename)
-      File.open(filename, 'r:bom|utf-8') { |f| self.safe_load f }
-    end
-
-    def self.unsafe_load_file(filename)
-      # https://github.com/tenderlove/psych/blob/v1.2.0/lib/psych.rb#L228-230
-      File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load f }
-    end
-
   else
     require "safe_yaml/syck_resolver"
     def self.safe_load(yaml)
@@ -93,7 +86,7 @@ module YAML
   class << self
     alias_method :unsafe_load, :load
 
-    if RUBY_VERSION >= "1.9.3"
+    if MULTI_ARGUMENT_PSYCH
       alias_method :load, :load_with_filename_and_options
     else
       alias_method :load, :load_with_options

@@ -166,7 +166,7 @@ describe YAML do
 
   describe "load" do
     let (:arguments) {
-      if RUBY_VERSION >= "1.9.3"
+      if YAML::MULTI_ARGUMENT_PSYCH
         ["foo: bar", nil]
       else
         ["foo: bar"]
