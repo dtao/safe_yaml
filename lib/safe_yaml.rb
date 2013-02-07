@@ -22,7 +22,7 @@ module YAML
     safe_mode = safe_mode_from_options("load", options)
 
     arguments = [yaml]
-    if Psych::Parser.instance_method(:parse).arity != 1
+    if RUBY_VERSION >= "1.9.2" && Psych::Parser.instance_method(:parse).arity != 1
       arguments << options[:filename]
     end
 
