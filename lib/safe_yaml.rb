@@ -22,7 +22,7 @@ module YAML
     safe_mode = safe_mode_from_options("load", options)
 
     arguments = [yaml]
-    if RUBY_VERSION >= "1.9.3"
+    if Psych::Parser.instance_method(:parse).arity != 1
       arguments << options[:filename]
     end
 
@@ -57,7 +57,11 @@ module YAML
 
     def self.unsafe_load_file(filename)
       # https://github.com/tenderlove/psych/blob/v1.3.2/lib/psych.rb#L296-298
-      File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load f, filename }
+      if method(:unsafe_load).arity == 1
+        File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load f }
+      else
+        File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load f, filename }
+      end
     end
   else
     require "safe_yaml/syck_resolver"
