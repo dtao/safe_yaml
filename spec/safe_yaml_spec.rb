@@ -166,7 +166,7 @@ describe YAML do
 
   describe "load" do
     let (:arguments) {
-      if YAML::MULTI_ARGUMENT_PSYCH
+      if YAML::MULTI_ARGUMENT_YAML_LOAD
         ["foo: bar", nil]
       else
         ["foo: bar"]

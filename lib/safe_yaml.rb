@@ -18,13 +18,13 @@ module SafeYAML
 end
 
 module YAML
-  MULTI_ARGUMENT_PSYCH =  RUBY_VERSION >= "1.9.2" && Psych::Parser.instance_method(:parse).arity != 1
+  MULTI_ARGUMENT_YAML_LOAD = self.method(:load).arity != 1
   
   def self.load_with_options(yaml, options={})
     safe_mode = safe_mode_from_options("load", options)
 
     arguments = [yaml]
-    if MULTI_ARGUMENT_PSYCH
+    if MULTI_ARGUMENT_YAML_LOAD
       arguments << options[:filename]
     end
 
@@ -40,7 +40,7 @@ module YAML
     load_with_options(yaml, options.merge(:filename => filename))
   end
 
-  if RUBY_VERSION >= "1.9.2"
+  if defined?(YAML::ENGINE) && YAML::ENGINE.yamler == "psych"
     require "safe_yaml/psych_handler"
     def self.safe_load(yaml, filename=nil)
       safe_handler = SafeYAML::PsychHandler.new
@@ -65,6 +65,7 @@ module YAML
         File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load f, filename }
       end
     end
+
   else
     require "safe_yaml/syck_resolver"
     def self.safe_load(yaml)
@@ -86,7 +87,7 @@ module YAML
   class << self
     alias_method :unsafe_load, :load
 
-    if MULTI_ARGUMENT_PSYCH
+    if MULTI_ARGUMENT_YAML_LOAD
       alias_method :load, :load_with_filename_and_options
     else
       alias_method :load, :load_with_options
