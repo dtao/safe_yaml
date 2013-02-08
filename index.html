@@ -129,7 +129,7 @@ YAML.load(yaml, :safe =&gt; false) # calls unsafe_load
 <li>Times</li>
 <li>Booleans</li>
 <li>Nils</li>
-</ul><p>Additionally, deserialization of symbols can be enabled by calling <code>YAML.enable_symbol_parsing!</code>.</p>
+</ul><p>Additionally, deserialization of symbols can be enabled by calling <code>YAML.enable_symbol_parsing!</code> (for example, in an initializer).</p>
 
 <h2>Known Issues</h2>
 
@@ -137,7 +137,9 @@ YAML.load(yaml, :safe =&gt; false) # calls unsafe_load
 
 <ul>
 <li>
-<strong>Guard</strong>: Uses YAML as a serialization format for notifications. The data serialized uses symbol keys, so calling <code>YAML.enable_symbol_parsing!</code> is necessary to allow Guard to work.</li>
+<a href="https://github.com/guard/guard"><strong>Guard</strong></a>: Uses YAML as a serialization format for notifications. The data serialized uses symbolic keys, so calling <code>YAML.enable_symbol_parsing!</code> is necessary to allow Guard to work.</li>
+<li>
+<a href="https://github.com/mperham/sidekiq"><strong>sidekiq</strong></a>: Uses a YAML configiuration file with symbolic keys, so calling <code>YAML.enable_symbol_parsing!</code> should allow it to work.</li>
 </ul><p>The above list will grow over time, as more issues are discovered.</p>
 
 <h2>Caveat</h2>
@@ -147,6 +149,8 @@ YAML.load(yaml, :safe =&gt; false) # calls unsafe_load
 <h2>Requirements</h2>
 
 <p>SafeYAML requires Ruby 1.8.7 or newer and works with both <a href="http://www.ruby-doc.org/stdlib-1.8.7/libdoc/yaml/rdoc/YAML.html">Syck</a> and <a href="http://github.com/tenderlove/psych">Psych</a>.</p>
+
+<p>If you are using a version of Ruby where Psych is the default YAML engine (e.g., 1.9.3) but you want to use Syck, be sure to set <code>YAML::ENGINE.yamler = "syck"</code> <strong>before</strong> requiring the safe_yaml gem.</p>
         </section>
 
         <aside id="sidebar">
