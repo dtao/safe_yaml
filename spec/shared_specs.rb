@@ -161,6 +161,7 @@ module SharedSpecs
         end
       end
 
+      # This does in fact appear to be a Ruby version thing as opposed to a YAML engine thing.
       context "for Ruby version #{RUBY_VERSION}" do
         if RUBY_VERSION >= "1.9.2"
           it "translates valid time values" do

@@ -1,6 +1,6 @@
 require File.join(File.dirname(__FILE__), "spec_helper")
 
-if RUBY_VERSION < "1.9.2"
+if SafeYAML::YAML_ENGINE == "syck"
   require "safe_yaml/syck_resolver"
 
   describe SafeYAML::SyckResolver do

@@ -6,10 +6,16 @@ rvm use 1.8.7@safe_yaml
 rake spec
 
 rvm use 1.9.2@safe_yaml
-rake spec
+YAMLER=syck rake spec
 
 rvm use 1.9.3@safe_yaml
-rake spec
+YAMLER=syck rake spec
+
+rvm use 1.9.2@safe_yaml
+YAMLER=psych rake spec
+
+rvm use 1.9.3@safe_yaml
+YAMLER=psych rake spec
 
 rvm use 2.0.0@safe_yaml
-rake spec
+YAMLER=psych rake spec

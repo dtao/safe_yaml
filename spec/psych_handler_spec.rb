@@ -1,6 +1,6 @@
 require File.join(File.dirname(__FILE__), "spec_helper")
 
-if RUBY_VERSION >= "1.9.2"
+if SafeYAML::YAML_ENGINE == "psych"
   require "safe_yaml/psych_handler"
 
   describe SafeYAML::PsychHandler do

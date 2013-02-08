@@ -10,6 +10,9 @@ require "safe_yaml/transform"
 require "safe_yaml/version"
 
 module SafeYAML
+  MULTI_ARGUMENT_YAML_LOAD = YAML.method(:load).arity != 1
+  YAML_ENGINE = defined?(YAML::ENGINE) ? YAML::ENGINE.yamler : "syck"
+
   OPTIONS = {
     :enable_symbol_parsing => false,
     :enable_arbitrary_object_deserialization => false,
@@ -18,16 +21,11 @@ module SafeYAML
 end
 
 module YAML
-  MULTI_ARGUMENT_YAML_LOAD = self.method(:load).arity != 1
-  
-  def self.load_with_options(yaml, options={})
+  def self.load_with_options(yaml, *filename_and_options)
+    options   = filename_and_options.last || {}
     safe_mode = safe_mode_from_options("load", options)
-
     arguments = [yaml]
-    if MULTI_ARGUMENT_YAML_LOAD
-      arguments << options[:filename]
-    end
-
+    arguments << filename_and_options.first if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
     safe_mode ? safe_load(*arguments) : unsafe_load(*arguments)
   end
 
@@ -36,19 +34,15 @@ module YAML
     safe_mode ? safe_load_file(file) : unsafe_load_file(file)
   end
 
-  def self.load_with_filename_and_options(yaml, filename=nil, options={})
-    load_with_options(yaml, options.merge(:filename => filename))
-  end
-
-  if defined?(YAML::ENGINE) && YAML::ENGINE.yamler == "psych"
+  if SafeYAML::YAML_ENGINE == "psych"
     require "safe_yaml/psych_handler"
     def self.safe_load(yaml, filename=nil)
       safe_handler = SafeYAML::PsychHandler.new
       parser = Psych::Parser.new(safe_handler)
-      if parser.method(:parse).arity == 1
-        parser.parse(yaml)
-      else
+      if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
         parser.parse(yaml, filename)
+      else
+        parser.parse(yaml)
       end
       return safe_handler.result
     end
@@ -58,11 +52,12 @@ module YAML
     end
 
     def self.unsafe_load_file(filename)
-      # https://github.com/tenderlove/psych/blob/v1.3.2/lib/psych.rb#L296-298
-      if method(:unsafe_load).arity == 1
-        File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load f }
-      else
+      if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
+        # https://github.com/tenderlove/psych/blob/v1.3.2/lib/psych.rb#L296-298
         File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load f, filename }
+      else
+        # https://github.com/tenderlove/psych/blob/v1.2.2/lib/psych.rb#L231-233
+        self.unsafe_load File.open(filename)
       end
     end
 
@@ -86,13 +81,7 @@ module YAML
 
   class << self
     alias_method :unsafe_load, :load
-
-    if MULTI_ARGUMENT_YAML_LOAD
-      alias_method :load, :load_with_filename_and_options
-    else
-      alias_method :load, :load_with_options
-    end
-
+    alias_method :load, :load_with_options
     alias_method :load_file, :load_file_with_options
 
     def enable_symbol_parsing?
@@ -118,18 +107,18 @@ module YAML
     def disable_arbitrary_object_deserialization!
       SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization] = false
     end
-  end
 
-  private
-  def self.safe_mode_from_options(method, options={})
-    safe_mode = options[:safe]
+    private
+    def safe_mode_from_options(method, options={})
+      safe_mode = options[:safe]
 
-    if safe_mode.nil?
-      mode = SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization] ? "unsafe" : "safe"
-      Kernel.warn "Called '#{method}' without the :safe option -- defaulting to #{mode} mode." unless SafeYAML::OPTIONS[:suppress_warnings]
-      safe_mode = !SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization]
+      if safe_mode.nil?
+        mode = SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization] ? "unsafe" : "safe"
+        Kernel.warn "Called '#{method}' without the :safe option -- defaulting to #{mode} mode." unless SafeYAML::OPTIONS[:suppress_warnings]
+        safe_mode = !SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization]
+      end
+
+      safe_mode
     end
-
-    safe_mode
   end
 end

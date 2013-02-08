@@ -16,7 +16,7 @@ describe YAML do
   end
 
   describe "unsafe_load" do
-    if RUBY_VERSION >= "1.9.3"
+    if SafeYAML::YAML_ENGINE == "psych" && RUBY_VERSION >= "1.9.3"
       it "allows exploits through objects defined in YAML w/ !ruby/hash via custom :[]= methods" do
         backdoor = YAML.unsafe_load("--- !ruby/hash:ExploitableBackDoor\nfoo: bar\n")
         backdoor.should be_exploited_through_setter
@@ -43,6 +43,33 @@ describe YAML do
     it "does NOT allow exploits through objects defined in YAML w/ !ruby/object" do
       object = YAML.safe_load("--- !ruby/object:ExploitableBackDoor\nfoo: bar\n")
       object.should_not be_a(ExploitableBackDoor)
+    end
+
+    context "for YAML engine #{SafeYAML::YAML_ENGINE}" do
+      if SafeYAML::YAML_ENGINE == "psych"
+        let(:arguments) {
+          if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
+            ["foo: bar", nil]
+          else
+            ["foo: bar"]
+          end
+        }
+        it "uses Psych internally to parse YAML" do
+          stub_parser = stub(Psych::Parser)
+          Psych::Parser.stub(:new).and_return(stub_parser)
+          stub_parser.should_receive(:parse).with(*arguments)
+          # This won't work now; we just want to ensure Psych::Parser#parse was in fact called.
+          YAML.safe_load(*arguments)
+        end
+      end
+
+      if SafeYAML::YAML_ENGINE == "syck"
+        it "uses Syck internally to parse YAML" do
+          YAML.should_receive(:parse).with("foo: bar")
+          # This won't work now; we just want to ensure YAML::parse was in fact called.
+          YAML.safe_load("foo: bar") rescue nil
+        end
+      end
     end
 
     it "loads a plain ol' YAML document just fine" do
@@ -158,12 +185,14 @@ describe YAML do
   end
 
   describe "unsafe_load_file" do
-    if RUBY_VERSION >= "1.9.3"
+    if SafeYAML::YAML_ENGINE == "psych" && RUBY_VERSION >= "1.9.3"
       it "allows exploits through objects defined in YAML w/ !ruby/hash via custom :[]= methods" do
         backdoor = YAML.unsafe_load_file "spec/exploit.1.9.3.yaml"
         backdoor.should be_exploited_through_setter
       end
+    end
 
+    if SafeYAML::YAML_ENGINE == "psych" && RUBY_VERSION >= "1.9.2"
       it "allows exploits through objects defined in YAML w/ !ruby/object via the :init_with method" do
         backdoor = YAML.unsafe_load_file "spec/exploit.1.9.2.yaml"
         backdoor.should be_exploited_through_init_with
@@ -190,7 +219,7 @@ describe YAML do
 
   describe "load" do
     let (:arguments) {
-      if YAML::MULTI_ARGUMENT_YAML_LOAD
+      if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
         ["foo: bar", nil]
       else
         ["foo: bar"]
