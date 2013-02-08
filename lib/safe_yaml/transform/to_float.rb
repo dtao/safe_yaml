@@ -1,7 +1,7 @@
 module SafeYAML
   class Transform
     class ToFloat
-      MATCHER = /\A(?:\d+(?:\.\d*)?\Z)|(?:^\.\d+\Z)/.freeze
+      MATCHER = /\A\d*\.\d+\Z/.freeze
 
       def transform?(value)
         return false unless MATCHER.match(value)
