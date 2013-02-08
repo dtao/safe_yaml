@@ -99,15 +99,15 @@ The way that SafeYAML works is by restricting the kinds of objects that can be d
 - Booleans
 - Nils
 
-Additionally, deserialization of symbols can be enabled by calling `YAML.enable_symbol_parsing!`.
+Additionally, deserialization of symbols can be enabled by calling `YAML.enable_symbol_parsing!` (for example, in an initializer).
 
 Known Issues
 ------------
 
 Also note that some Ruby libraries, particularly those requiring inter-process communication, leverage YAML's object deserialization functionality and therefore may break or otherwise be impacted by SafeYAML. The following list includes known instances of SafeYAML's interaction with other Ruby gems:
 
-- **Guard**: Uses YAML as a serialization format for notifications. The data serialized uses symbolic keys, so calling `YAML.enable_symbol_parsing!` is necessary to allow Guard to work.
-- **sidekiq**: Uses a YAML configiuration file with symbolic keys, so calling `YAML.enable_symbol_parsing!` should allow it to work.
+- [**Guard**](https://github.com/guard/guard): Uses YAML as a serialization format for notifications. The data serialized uses symbolic keys, so calling `YAML.enable_symbol_parsing!` is necessary to allow Guard to work.
+- [**sidekiq**](https://github.com/mperham/sidekiq): Uses a YAML configiuration file with symbolic keys, so calling `YAML.enable_symbol_parsing!` should allow it to work.
 
 The above list will grow over time, as more issues are discovered.
 
@@ -120,3 +120,5 @@ Requirements
 ------------
 
 SafeYAML requires Ruby 1.8.7 or newer and works with both [Syck](http://www.ruby-doc.org/stdlib-1.8.7/libdoc/yaml/rdoc/YAML.html) and [Psych](http://github.com/tenderlove/psych).
+
+If you are using a version of Ruby where Psych is the default YAML engine (e.g., 1.9.3) but you want to use Syck, be sure to set `YAML::ENGINE.yamler = "syck"` **before** requiring the safe_yaml gem.
