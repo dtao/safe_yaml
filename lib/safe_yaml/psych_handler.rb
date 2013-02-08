@@ -1,4 +1,5 @@
 require "psych"
+require "base64"
 
 module SafeYAML
   class PsychHandler < Psych::Handler
@@ -13,8 +14,8 @@ module SafeYAML
       @result
     end
 
-    def add_to_current_structure(value, anchor=nil, quoted=nil)
-      value = Transform.to_proper_type(value, quoted)
+    def add_to_current_structure(value, anchor=nil, quoted=nil, tag=nil)
+      value = Transform.to_proper_type(value, quoted, tag)
 
       @anchors[anchor] = value if anchor
 
@@ -62,7 +63,7 @@ module SafeYAML
     end
 
     def scalar(value, anchor, tag, plain, quoted, style)
-      add_to_current_structure(value, anchor, quoted)
+      add_to_current_structure(value, anchor, quoted, tag)
     end
 
     def start_mapping(anchor, tag, implicit, style)

@@ -41,7 +41,7 @@ module SafeYAML
     end
 
     def resolve_scalar(node)
-      Transform.to_proper_type(node.value, QUOTE_STYLES.include?(node.instance_variable_get(:@style)))
+      Transform.to_proper_type(node.value, QUOTE_STYLES.include?(node.instance_variable_get(:@style)), node.type_id)
     end
   end
 end
