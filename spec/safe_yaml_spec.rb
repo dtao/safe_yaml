@@ -182,6 +182,27 @@ describe YAML do
         }
       end
     end
+
+    it "works with multi-level inheritance" do
+      result = YAML.safe_load <<-YAML
+        defaults: &defaults
+          foo: foo
+          bar: bar
+          baz: baz
+        custom: &custom
+          <<: *defaults
+          bar: custom_bar
+          baz: custom_baz
+        grandcustom: &grandcustom
+          <<: *custom
+      YAML
+
+      result.should == {
+        "defaults"    => { "foo" => "foo", "bar" => "bar", "baz" => "baz" },
+        "custom"      => { "foo" => "foo", "bar" => "custom_bar", "baz" => "custom_baz" },
+        "grandcustom" => { "foo" => "foo", "bar" => "custom_bar", "baz" => "custom_baz" }
+      }
+    end
   end
 
   describe "unsafe_load_file" do

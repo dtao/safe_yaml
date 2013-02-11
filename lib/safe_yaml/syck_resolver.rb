@@ -22,13 +22,15 @@ module SafeYAML
 
       # Take the "<<" key nodes first, as these are meant to approximate a form of inheritance.
       inheritors = map.keys.select { |node| resolve_node(node) == "<<" }
-      inheritors.each do |key|
-        value_node = map.delete(key)
+      inheritors.each do |key_node|
+        value_node = map[key_node]
         hash.merge!(resolve_node(value_node))
       end
 
       # All that's left should be normal (non-"<<") nodes.
-      map.each do |key_node, value_node|
+      normal_keys = map.keys.reject { |node| resolve_node(node) == "<<" }
+      normal_keys.each do |key_node|
+        value_node = map[key_node]
         hash[resolve_node(key_node)] = resolve_node(value_node)
       end
 
