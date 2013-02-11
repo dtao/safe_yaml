@@ -28,7 +28,7 @@ module SafeYAML
       end
 
       # All that's left should be normal (non-"<<") nodes.
-      normal_keys = map.keys.reject { |node| resolve_node(node) == "<<" }
+      normal_keys = map.keys - inheritors
       normal_keys.each do |key_node|
         value_node = map[key_node]
         hash[resolve_node(key_node)] = resolve_node(value_node)
