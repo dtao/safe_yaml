@@ -1,5 +1,5 @@
-HERE = File.dirname(__FILE__)
-ROOT = File.join(HERE, "..")
+HERE = File.dirname(__FILE__) unless defined?(HERE)
+ROOT = File.join(HERE, "..") unless defined?(ROOT)
 
 $LOAD_PATH << File.join(ROOT, "lib")
 $LOAD_PATH << File.join(HERE, "support")
