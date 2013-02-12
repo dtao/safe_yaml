@@ -214,6 +214,48 @@ describe YAML do
         "grandcustom" => { "foo" => "foo", "bar" => "custom_bar", "baz" => "custom_baz" }
       }
     end
+
+    context "with custom initializers defined" do
+      before :each do
+        if SafeYAML::YAML_ENGINE == "psych"
+          SafeYAML::OPTIONS[:custom_initializers] = {
+            "!set" => lambda { Set.new },
+            "!hashiemash" => lambda { Hashie::Mash.new }
+          }
+        else
+          SafeYAML::OPTIONS[:custom_initializers] = {
+            "tag:yaml.org,2002:set" => lambda { Set.new },
+            "tag:yaml.org,2002:hashiemash" => lambda { Hashie::Mash.new }
+          }
+        end
+      end
+
+      after :each do
+        SafeYAML::OPTIONS[:custom_initializers] = {}
+      end
+
+      it "will use a custom initializer to instantiate an array-like class upon deserialization" do
+        result = YAML.safe_load <<-YAML.unindent
+          --- !set
+          - 1
+          - 2
+          - 3
+        YAML
+
+        result.should be_a(Set)
+        result.to_a.should =~ [1, 2, 3]
+      end
+
+      it "will use a custom initializer to instantiate a hash-like class upon deserialization" do
+        result = YAML.safe_load <<-YAML.unindent
+          --- !hashiemash
+          foo: bar
+        YAML
+
+        result.should be_a(Hashie::Mash)
+        result.to_hash.should == { "foo" => "bar" }
+      end
+    end
   end
 
   describe "unsafe_load_file" do

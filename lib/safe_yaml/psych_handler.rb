@@ -4,10 +4,11 @@ require "base64"
 module SafeYAML
   class PsychHandler < Psych::Handler
     def initialize
-      @anchors = {}
-      @stack = []
-      @current_key = nil
-      @result = nil
+      @initializers = SafeYAML::OPTIONS[:custom_initializers] || {}
+      @anchors      = {}
+      @stack        = []
+      @current_key  = nil
+      @result       = nil
     end
 
     def result
@@ -25,11 +26,10 @@ module SafeYAML
         return
       end
 
-      case @current_structure
-      when Array
-        @current_structure.push(value)
+      if @current_structure.respond_to?(:<<)
+        @current_structure << value
 
-      when Hash
+      elsif @current_structure.respond_to?(:[]=)
         if @current_key.nil?
           @current_key = value
 
@@ -67,7 +67,7 @@ module SafeYAML
     end
 
     def start_mapping(anchor, tag, implicit, style)
-      map = {}
+      map = @initializers.include?(tag) ? @initializers[tag].call : {}
       self.add_to_current_structure(map, anchor)
       @current_structure = map
       @stack.push(map)
@@ -78,7 +78,7 @@ module SafeYAML
     end
 
     def start_sequence(anchor, tag, implicit, style)
-      seq = []
+      seq = @initializers.include?(tag) ? @initializers[tag].call : []
       self.add_to_current_structure(seq, anchor)
       @current_structure = seq
       @stack.push(seq)

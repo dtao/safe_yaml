@@ -25,7 +25,7 @@ module SafeYAML
       value
     end
 
-    def self.to_proper_type(value, quoted=false,tag=nil)
+    def self.to_proper_type(value, quoted=false, tag=nil)
       case tag
       when "tag:yaml.org,2002:binary", "x-private:binary", "!binary"
         Base64.decode64(value)

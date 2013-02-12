@@ -11,6 +11,7 @@ if ENV["YAMLER"] && defined?(YAML::ENGINE)
 end
 
 require "safe_yaml"
+require "hashie"
 require "heredoc_unindent"
 
 require File.join(HERE, "shared_specs")

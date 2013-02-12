@@ -2,6 +2,10 @@ module SafeYAML
   class SyckResolver
     QUOTE_STYLES = [:quote1, :quote2]
 
+    def initialize
+      @initializers = SafeYAML::OPTIONS[:custom_initializers] || {}
+    end
+
     def resolve_node(node)
       case node.value
       when Hash
@@ -18,7 +22,8 @@ module SafeYAML
     def resolve_map(node)
       map = node.value
 
-      hash = {}
+      tag = node.type_id
+      hash = @initializers.include?(tag) ? @initializers[tag].call : {}
 
       # Take the "<<" key nodes first, as these are meant to approximate a form of inheritance.
       inheritors = map.keys.select { |node| resolve_node(node) == "<<" }
@@ -39,7 +44,11 @@ module SafeYAML
 
     def resolve_seq(node)
       seq = node.value
-      seq.map { |node| resolve_node(node) }
+
+      tag = node.type_id
+      arr = @initializers.include?(tag) ? @initializers[tag].call : []
+
+      seq.inject(arr) { |array, node| array << resolve_node(node) }
     end
 
     def resolve_scalar(node)

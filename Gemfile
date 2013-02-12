@@ -3,6 +3,7 @@ source :rubygems
 gemspec
 
 group :development do
+  gem "hashie"
   gem "heredoc_unindent"
   gem "rake"
   gem "rspec"
