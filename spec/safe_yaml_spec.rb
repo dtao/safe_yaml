@@ -32,17 +32,63 @@ describe YAML do
       backdoor = YAML.unsafe_load("--- !ruby/object:ExploitableBackDoor\nfoo: bar\n")
       backdoor.should be_exploited_through_ivars
     end
+
+    it "allows exploits through sequenced objects" do
+      yaml = <<-YAML.unindent
+      ---
+      - 1
+      - 2
+      - !ruby/object:ExploitableBackDoor
+        foo: bar
+      YAML
+      array = YAML.unsafe_load(yaml)
+      array[2].should be_exploited_through_ivars
+    end
+
+    it "allows exploits through nested objects" do
+      yaml = <<-YAML.unindent
+      ---
+      a: 1
+      b:
+        a: 1
+        b: !ruby/object:ExploitableBackDoor
+           foo: bar
+      YAML
+      hash = YAML.unsafe_load(yaml)
+      hash['b']['b'].should be_exploited_through_ivars
+    end
   end
 
   describe "safe_load" do
     it "does NOT allow exploits through objects defined in YAML w/ !ruby/hash" do
-      object = YAML.safe_load("--- !ruby/hash:ExploitableBackDoor\nfoo: bar\n")
-      object.should_not be_a(ExploitableBackDoor)
+      expect { YAML.safe_load("--- !ruby/hash:ExploitableBackDoor\nfoo: bar\n") }.to raise_error(SafeYAML::UnsafeTagError)
     end
 
     it "does NOT allow exploits through objects defined in YAML w/ !ruby/object" do
-      object = YAML.safe_load("--- !ruby/object:ExploitableBackDoor\nfoo: bar\n")
-      object.should_not be_a(ExploitableBackDoor)
+      expect { YAML.safe_load("--- !ruby/object:ExploitableBackDoor\nfoo: bar\n") }.to raise_error(SafeYAML::UnsafeTagError)
+    end
+
+    it "does NOT allow exploits in sequenced objects" do
+      yaml = <<-YAML.unindent
+      ---
+      - 1
+      - 2
+      - !ruby/object:ExploitableBackDoor
+        foo: bar
+      YAML
+      expect { YAML.safe_load(yaml) }.to raise_error(SafeYAML::UnsafeTagError)
+    end
+
+    it "does NOT allow exploits in nested objects" do
+      yaml = <<-YAML.unindent
+      ---
+      a: 1
+      b:
+        a: 1
+        b: !ruby/object:ExploitableBackDoor
+           foo: bar
+      YAML
+      expect { YAML.safe_load(yaml) }.to raise_error(SafeYAML::UnsafeTagError)
     end
 
     context "for YAML engine #{SafeYAML::YAML_ENGINE}" do
@@ -57,7 +103,7 @@ describe YAML do
         it "uses Psych internally to parse YAML" do
           stub_parser = stub(Psych::Parser)
           Psych::Parser.stub(:new).and_return(stub_parser)
-          stub_parser.should_receive(:parse).with(*arguments)
+          stub_parser.should_receive(:parse).with(*arguments).twice
           # This won't work now; we just want to ensure Psych::Parser#parse was in fact called.
           YAML.safe_load(*arguments)
         end
@@ -73,11 +119,20 @@ describe YAML do
     end
 
     it "loads a plain ol' YAML document just fine" do
+      YAML.enable_symbol_parsing!
       result = YAML.safe_load <<-YAML.unindent
         foo:
           number: 1
+          float: 1.5
           string: Hello, there!
           symbol: :blah
+          quoted_symbol_1: ":blah"
+          quoted_symbol_2: ':blah'
+          y: true
+          n: false
+          nada:
+          date: 2013-02-14
+          time: 2013-02-14 09:49:19.419780000 -07:00
           sequence:
             - hi
             - bye
@@ -85,10 +140,18 @@ describe YAML do
 
       result.should == {
         "foo" => {
-          "number" => 1,
-          "string" => "Hello, there!",
-          "symbol" => ":blah",
-          "sequence" => ["hi", "bye"]
+          "number"          => 1,
+          "float"           => 1.5,
+          "string"          => "Hello, there!",
+          "symbol"          => :blah,
+          "quoted_symbol_1" => ":blah",
+          "quoted_symbol_2" => ":blah",
+          "y"               => true,
+          "n"               => false,
+          "nada"            => nil,
+          "date"            => YAML.unsafe_load("2013-02-14"),
+          "time"            => YAML.unsafe_load("2013-02-14 09:49:19.419780000 -07:00"),
+          "sequence"        => ["hi", "bye"]
         }
       }
     end
@@ -103,39 +166,42 @@ describe YAML do
       result.should == [{}, {}, {}]
     end
 
-    it "works for YAML documents with binary tagged keys" do
-      result = YAML.safe_load <<-YAML
-        ? !!binary >
-          Zm9v
-        : "bar"
-        ? !!binary >
-          YmFy
-        : "baz"
-      YAML
+    if SafeYAML::YAML_ENGINE == "psych"
+      # syck doesn't support !binary
+      it "works for YAML documents with binary tagged keys" do
+        result = YAML.safe_load <<-YAML
+          ? !!binary >
+            Zm9v
+          : "bar"
+          ? !!binary >
+            YmFy
+          : "baz"
+        YAML
 
-      result.should == {"foo" => "bar", "bar" => "baz"}
-    end
+        result.should == {"foo" => "bar", "bar" => "baz"}
+      end
 
-    it "works for YAML documents with binary tagged values" do
-      result = YAML.safe_load <<-YAML
-        "foo": !!binary >
-          YmFy
-        "bar": !!binary >
-          YmF6
-      YAML
+      it "works for YAML documents with binary tagged values" do
+        result = YAML.safe_load <<-YAML
+          "foo": !!binary >
+            YmFy
+          "bar": !!binary >
+            YmF6
+        YAML
 
-      result.should == {"foo" => "bar", "bar" => "baz"}
-    end
+        result.should == {"foo" => "bar", "bar" => "baz"}
+      end
 
-    it "works for YAML documents with binary tagged array values" do
-      result = YAML.safe_load <<-YAML
-        - !binary |-
-          Zm9v
-        - !binary |-
-          YmFy
-      YAML
+      it "works for YAML documents with binary tagged array values" do
+        result = YAML.safe_load <<-YAML
+          - !binary |-
+            Zm9v
+          - !binary |-
+            YmFy
+        YAML
 
-      result.should == ["foo", "bar"]
+        result.should == ["foo", "bar"]
+      end
     end
 
     it "works for YAML documents with sections" do
@@ -215,45 +281,74 @@ describe YAML do
       }
     end
 
-    context "with custom initializers defined" do
+    context "with custom whitelist defined" do
+      class MyClass
+        attr_reader :a, :b
+        def initialize(a, b)
+          @a = a
+          @b = b
+        end
+
+        def self.new_from_hash(hash)
+          self.new(*hash.values_at('a', 'b'))
+        end
+      end
+
       before :each do
         if SafeYAML::YAML_ENGINE == "psych"
-          SafeYAML::OPTIONS[:custom_initializers] = {
-            "!set" => lambda { Set.new },
-            "!hashiemash" => lambda { Hashie::Mash.new }
-          }
+          YAML.set_whitelist(['!ruby/object:Set',
+                              '!map:Hashie::Mash',
+                              '!ruby/object:MyClass',])
         else
-          SafeYAML::OPTIONS[:custom_initializers] = {
-            "tag:yaml.org,2002:set" => lambda { Set.new },
-            "tag:yaml.org,2002:hashiemash" => lambda { Hashie::Mash.new }
-          }
+          YAML.set_whitelist(['tag:ruby.yaml.org,2002:object:Set',
+                              'tag:yaml.org,2002:map:Hashie::Mash',
+                              'tag:ruby.yaml.org,2002:object:MyClass',])
         end
       end
 
       after :each do
-        SafeYAML::OPTIONS[:custom_initializers] = {}
+        YAML.set_whitelist([])
       end
 
-      it "will use a custom initializer to instantiate an array-like class upon deserialization" do
+      it "will allow array-structure classes via the whitelist" do
         result = YAML.safe_load <<-YAML.unindent
-          --- !set
-          - 1
-          - 2
-          - 3
+          --- !ruby/object:Set
+          hash:
+            1: true
+            2: true
+            3: true
         YAML
 
         result.should be_a(Set)
         result.to_a.should =~ [1, 2, 3]
       end
 
-      it "will use a custom initializer to instantiate a hash-like class upon deserialization" do
+      it "will allow hash-structure classes via the whitelist" do
         result = YAML.safe_load <<-YAML.unindent
-          --- !hashiemash
+          --- !map:Hashie::Mash
           foo: bar
         YAML
 
         result.should be_a(Hashie::Mash)
         result.to_hash.should == { "foo" => "bar" }
+
+        result = YAML.safe_load <<-YAML.unindent
+          --- !ruby/object:MyClass
+          a: 1
+          b: !ruby/object:MyClass
+            a: &70346695583400 !ruby/object:MyClass
+              a: 2
+              b: *70346695583400
+            b: *70346695583400
+        YAML
+
+        result.should be_a(MyClass)
+        result.a.should == 1
+        result.b.should be_a(MyClass)
+        result.b.a.should be_a(MyClass)
+        result.b.a.a.should == 2
+        result.b.a.b.object_id.should == result.b.a.object_id
+        result.b.a.object_id.should == result.b.b.object_id
       end
     end
   end
@@ -281,18 +376,16 @@ describe YAML do
 
   describe "safe_load_file" do
     it "does NOT allow exploits through objects defined in YAML w/ !ruby/hash" do
-      object = YAML.safe_load_file "spec/exploit.1.9.3.yaml"
-      object.should_not be_a(ExploitableBackDoor)
+      expect { YAML.safe_load_file "spec/exploit.1.9.3.yaml" }.to raise_error(SafeYAML::UnsafeTagError)
     end
 
     it "does NOT allow exploits through objects defined in YAML w/ !ruby/object" do
-      object = YAML.safe_load_file "spec/exploit.1.9.2.yaml"
-      object.should_not be_a(ExploitableBackDoor)
+      expect { YAML.safe_load_file "spec/exploit.1.9.2.yaml" }.to raise_error(SafeYAML::UnsafeTagError)
     end
   end
 
   describe "load" do
-    let (:arguments) {
+    let(:arguments) {
       if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
         ["foo: bar", nil]
       else
@@ -364,7 +457,7 @@ describe YAML do
   end
 
   describe "load_file" do
-    let(:filename) { "spec/exploit.1.9.2.yaml" } # doesn't really matter
+    let(:filename) { "spec/ok.yaml" } # doesn't really matter
 
     it "issues a warning if the :safe option is omitted" do
       silence_warnings do
