@@ -12,7 +12,7 @@ describe YAML do
   end
 
   before :each do
-    YAML.disable_symbol_parsing!
+    SafeYAML::OPTIONS[:deserialize_symbols] = false
   end
 
   describe "unsafe_load" do
@@ -230,7 +230,7 @@ describe YAML do
       end
 
       after :each do
-        SafeYAML::OPTIONS[:custom_initializers] = {}
+        SafeYAML.reset_defaults!
       end
 
       it "will use a custom initializer to instantiate an array-like class upon deserialization" do
@@ -266,7 +266,7 @@ describe YAML do
       end
 
       after :each do
-        SafeYAML::OPTIONS[:whitelisted_tags] = []
+        SafeYAML.reset_defaults!
       end
 
       it "will allow objects to be deserialized for whitelisted tags" do
@@ -338,12 +338,19 @@ describe YAML do
       end
     }
 
-    context "with :suppress_warnings set to true" do
-      before :each do SafeYAML::OPTIONS[:suppress_warnings] = true; end
-      after :each do SafeYAML::OPTIONS[:suppress_warnings] = false; end
+    context "as long as a :default_mode has been specified" do
+      after :each do
+        SafeYAML.reset_defaults!
+      end
 
-      it "doesn't issue a warning if :suppress_warnings option is set to true" do
-        SafeYAML::OPTIONS[:suppress_warnings] = true
+      it "doesn't issue a warning for safe mode, since an explicit mode has been set" do
+        SafeYAML::OPTIONS[:default_mode] = :safe
+        Kernel.should_not_receive(:warn)
+        YAML.load(*arguments)
+      end
+
+      it "doesn't issue a warning for unsafe mode, since an explicit mode has been set" do
+        SafeYAML::OPTIONS[:default_mode] = :unsafe
         Kernel.should_not_receive(:warn)
         YAML.load(*arguments)
       end
@@ -380,11 +387,11 @@ describe YAML do
 
     context "with arbitrary object deserialization enabled by default" do
       before :each do
-        YAML.enable_arbitrary_object_deserialization!
+        SafeYAML::OPTIONS[:default_mode] = :unsafe
       end
 
       after :each do
-        YAML.disable_arbitrary_object_deserialization!
+        SafeYAML.reset_defaults!
       end
 
       it "defaults to unsafe mode if the :safe option is omitted" do
@@ -435,11 +442,11 @@ describe YAML do
 
     context "with arbitrary object deserialization enabled by default" do
       before :each do
-        YAML.enable_arbitrary_object_deserialization!
+        SafeYAML::OPTIONS[:default_mode] = :unsafe
       end
 
       after :each do
-        YAML.disable_arbitrary_object_deserialization!
+        SafeYAML.reset_defaults!
       end
 
       it "defaults to unsafe mode if the :safe option is omitted" do

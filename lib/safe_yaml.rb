@@ -14,13 +14,19 @@ module SafeYAML
   MULTI_ARGUMENT_YAML_LOAD = YAML.method(:load).arity != 1
   YAML_ENGINE = defined?(YAML::ENGINE) ? YAML::ENGINE.yamler : "syck"
 
-  OPTIONS = {
+  DEFAULT_OPTIONS = {
     :custom_initializers => {},
-    :enable_symbol_parsing => false,
-    :enable_arbitrary_object_deserialization => false,
-    :suppress_warnings => false,
-    :whitelisted_tags => []
-  }
+    :default_mode        => nil,
+    :deserialize_symbols => false,
+    :whitelisted_tags    => []
+  }.freeze
+
+  OPTIONS = DEFAULT_OPTIONS.dup
+
+  module_function
+  def reset_defaults!
+    OPTIONS.merge!(DEFAULT_OPTIONS)
+  end
 end
 
 module YAML
@@ -29,12 +35,12 @@ module YAML
     safe_mode = safe_mode_from_options("load", options)
     arguments = [yaml]
     arguments << filename_and_options.first if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
-    safe_mode ? safe_load(*arguments) : unsafe_load(*arguments)
+    safe_mode == :safe ? safe_load(*arguments) : unsafe_load(*arguments)
   end
 
   def self.load_file_with_options(file, options={})
     safe_mode = safe_mode_from_options("load_file", options)
-    safe_mode ? safe_load_file(file) : unsafe_load_file(file)
+    safe_mode == :safe ? safe_load_file(file) : unsafe_load_file(file)
   end
 
   if SafeYAML::YAML_ENGINE == "psych"
@@ -90,40 +96,49 @@ module YAML
     alias_method :load_file, :load_file_with_options
 
     def enable_symbol_parsing?
-      SafeYAML::OPTIONS[:enable_symbol_parsing]
+      warn_of_deprecated_method("set the SafeYAML::OPTIONS[:deserialize_symbols] option instead")
+      SafeYAML::OPTIONS[:deserialize_symbols]
     end
 
     def enable_symbol_parsing!
-      SafeYAML::OPTIONS[:enable_symbol_parsing] = true
+      warn_of_deprecated_method("set the SafeYAML::OPTIONS[:deserialize_symbols] option instead")
+      SafeYAML::OPTIONS[:deserialize_symbols] = true
     end
 
     def disable_symbol_parsing!
-      SafeYAML::OPTIONS[:enable_symbol_parsing] = false
+      warn_of_deprecated_method("set the SafeYAML::OPTIONS[:deserialize_symbols] option instead")
+      SafeYAML::OPTIONS[:deserialize_symbols] = false
     end
 
     def enable_arbitrary_object_deserialization?
-      SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization]
+      warn_of_deprecated_method("set the SafeYAML::OPTIONS[:default_mode] to either :safe or :unsafe")
+      SafeYAML::OPTIONS[:default_mode] == :unsafe
     end
 
     def enable_arbitrary_object_deserialization!
-      SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization] = true
+      warn_of_deprecated_method("set the SafeYAML::OPTIONS[:default_mode] to either :safe or :unsafe")
+      SafeYAML::OPTIONS[:default_mode] = :unsafe
     end
 
     def disable_arbitrary_object_deserialization!
-      SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization] = false
+      warn_of_deprecated_method("set the SafeYAML::OPTIONS[:default_mode] to either :safe or :unsafe")
+      SafeYAML::OPTIONS[:default_mode] = :safe
     end
 
     private
     def safe_mode_from_options(method, options={})
-      safe_mode = options[:safe]
-
-      if safe_mode.nil?
-        mode = SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization] ? "unsafe" : "safe"
-        Kernel.warn "Called '#{method}' without the :safe option -- defaulting to #{mode} mode." unless SafeYAML::OPTIONS[:suppress_warnings]
-        safe_mode = !SafeYAML::OPTIONS[:enable_arbitrary_object_deserialization]
+      if options[:safe].nil?
+        safe_mode = SafeYAML::OPTIONS[:default_mode] || :safe
+        Kernel.warn "Called '#{method}' without the :safe option -- defaulting to #{safe_mode} mode." if SafeYAML::OPTIONS[:default_mode].nil?
+        return safe_mode
       end
 
-      safe_mode
+      options[:safe] ? :safe : :unsafe
+    end
+
+    def warn_of_deprecated_method(message)
+      method = caller.first[/`([^']*)'$/, 1]
+      Kernel.warn("The method 'YAML.#{method}' is deprecated and will be removed in the next release of SafeYAML -- #{message}.")
     end
   end
 end

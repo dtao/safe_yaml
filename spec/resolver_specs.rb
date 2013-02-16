@@ -198,13 +198,13 @@ module ResolverSpecs
         end
       end
 
-      context "with symbol parsing enabled" do
+      context "with symbol deserialization enabled" do
         before :each do
-          YAML.enable_symbol_parsing!
+          SafeYAML::OPTIONS[:deserialize_symbols] = true
         end
 
         after :each do
-          YAML.disable_symbol_parsing!
+          SafeYAML.reset_defaults!
         end
 
         it "translates values starting with ':' to symbols" do
