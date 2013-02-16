@@ -21,7 +21,7 @@ module SafeYAML
       resolve_node(@aliased_nodes[node.anchor])
     end
 
-    def unsafe_resolve(node)
+    def native_resolve(node)
       @visitor ||= SafeYAML::PsychVisitor.new(self)
       @visitor.accept(node)
     end

@@ -12,7 +12,7 @@ module SafeYAML
       super()
     end
 
-    def unsafe_resolve(node)
+    def native_resolve(node)
       node.transform
     end
 

@@ -24,7 +24,7 @@ module SafeYAML
 
     def resolve_map(node)
       tag = self.get_node_tag(node)
-      return self.unsafe_resolve(node) if tag_is_whitelisted?(tag)
+      return self.native_resolve(node) if tag_is_whitelisted?(tag)
 
       hash = @initializers.include?(tag) ? @initializers[tag].call : {}
 
