@@ -9,7 +9,7 @@ module SafeYAML
     }.freeze
 
     def initialize
-      super
+      super()
       @aliased_nodes = {}
     end
 
