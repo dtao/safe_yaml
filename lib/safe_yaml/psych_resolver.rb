@@ -14,7 +14,12 @@ module SafeYAML
     end
 
     def resolve_tree(tree)
-      resolve_node(tree)[0]
+      case tree
+      when Psych::Nodes::Document
+        resolve_node(tree)[0]
+      else
+        resolve_node(tree)
+      end
     end
 
     def resolve_alias(node)
