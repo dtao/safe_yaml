@@ -8,7 +8,6 @@ require "safe_yaml/transform/to_symbol"
 require "safe_yaml/transform/to_time"
 require "safe_yaml/transform"
 require "safe_yaml/resolver"
-require "safe_yaml/version"
 
 module SafeYAML
   MULTI_ARGUMENT_YAML_LOAD = YAML.method(:load).arity != 1
