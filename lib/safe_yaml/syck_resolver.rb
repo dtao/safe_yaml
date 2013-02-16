@@ -1,12 +1,12 @@
 module SafeYAML
   class SyckResolver < Resolver
-    QUOTE_STYLES = [:quote1, :quote2]
+    QUOTE_STYLES = [:quote1, :quote2].freeze
 
     NODE_TYPES = {
       Hash   => :map,
       Array  => :seq,
       String => :scalar
-    }
+    }.freeze
 
     def get_node_type(node)
       NODE_TYPES[node.value.class]
@@ -14,6 +14,10 @@ module SafeYAML
 
     def get_node_tag(node)
       node.type_id
+    end
+
+    def get_node_value(node)
+      node.value
     end
 
     def value_is_quoted?(node)

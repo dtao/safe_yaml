@@ -36,16 +36,15 @@ module YAML
   end
 
   if SafeYAML::YAML_ENGINE == "psych"
-    require "safe_yaml/psych_handler"
+    require "safe_yaml/psych_resolver"
     def self.safe_load(yaml, filename=nil)
-      safe_handler = SafeYAML::PsychHandler.new
-      parser = Psych::Parser.new(safe_handler)
-      if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
-        parser.parse(yaml, filename)
+      safe_resolver = SafeYAML::PsychResolver.new
+      tree = if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
+        Psych.parse(yaml, filename)
       else
-        parser.parse(yaml)
+        Psych.parse(yaml)
       end
-      return safe_handler.result
+      return safe_resolver.resolve_tree(tree)
     end
 
     def self.safe_load_file(filename)

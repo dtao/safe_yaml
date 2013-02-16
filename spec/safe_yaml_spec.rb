@@ -54,12 +54,11 @@ describe YAML do
             ["foo: bar"]
           end
         }
+
         it "uses Psych internally to parse YAML" do
-          stub_parser = stub(Psych::Parser)
-          Psych::Parser.stub(:new).and_return(stub_parser)
-          stub_parser.should_receive(:parse).with(*arguments)
+          Psych.should_receive(:parse).with(*arguments)
           # This won't work now; we just want to ensure Psych::Parser#parse was in fact called.
-          YAML.safe_load(*arguments)
+          YAML.safe_load(*arguments) rescue nil
         end
       end
 
