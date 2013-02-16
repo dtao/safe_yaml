@@ -259,9 +259,9 @@ describe YAML do
     context "with special whitelisted tags defined" do
       before :each do
         if SafeYAML::YAML_ENGINE == "psych"
-          SafeYAML::OPTIONS[:whitelisted_tags] = ["!ruby/hash:Hashie::Mash"]
+          SafeYAML::OPTIONS[:whitelisted_tags] = ["!ruby/object:OpenStruct"]
         else
-          SafeYAML::OPTIONS[:whitelisted_tags] = ["tag:ruby.yaml.org,2002:hash:Hashie::Mash"]
+          SafeYAML::OPTIONS[:whitelisted_tags] = ["tag:ruby.yaml.org,2002:object:OpenStruct"]
         end
       end
 
@@ -270,9 +270,9 @@ describe YAML do
       end
 
       it "will allow objects to be deserialized for whitelisted tags" do
-        result = YAML.safe_load("--- !ruby/hash:Hashie::Mash\nfoo: bar\n")
-        result.should be_a(Hashie::Mash)
-        result.to_hash.should == { "foo" => "bar" }
+        result = YAML.safe_load("--- !ruby/object:OpenStruct\ntable:\n  foo: bar\n")
+        result.should be_a(OpenStruct)
+        result.instance_variable_get(:@table).should == { "foo" => "bar" }
       end
 
       it "will not deserialize objects without whitelisted tags" do
@@ -283,14 +283,15 @@ describe YAML do
 
       it "will not allow non-whitelisted objects to be embedded within objects with whitelisted tags" do
         result = YAML.safe_load <<-YAML.unindent
-          --- !ruby/hash:Hashie::Mash
-          backdoor: !ruby/object:ExploitableBackDoor
-            foo: bar
+          --- !ruby/object:OpenStruct
+          table:
+            backdoor: !ruby/object:ExploitableBackDoor
+              foo: bar
         YAML
 
-        result.should be_a(Hashie::Mash)
-        result["backdoor"].should_not be_a(ExploitableBackDoor)
-        result.to_hash.should == { "backdoor" => { "foo" => "bar" } }
+        result.should be_a(OpenStruct)
+        result.backdoor.should_not be_a(ExploitableBackDoor)
+        result.instance_variable_get(:@table).should == { "backdoor" => { "foo" => "bar" } }
       end
     end
   end

@@ -11,6 +11,7 @@ if ENV["YAMLER"] && defined?(YAML::ENGINE)
 end
 
 require "safe_yaml"
+require "ostruct"
 require "hashie"
 require "heredoc_unindent"
 
