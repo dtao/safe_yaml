@@ -66,10 +66,12 @@ module YAML
 
   else
     require "safe_yaml/syck_resolver"
+    require "safe_yaml/syck_node"
+
     def self.safe_load(yaml)
-      safe_resolver = SafeYAML::SyckResolver.new
+      resolver = SafeYAML::SyckResolver.new
       tree = YAML.parse(yaml)
-      return safe_resolver.resolve_node(tree)
+      return resolver.resolve_node(tree)
     end
 
     def self.safe_load_file(filename)

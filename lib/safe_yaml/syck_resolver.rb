@@ -8,6 +8,14 @@ module SafeYAML
       String => :scalar
     }.freeze
 
+    def initialize
+      super
+    end
+
+    def unsafe_resolve(node)
+      node.transform
+    end
+
     def get_node_type(node)
       NODE_TYPES[node.value.class]
     end
