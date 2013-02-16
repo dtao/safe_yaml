@@ -1,7 +1,7 @@
 module SafeYAML
   class PsychResolver < Resolver
     NODE_TYPES = {
-      Psych::Nodes::Document => :seq,
+      Psych::Nodes::Document => :root,
       Psych::Nodes::Mapping  => :map,
       Psych::Nodes::Sequence => :seq,
       Psych::Nodes::Scalar   => :scalar,
@@ -13,13 +13,8 @@ module SafeYAML
       @aliased_nodes = {}
     end
 
-    def resolve_tree(tree)
-      case tree
-      when Psych::Nodes::Document
-        resolve_node(tree)[0]
-      else
-        resolve_node(tree)
-      end
+    def resolve_root(root)
+      resolve_seq(root).first
     end
 
     def resolve_alias(node)
@@ -35,11 +30,10 @@ module SafeYAML
     end
 
     def get_node_value(node)
+      @aliased_nodes[node.anchor] = node if node.respond_to?(:anchor) && node.anchor
+
       case get_node_type(node)
-      when :map
-        @aliased_nodes[node.anchor] = node if node.anchor
-        node.children
-      when :seq
+      when :root, :map, :seq
         node.children
       when :scalar
         node.value

@@ -44,7 +44,7 @@ module YAML
       else
         Psych.parse(yaml)
       end
-      return safe_resolver.resolve_tree(tree)
+      return safe_resolver.resolve_node(tree)
     end
 
     def self.safe_load_file(filename)

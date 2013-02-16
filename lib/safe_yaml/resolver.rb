@@ -6,6 +6,8 @@ module SafeYAML
 
     def resolve_node(node)
       case self.get_node_type(node)
+      when :root
+        resolve_root(node)
       when :map
         resolve_map(node)
       when :seq
