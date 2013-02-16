@@ -15,9 +15,11 @@ module SafeYAML
   YAML_ENGINE = defined?(YAML::ENGINE) ? YAML::ENGINE.yamler : "syck"
 
   OPTIONS = {
+    :custom_initializers => {},
     :enable_symbol_parsing => false,
     :enable_arbitrary_object_deserialization => false,
-    :suppress_warnings => false
+    :suppress_warnings => false,
+    :whitelisted_tags => []
   }
 end
 
@@ -36,6 +38,7 @@ module YAML
   end
 
   if SafeYAML::YAML_ENGINE == "psych"
+    require "safe_yaml/psych_visitor"
     require "safe_yaml/psych_resolver"
     def self.safe_load(yaml, filename=nil)
       safe_resolver = SafeYAML::PsychResolver.new

@@ -255,6 +255,44 @@ describe YAML do
         result.to_hash.should == { "foo" => "bar" }
       end
     end
+
+    context "with special whitelisted tags defined" do
+      before :each do
+        if SafeYAML::YAML_ENGINE == "psych"
+          SafeYAML::OPTIONS[:whitelisted_tags] = ["!ruby/hash:Hashie::Mash"]
+        else
+          SafeYAML::OPTIONS[:whitelisted_tags] = ["tag:ruby.yaml.org,2002:hash:Hashie::Mash"]
+        end
+      end
+
+      after :each do
+        SafeYAML::OPTIONS[:whitelisted_tags] = []
+      end
+
+      it "will allow objects to be deserialized for whitelisted tags" do
+        result = YAML.safe_load("--- !ruby/hash:Hashie::Mash\nfoo: bar\n")
+        result.should be_a(Hashie::Mash)
+        result.to_hash.should == { "foo" => "bar" }
+      end
+
+      it "will not deserialize objects without whitelisted tags" do
+        result = YAML.safe_load("--- !ruby/hash:ExploitableBackDoor\nfoo: bar\n")
+        result.should_not be_a(ExploitableBackDoor)
+        result.should == { "foo" => "bar" }
+      end
+
+      it "will not allow non-whitelisted objects to be embedded within objects with whitelisted tags" do
+        result = YAML.safe_load <<-YAML.unindent
+          --- !ruby/hash:Hashie::Mash
+          backdoor: !ruby/object:ExploitableBackDoor
+            foo: bar
+        YAML
+
+        result.should be_a(Hashie::Mash)
+        result["backdoor"].should_not be_a(ExploitableBackDoor)
+        result.to_hash.should == { "backdoor" => { "foo" => "bar" } }
+      end
+    end
   end
 
   describe "unsafe_load_file" do

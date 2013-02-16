@@ -21,6 +21,11 @@ module SafeYAML
       resolve_node(@aliased_nodes[node.anchor])
     end
 
+    def unsafe_resolve(node)
+      @visitor ||= SafeYAML::PsychVisitor.new(self)
+      @visitor.accept(node)
+    end
+
     def get_node_type(node)
       NODE_TYPES[node.class]
     end

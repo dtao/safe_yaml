@@ -1,6 +1,7 @@
 module SafeYAML
   class Resolver
     def initialize
+      @whitelist    = SafeYAML::OPTIONS[:whitelisted_tags] || []
       @initializers = SafeYAML::OPTIONS[:custom_initializers] || {}
     end
 
@@ -22,10 +23,12 @@ module SafeYAML
     end
 
     def resolve_map(node)
-      map = normalize_map(self.get_node_value(node))
-
       tag = self.get_node_tag(node)
+      return self.unsafe_resolve(node) if tag_is_whitelisted?(tag)
+
       hash = @initializers.include?(tag) ? @initializers[tag].call : {}
+
+      map = normalize_map(self.get_node_value(node))
 
       # Take the "<<" key nodes first, as these are meant to approximate a form of inheritance.
       inheritors = map.select { |key_node, value_node| resolve_node(key_node) == "<<" }
@@ -52,6 +55,10 @@ module SafeYAML
 
     def resolve_scalar(node)
       Transform.to_proper_type(self.get_node_value(node), self.value_is_quoted?(node), self.get_node_tag(node))
+    end
+
+    def tag_is_whitelisted?(tag)
+      @whitelist.include?(tag)
     end
 
     private
