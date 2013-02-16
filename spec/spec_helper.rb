@@ -14,4 +14,4 @@ require "safe_yaml"
 require "hashie"
 require "heredoc_unindent"
 
-require File.join(HERE, "shared_specs")
+require File.join(HERE, "resolver_specs")

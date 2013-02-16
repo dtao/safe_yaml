@@ -1,6 +1,14 @@
-module SharedSpecs
+module ResolverSpecs
   def self.included(base)
-    base.instance_eval do
+    base.module_eval do
+      let(:resolver) { nil }
+      let(:result) { @result }
+
+      def parse(yaml)
+        tree = YAML.parse(yaml.unindent)
+        @result = resolver.resolve_node(tree)
+      end
+
       context "by default" do
         it "translates maps to hashes" do
           parse <<-YAML
