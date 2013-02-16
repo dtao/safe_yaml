@@ -72,7 +72,7 @@ module YAML
 
   else
     require "safe_yaml/syck_resolver"
-    require "safe_yaml/syck_node"
+    require "safe_yaml/syck_node_monkeypatch"
 
     def self.safe_load(yaml)
       resolver = SafeYAML::SyckResolver.new
