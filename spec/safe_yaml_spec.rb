@@ -32,6 +32,32 @@ describe YAML do
       backdoor = YAML.unsafe_load("--- !ruby/object:ExploitableBackDoor\nfoo: bar\n")
       backdoor.should be_exploited_through_ivars
     end
+
+    context "with special whitelisted tags defined" do
+      before :each do
+        if SafeYAML::YAML_ENGINE == "psych"
+          SafeYAML::OPTIONS[:whitelisted_tags] = ["!ruby/object:OpenStruct"]
+        else
+          SafeYAML::OPTIONS[:whitelisted_tags] = ["tag:ruby.yaml.org,2002:object:OpenStruct"]
+        end
+      end
+
+      after :each do
+        SafeYAML.reset_defaults!
+      end
+
+      it "effectively ignores the whitelist (since everything is whitelisted)" do
+        result = YAML.unsafe_load <<-YAML.unindent
+          --- !ruby/object:OpenStruct 
+          table: 
+            :backdoor: !ruby/object:ExploitableBackDoor 
+              foo: bar
+        YAML
+
+        result.should be_a(OpenStruct)
+        result.backdoor.should be_exploited_through_ivars
+      end
+    end
   end
 
   describe "safe_load" do
@@ -283,15 +309,15 @@ describe YAML do
 
       it "will not allow non-whitelisted objects to be embedded within objects with whitelisted tags" do
         result = YAML.safe_load <<-YAML.unindent
-          --- !ruby/object:OpenStruct
-          table:
-            backdoor: !ruby/object:ExploitableBackDoor
+          --- !ruby/object:OpenStruct 
+          table: 
+            :backdoor: !ruby/object:ExploitableBackDoor 
               foo: bar
         YAML
 
         result.should be_a(OpenStruct)
         result.backdoor.should_not be_a(ExploitableBackDoor)
-        result.instance_variable_get(:@table).should == { "backdoor" => { "foo" => "bar" } }
+        result.instance_variable_get(:@table).should == { ":backdoor" => { "foo" => "bar" } }
       end
     end
   end
