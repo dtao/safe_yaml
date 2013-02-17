@@ -133,6 +133,15 @@ EOYAML
     > YAML.safe_load(yaml)
     => #<OpenStruct :backdoor={"foo; end; puts %(I'm in yr system!); def bar"=>"baz"}>
 
+You may prefer, rather than quietly sanitizing and accepting YAML documents with unknown tags, to fail loudly when questionable data is encountered. In this case, you can also set the `:raise_on_unknown_tag` option to `true`:
+
+```ruby
+SafeYAML::OPTIONS[:raise_on_unknown_tag] = true
+```
+
+    > YAML.safe_load(yaml)
+    => RuntimeError: Unknown YAML tag '!ruby/hash:ExploitableClassBuilder'
+
 Pretty sweet, right?
 
 Known Issues
