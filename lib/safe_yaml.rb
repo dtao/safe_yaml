@@ -14,10 +14,11 @@ module SafeYAML
   YAML_ENGINE = defined?(YAML::ENGINE) ? YAML::ENGINE.yamler : "syck"
 
   DEFAULT_OPTIONS = {
-    :custom_initializers => {},
-    :default_mode        => nil,
-    :deserialize_symbols => false,
-    :whitelisted_tags    => []
+    :default_mode         => nil,
+    :deserialize_symbols  => false,
+    :whitelisted_tags     => [],
+    :custom_initializers  => {},
+    :raise_on_unknown_tag => false
   }.freeze
 
   OPTIONS = DEFAULT_OPTIONS.dup
@@ -43,7 +44,7 @@ module YAML
   end
 
   if SafeYAML::YAML_ENGINE == "psych"
-    require "safe_yaml/psych_visitor"
+    require "safe_yaml/safe_to_ruby_visitor"
     require "safe_yaml/psych_resolver"
     def self.safe_load(yaml, filename=nil)
       safe_resolver = SafeYAML::PsychResolver.new

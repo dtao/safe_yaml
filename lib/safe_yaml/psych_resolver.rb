@@ -22,7 +22,7 @@ module SafeYAML
     end
 
     def native_resolve(node)
-      @visitor ||= SafeYAML::PsychVisitor.new(self)
+      @visitor ||= SafeYAML::SafeToRubyVisitor.new(self)
       @visitor.accept(node)
     end
 

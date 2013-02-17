@@ -1,8 +1,9 @@
 module SafeYAML
   class Resolver
     def initialize
-      @whitelist    = SafeYAML::OPTIONS[:whitelisted_tags] || []
-      @initializers = SafeYAML::OPTIONS[:custom_initializers] || {}
+      @whitelist            = SafeYAML::OPTIONS[:whitelisted_tags] || []
+      @initializers         = SafeYAML::OPTIONS[:custom_initializers] || {}
+      @raise_on_unknown_tag = SafeYAML::OPTIONS[:raise_on_unknown_tag]
     end
 
     def resolve_node(node)
@@ -23,7 +24,7 @@ module SafeYAML
     end
 
     def resolve_map(node)
-      tag = self.get_node_tag(node)
+      tag = get_and_check_node_tag(node)
       return self.native_resolve(node) if tag_is_whitelisted?(tag)
 
       hash = @initializers.include?(tag) ? @initializers[tag].call : {}
@@ -47,14 +48,22 @@ module SafeYAML
     def resolve_seq(node)
       seq = self.get_node_value(node)
 
-      tag = get_node_tag(node)
+      tag = get_and_check_node_tag(node)
       arr = @initializers.include?(tag) ? @initializers[tag].call : []
 
       seq.inject(arr) { |array, node| array << resolve_node(node) }
     end
 
     def resolve_scalar(node)
-      Transform.to_proper_type(self.get_node_value(node), self.value_is_quoted?(node), self.get_node_tag(node))
+      Transform.to_proper_type(self.get_node_value(node), self.value_is_quoted?(node), get_and_check_node_tag(node))
+    end
+
+    def get_and_check_node_tag(node)
+      tag = self.get_node_tag(node)
+      if !!tag && @raise_on_unknown_tag && !tag_is_whitelisted?(tag)
+        raise "Unknown YAML tag '#{tag}'"
+      end
+      tag
     end
 
     def tag_is_whitelisted?(tag)

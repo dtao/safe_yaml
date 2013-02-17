@@ -1,7 +1,11 @@
 monkeypatch = <<-EORUBY
   class Node
     def safe_transform
-      return unsafe_transform if SafeYAML::OPTIONS[:whitelisted_tags].include?(self.type_id)
+      if self.type_id
+        return unsafe_transform if SafeYAML::OPTIONS[:whitelisted_tags].include?(self.type_id)
+        raise "Unknown YAML tag '#{self.type_id}'" if SafeYAML::OPTIONS[:raise_on_unknown_tag]
+      end
+
       SafeYAML::SyckResolver.new.resolve_node(self)
     end
 

@@ -318,6 +318,47 @@ describe YAML do
         result.should be_a(OpenStruct)
         result.backdoor.should_not be_a(ExploitableBackDoor)
         result.instance_variable_get(:@table).should == { ":backdoor" => { "foo" => "bar" } }
+
+      context "with the :raise_on_unknown_tag option enabled" do
+        before :each do
+          SafeYAML::OPTIONS[:raise_on_unknown_tag] = true
+        end
+
+        after :each do
+          SafeYAML.restore_defaults!
+        end
+
+        it "raises an exception if a non-nil, non-whitelisted tag is encountered" do
+          lambda {
+            YAML.safe_load <<-YAML.unindent
+              --- !ruby/object:Unknown
+              foo: bar
+            YAML
+          }.should raise_error
+        end
+
+        it "checks all tags, even those within objects with trusted tags" do
+          lambda {
+            YAML.safe_load <<-YAML.unindent
+              --- !ruby/object:OpenStruct
+              table:
+                :backdoor: !ruby/object:Unknown
+                  foo: bar
+            YAML
+          }.should raise_error
+        end
+
+        it "does not raise an exception as long as all tags are whitelisted" do
+          result = YAML.safe_load <<-YAML.unindent
+            --- !ruby/object:OpenStruct
+            table:
+              :backdoor:
+                foo: bar
+          YAML
+
+          result.should be_a(OpenStruct)
+          result.backdoor.should == { "foo" => "bar" }
+        end
       end
     end
   end
