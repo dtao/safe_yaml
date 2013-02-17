@@ -27,6 +27,26 @@ module SafeYAML
   def restore_defaults!
     OPTIONS.clear.merge!(DEFAULT_OPTIONS)
   end
+
+  def tag_safety_check!(tag)
+    return if tag.nil?
+    if OPTIONS[:raise_on_unknown_tag] && !OPTIONS[:whitelisted_tags].include?(tag) && !tag_is_explicitly_trusted?(tag)
+      raise "Unknown YAML tag '#{tag}'"
+    end
+  end
+
+  if YAML_ENGINE == "psych"
+    def tag_is_explicitly_trusted?(tag)
+      false
+    end
+
+  else
+    TRUSTED_TAGS = ["tag:yaml.org,2002:str"].freeze
+
+    def tag_is_explicitly_trusted?(tag)
+      TRUSTED_TAGS.include?(tag)
+    end
+  end
 end
 
 module YAML

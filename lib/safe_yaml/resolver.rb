@@ -60,9 +60,7 @@ module SafeYAML
 
     def get_and_check_node_tag(node)
       tag = self.get_node_tag(node)
-      if !!tag && @raise_on_unknown_tag && !tag_is_whitelisted?(tag)
-        raise "Unknown YAML tag '#{tag}'"
-      end
+      SafeYAML.tag_safety_check!(tag)
       tag
     end
 
