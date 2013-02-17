@@ -47,11 +47,12 @@ Now, if you were to use `YAML.load` on user input anywhere in your application w
 
 Observe:
 
-    > yaml = <<-EOYAML
-    > --- !ruby/hash:ExploitableClassBuilder
-    > "foo; end; puts %(I'm in yr system!); def bar": "baz"
-    > EOYAML
-    => "--- !ruby/hash:ExploitableClassBuilder\n\"foo; end; puts %(I'm in yr system!); def bar\": \"baz\"\n"
+```ruby
+yaml = <<-EOYAML
+--- !ruby/hash:ExploitableClassBuilder
+"foo; end; puts %(I'm in yr system!); def bar": "baz"
+EOYAML
+```
 
     > YAML.load(yaml)
     I'm in yr system!
@@ -116,7 +117,9 @@ SafeYAML::OPTIONS[:whitelisted_tags] = ["tag:ruby.yaml.org,2002:object:OpenStruc
 SafeYAML::OPTIONS[:whitelisted_tags] = ["!ruby/object:OpenStruct"]
 ```
 
-Notably, this feature will *not* allow would-be attackers to embed untrusted types within trusted types:
+When SafeYAML encounters whitelisted tags in a YAML document, it will default to the deserialization capabilities of the underlying YAML engine (i.e., either Syck or Psych).
+
+**However**, this feature will *not* allow would-be attackers to embed untrusted types within trusted types:
 
 ```ruby
 yaml = <<-EOYAML
@@ -130,10 +133,12 @@ EOYAML
     > YAML.safe_load(yaml)
     => #<OpenStruct :backdoor={"foo; end; puts %(I'm in yr system!); def bar"=>"baz"}>
 
+Pretty sweet, right?
+
 Known Issues
 ------------
 
-Also note that some Ruby libraries, particularly those requiring inter-process communication, leverage YAML's object deserialization functionality and therefore may break or otherwise be impacted by SafeYAML. The following list includes known instances of SafeYAML's interaction with other Ruby gems:
+Be aware that some Ruby libraries, particularly those requiring inter-process communication, leverage YAML's object deserialization functionality and therefore may break or otherwise be impacted by SafeYAML. The following list includes known instances of SafeYAML's interaction with other Ruby gems:
 
 - [**Guard**](https://github.com/guard/guard): Uses YAML as a serialization format for notifications. The data serialized uses symbolic keys, so setting `SafeYAML::OPTIONS[:deserialize_symbols] = true` is necessary to allow Guard to work.
 - [**sidekiq**](https://github.com/mperham/sidekiq): Uses a YAML configiuration file with symbolic keys, so setting `SafeYAML::OPTIONS[:deserialize_symbols] = true` should allow it to work.
