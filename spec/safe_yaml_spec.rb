@@ -289,6 +289,9 @@ describe YAML do
         else
           SafeYAML::OPTIONS[:whitelisted_tags] = ["tag:ruby.yaml.org,2002:object:OpenStruct"]
         end
+
+        # Necessary for deserializing OpenStructs properly.
+        SafeYAML::OPTIONS[:deserialize_symbols] = true
       end
 
       after :each do
@@ -317,7 +320,8 @@ describe YAML do
 
         result.should be_a(OpenStruct)
         result.backdoor.should_not be_a(ExploitableBackDoor)
-        result.instance_variable_get(:@table).should == { ":backdoor" => { "foo" => "bar" } }
+        result.backdoor.should == { "foo" => "bar" }
+      end
 
       context "with the :raise_on_unknown_tag option enabled" do
         before :each do
