@@ -43,7 +43,7 @@ describe YAML do
       end
 
       after :each do
-        SafeYAML.reset_defaults!
+        SafeYAML.restore_defaults!
       end
 
       it "effectively ignores the whitelist (since everything is whitelisted)" do
@@ -256,7 +256,7 @@ describe YAML do
       end
 
       after :each do
-        SafeYAML.reset_defaults!
+        SafeYAML.restore_defaults!
       end
 
       it "will use a custom initializer to instantiate an array-like class upon deserialization" do
@@ -292,7 +292,7 @@ describe YAML do
       end
 
       after :each do
-        SafeYAML.reset_defaults!
+        SafeYAML.restore_defaults!
       end
 
       it "will allow objects to be deserialized for whitelisted tags" do
@@ -366,7 +366,7 @@ describe YAML do
 
     context "as long as a :default_mode has been specified" do
       after :each do
-        SafeYAML.reset_defaults!
+        SafeYAML.restore_defaults!
       end
 
       it "doesn't issue a warning for safe mode, since an explicit mode has been set" do
@@ -417,7 +417,7 @@ describe YAML do
       end
 
       after :each do
-        SafeYAML.reset_defaults!
+        SafeYAML.restore_defaults!
       end
 
       it "defaults to unsafe mode if the :safe option is omitted" do
@@ -472,7 +472,7 @@ describe YAML do
       end
 
       after :each do
-        SafeYAML.reset_defaults!
+        SafeYAML.restore_defaults!
       end
 
       it "defaults to unsafe mode if the :safe option is omitted" do

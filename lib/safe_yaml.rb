@@ -23,7 +23,7 @@ module SafeYAML
   OPTIONS = DEFAULT_OPTIONS.dup
 
   module_function
-  def reset_defaults!
+  def restore_defaults!
     OPTIONS.merge!(DEFAULT_OPTIONS)
   end
 end

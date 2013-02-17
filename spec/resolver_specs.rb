@@ -204,7 +204,7 @@ module ResolverSpecs
         end
 
         after :each do
-          SafeYAML.reset_defaults!
+          SafeYAML.restore_defaults!
         end
 
         it "translates values starting with ':' to symbols" do
