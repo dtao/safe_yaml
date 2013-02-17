@@ -24,7 +24,7 @@ module SafeYAML
 
   module_function
   def restore_defaults!
-    OPTIONS.merge!(DEFAULT_OPTIONS)
+    OPTIONS.clear.merge!(DEFAULT_OPTIONS)
   end
 end
 
