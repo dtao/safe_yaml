@@ -239,6 +239,11 @@ describe YAML do
         "grandcustom" => { "foo" => "foo", "bar" => "custom_bar", "baz" => "custom_baz" }
       }
     end
+    
+    it "returns false when parsing an empty document" do
+      result = YAML.safe_load ""
+      result.should == false
+    end
 
     context "with custom initializers defined" do
       before :each do

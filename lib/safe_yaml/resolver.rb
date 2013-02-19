@@ -7,6 +7,10 @@ module SafeYAML
     end
 
     def resolve_node(node)
+      if not node
+        return node
+      end
+      
       case self.get_node_type(node)
       when :root
         resolve_root(node)
