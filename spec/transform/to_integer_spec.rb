@@ -2,7 +2,7 @@ require File.join(File.dirname(__FILE__), "..", "spec_helper")
 
 describe SafeYAML::Transform::ToInteger do
   it "returns true when the value matches a valid Integer" do
-    subject.transform?("10").should be_true
+    subject.transform?("10").should == [true, 10]
   end
 
   it "returns false when the value does not match a valid Integer" do
@@ -27,5 +27,25 @@ describe SafeYAML::Transform::ToInteger do
 
   it "defaults to a string for a number that resembles hexadecimal format but is not" do
     subject.transform?("0x1G").should be_false
+  end
+
+  it "correctly parses all formats in the YAML spec" do
+    # canonical
+    subject.transform?("685230").should == [true, 685230]
+
+    # decimal
+    subject.transform?("+685_230").should == [true, 685230]
+
+    # octal
+    subject.transform?("02472256").should == [true, 685230]
+    
+    # hexadecimal:
+    subject.transform?("0x_0A_74_AE").should == [true, 685230]
+
+    # binary
+    subject.transform?("0b1010_0111_0100_1010_1110").should == [true, 685230]
+
+    # sexagesimal
+    subject.transform?("190:20:30").should == [true, 685230]
   end
 end

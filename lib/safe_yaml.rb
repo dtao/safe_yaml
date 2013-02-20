@@ -1,4 +1,6 @@
 require "yaml"
+require "safe_yaml/parse/hexadecimal"
+require "safe_yaml/parse/sexagesimal"
 require "safe_yaml/transform/to_boolean"
 require "safe_yaml/transform/to_date"
 require "safe_yaml/transform/to_float"
