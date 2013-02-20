@@ -362,11 +362,25 @@ describe YAML do
             --- !ruby/object:OpenStruct
             table:
               :backdoor:
-                foo: bar
+                string: foo
+                integer: 1
+                float: 3.14
+                symbol: :bar
+                date: 2013-02-20
+                array: []
+                hash: {}
           YAML
 
           result.should be_a(OpenStruct)
-          result.backdoor.should == { "foo" => "bar" }
+          result.backdoor.should == {
+            "string"  => "foo",
+            "integer" => 1,
+            "float"   => 3.14,
+            "symbol"  => :bar,
+            "date"    => Date.parse("2013-02-20"),
+            "array"   => [],
+            "hash"    => {}
+          }
         end
       end
     end

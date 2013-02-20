@@ -41,7 +41,12 @@ module SafeYAML
     end
 
   else
-    TRUSTED_TAGS = ["tag:yaml.org,2002:str"].freeze
+    TRUSTED_TAGS = [
+      "tag:yaml.org,2002:str",
+      "tag:yaml.org,2002:int",
+      "tag:yaml.org,2002:float#fix",
+      "tag:yaml.org,2002:timestamp#ymd"
+    ].freeze
 
     def tag_is_explicitly_trusted?(tag)
       TRUSTED_TAGS.include?(tag)
