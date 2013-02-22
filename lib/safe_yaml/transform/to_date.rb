@@ -1,12 +1,10 @@
 module SafeYAML
   class Transform
     class ToDate
-      MATCHER = /\A\d{4}\-\d{2}\-\d{2}\Z/.freeze
-
       def transform?(value)
-        return false unless MATCHER.match(value)
-        date = Date.parse(value) rescue nil
-        return !!date, date
+        return true, Date.parse(value) if Parse::Date::DATE_MATCHER.match(value)
+        return true, Parse::Date.value(value) if Parse::Date::TIME_MATCHER.match(value)
+        false
       end
     end
   end

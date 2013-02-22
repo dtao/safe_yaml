@@ -8,8 +8,7 @@ module SafeYAML
       Transform::ToFloat.new,
       Transform::ToNil.new,
       Transform::ToBoolean.new,
-      Transform::ToDate.new,
-      Transform::ToTime.new
+      Transform::ToDate.new
     ]
 
     def self.to_guessed_type(value, quoted=false)
