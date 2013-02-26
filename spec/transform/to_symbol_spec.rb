@@ -23,6 +23,10 @@ describe SafeYAML::Transform::ToSymbol do
     with_symbol_deserialization { subject.transform?(":foo")[0].should be_true }
   end
 
+  it "returns true when the value matches a valid String+Symbol" do
+    with_symbol_deserialization { subject.transform?(':"foo"')[0].should be_true }
+  end
+
   it "returns false when symbol deserialization is disabled" do
     without_symbol_deserialization { subject.transform?(":foo").should be_false }
   end
