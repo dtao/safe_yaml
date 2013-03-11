@@ -12,7 +12,7 @@ describe YAML do
   end
 
   before :each do
-    SafeYAML::OPTIONS[:deserialize_symbols] = false
+    SafeYAML.restore_defaults!
   end
 
   describe "unsafe_load" do
@@ -40,10 +40,6 @@ describe YAML do
         else
           SafeYAML::OPTIONS[:whitelisted_tags] = ["tag:ruby.yaml.org,2002:object:OpenStruct"]
         end
-      end
-
-      after :each do
-        SafeYAML.restore_defaults!
       end
 
       it "effectively ignores the whitelist (since everything is whitelisted)" do
@@ -260,10 +256,6 @@ describe YAML do
         end
       end
 
-      after :each do
-        SafeYAML.restore_defaults!
-      end
-
       it "will use a custom initializer to instantiate an array-like class upon deserialization" do
         result = YAML.safe_load <<-YAML.unindent
           --- !set
@@ -297,10 +289,6 @@ describe YAML do
 
         # Necessary for deserializing OpenStructs properly.
         SafeYAML::OPTIONS[:deserialize_symbols] = true
-      end
-
-      after :each do
-        SafeYAML.restore_defaults!
       end
 
       it "will allow objects to be deserialized for whitelisted tags" do
@@ -429,10 +417,6 @@ describe YAML do
     }
 
     context "as long as a :default_mode has been specified" do
-      after :each do
-        SafeYAML.restore_defaults!
-      end
-
       it "doesn't issue a warning for safe mode, since an explicit mode has been set" do
         SafeYAML::OPTIONS[:default_mode] = :safe
         Kernel.should_not_receive(:warn)
@@ -450,6 +434,13 @@ describe YAML do
       silence_warnings do
         Kernel.should_receive(:warn)
         YAML.load(*arguments)
+      end
+    end
+
+    it "only issues a warning once (to avoid spamming an app's output)" do
+      silence_warnings do
+        Kernel.should_receive(:warn).once
+        2.times { YAML.load(*arguments) }
       end
     end
 
@@ -478,10 +469,6 @@ describe YAML do
     context "with arbitrary object deserialization enabled by default" do
       before :each do
         SafeYAML::OPTIONS[:default_mode] = :unsafe
-      end
-
-      after :each do
-        SafeYAML.restore_defaults!
       end
 
       it "defaults to unsafe mode if the :safe option is omitted" do
@@ -533,10 +520,6 @@ describe YAML do
     context "with arbitrary object deserialization enabled by default" do
       before :each do
         SafeYAML::OPTIONS[:default_mode] = :unsafe
-      end
-
-      after :each do
-        SafeYAML.restore_defaults!
       end
 
       it "defaults to unsafe mode if the :safe option is omitted" do

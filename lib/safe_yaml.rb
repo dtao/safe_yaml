@@ -17,6 +17,7 @@ module SafeYAML
 
   DEFAULT_OPTIONS = {
     :default_mode         => nil,
+    :suppress_warnings    => false,
     :deserialize_symbols  => false,
     :whitelisted_tags     => [],
     :custom_initializers  => {},
@@ -156,7 +157,10 @@ module YAML
     def safe_mode_from_options(method, options={})
       if options[:safe].nil?
         safe_mode = SafeYAML::OPTIONS[:default_mode] || :safe
-        Kernel.warn "Called '#{method}' without the :safe option -- defaulting to #{safe_mode} mode." if SafeYAML::OPTIONS[:default_mode].nil?
+        if SafeYAML::OPTIONS[:default_mode].nil? && !SafeYAML::OPTIONS[:suppress_warnings]
+          Kernel.warn "Called '#{method}' without the :safe option -- defaulting to #{safe_mode} mode."
+          SafeYAML::OPTIONS[:suppress_warnings] = true
+        end
         return safe_mode
       end
 
