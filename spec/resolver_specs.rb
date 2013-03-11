@@ -182,9 +182,12 @@ module ResolverSpecs
             result.should == [Time.utc(2013, 1, 29, 13, 58, 0)]
           end
 
-          it "applies the same transformation to keys" do
-            parse "2013-01-29 05:58:00 -0800: time"
-            result.should == { Time.utc(2013, 1, 29, 13, 58, 0) => "time" }
+          # On Ruby 2.0.0-rc1, even YAML.load overflows the stack on this input.
+          if RUBY_VERSION != "2.0.0"
+            it "applies the same transformation to keys" do
+              parse "2013-01-29 05:58:00 -0800: time"
+              result.should == { Time.utc(2013, 1, 29, 13, 58, 0) => "time" }
+            end
           end
         end
       end
