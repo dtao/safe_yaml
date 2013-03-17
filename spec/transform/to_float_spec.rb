@@ -34,4 +34,9 @@ describe SafeYAML::Transform::ToFloat do
     success, result = subject.transform?(".NaN")
     success.should be_true; result.should be_nan
   end
+
+  # issue 29
+  it "returns false for the string '.'" do
+    subject.transform?(".").should be_false
+  end
 end

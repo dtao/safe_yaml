@@ -16,7 +16,7 @@ module SafeYAML
         ".NAN"  => NaN,
       }.freeze
 
-      MATCHER = /\A[-+]?(?:\d[\d_]*)?\.[\d_]*(?:[eE][-+][\d]+)?\Z/.freeze
+      MATCHER = /\A[-+]?(?:\d[\d_]*)?\.[\d_]+(?:[eE][-+][\d]+)?\Z/.freeze
 
       def transform?(value)
         return true, Float(value) if MATCHER.match(value)
