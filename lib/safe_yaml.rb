@@ -38,6 +38,17 @@ module SafeYAML
     end
   end
 
+  def whitelist!(klass)
+    raise "#{klass} not a Class" unless klass.is_a?(::Class)
+    klass_name = klass.name or raise "#{klass} cannot be anonymous"
+    tag_prefix = case YAML_ENGINE
+                 when 'psych' then '!ruby/object'
+                 when 'sych'  then 'tag:ruby.yaml.org,2002:object'
+                 else raise "unknown YAML_ENGINE #{YAML_ENGINE}"
+                 end
+    OPTIONS[:whitelisted_tags] << "#{tag_prefix}:#{klass_name}"
+  end
+
   if YAML_ENGINE == "psych"
     def tag_is_explicitly_trusted?(tag)
       false
