@@ -68,6 +68,16 @@ module SafeYAML
         YAML.tagged_classes.each do |tag, klass|
           @predefined_tags[klass] = tag
         end
+
+      else
+        # Special tags appear to be hard-coded in Psych:
+        # https://github.com/tenderlove/psych/blob/v1.3.4/lib/psych/visitors/to_ruby.rb
+        # Fortunately, there aren't many that SafeYAML doesn't already support.
+        @predefined_tags.merge!({
+          Exception => "!ruby/exception",
+          Range     => "!ruby/range",
+          Regexp    => "!ruby/regexp",
+        })
       end
     end
 
