@@ -568,6 +568,22 @@ describe YAML do
         result.should be_a(OpenStruct)
         result.foo.should == "bar"
       end
+
+      xit "works for Ruby ranges" do
+        SafeYAML.whitelist!(Range)
+
+        result = round_trip((1..10))
+        result.should be_a(Range)
+        result.should == (1..10)
+      end
+
+      xit "works for regular expressions" do
+        SafeYAML.whitelist!(Regexp)
+
+        result = round_trip(/foo/)
+        result.should be_a(Regexp)
+        result.should == /foo/
+      end
     end
   end
 end
