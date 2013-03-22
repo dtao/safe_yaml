@@ -39,7 +39,13 @@ module SafeYAML
     end
   end
 
-  def whitelist!(klass)
+  def whitelist!(*classes)
+    classes.each do |klass|
+      whitelist_class!(klass)
+    end
+  end
+
+  def whitelist_class!(klass)
     raise "#{klass} not a Class" unless klass.is_a?(::Class)
 
     klass_name = klass.name

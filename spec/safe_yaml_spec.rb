@@ -634,7 +634,7 @@ describe YAML do
         result.foo.should == "bar"
       end
 
-      it "works for Ruby ranges" do
+      it "works for ranges" do
         SafeYAML.whitelist!(Range)
         safe_load_round_trip(1..10).should == (1..10)
       end
@@ -642,6 +642,11 @@ describe YAML do
       it "works for regular expressions" do
         SafeYAML.whitelist!(Regexp)
         safe_load_round_trip(/foo/).should == /foo/
+      end
+
+      it "works for multiple classes" do
+        SafeYAML.whitelist!(Range, Regexp)
+        safe_load_round_trip([(1..10), /bar/]).should == [(1..10), /bar/]
       end
 
       it "works for arbitrary Exception subclasses" do
