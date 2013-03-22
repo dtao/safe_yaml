@@ -15,6 +15,10 @@ describe YAML do
     SafeYAML.restore_defaults!
   end
 
+  after :each do
+    SafeYAML.restore_defaults!
+  end
+
   describe "unsafe_load" do
     if SafeYAML::YAML_ENGINE == "psych" && RUBY_VERSION >= "1.9.3"
       it "allows exploits through objects defined in YAML w/ !ruby/hash via custom :[]= methods" do
@@ -544,9 +548,25 @@ describe YAML do
     end
 
     context "with a Class as its argument" do
+      def round_trip(object)
+        yaml = object.to_yaml
+        YAML.safe_load(yaml)
+      end
+
       it "should configure correctly" do
         expect { SafeYAML::whitelist! OpenStruct }.to_not raise_error
         SafeYAML::OPTIONS[:whitelisted_tags].grep(/OpenStruct\Z/).should_not be_empty
+      end
+
+      it "successfully deserializes the specified class" do
+        SafeYAML.whitelist!(OpenStruct)
+
+        # necessary for properly assigning OpenStruct attributes
+        SafeYAML::OPTIONS[:deserialize_symbols] = true
+
+        result = round_trip(OpenStruct.new(:foo => "bar"))
+        result.should be_a(OpenStruct)
+        result.foo.should == "bar"
       end
     end
   end
