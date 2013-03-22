@@ -169,26 +169,20 @@ module ResolverSpecs
         end
       end
 
-      # This does in fact appear to be a Ruby version thing as opposed to a YAML engine thing.
       context "for Ruby version #{RUBY_VERSION}" do
-        if RUBY_VERSION >= "1.8.7"
-          it "translates valid time values" do
-            parse "time: 2013-01-29 05:58:00 -0800"
-            result.should == { "time" => Time.utc(2013, 1, 29, 13, 58, 0) }
-          end
+        it "translates valid time values" do
+          parse "time: 2013-01-29 05:58:00 -0800"
+          result.should == { "time" => Time.utc(2013, 1, 29, 13, 58, 0) }
+        end
 
-          it "applies the same transformation to elements in sequences" do
-            parse "- 2013-01-29 05:58:00 -0800"
-            result.should == [Time.utc(2013, 1, 29, 13, 58, 0)]
-          end
+        it "applies the same transformation to elements in sequences" do
+          parse "- 2013-01-29 05:58:00 -0800"
+          result.should == [Time.utc(2013, 1, 29, 13, 58, 0)]
+        end
 
-          # On Ruby 2.0.0-rc1, even YAML.load overflows the stack on this input.
-          if RUBY_VERSION != "2.0.0"
-            it "applies the same transformation to keys" do
-              parse "2013-01-29 05:58:00 -0800: time"
-              result.should == { Time.utc(2013, 1, 29, 13, 58, 0) => "time" }
-            end
-          end
+        it "applies the same transformation to keys" do
+          parse "2013-01-29 05:58:00 -0800: time"
+          result.should == { Time.utc(2013, 1, 29, 13, 58, 0) => "time" }
         end
       end
 
