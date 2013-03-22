@@ -11,6 +11,15 @@ describe YAML do
     $VERBOSE = true
   end
 
+  def safe_load_round_trip(object, options={})
+    yaml = object.to_yaml
+    if SafeYAML::YAML_ENGINE == "psych"
+      YAML.safe_load(yaml, nil, options)
+    else
+      YAML.safe_load(yaml, options)
+    end
+  end
+
   before :each do
     SafeYAML.restore_defaults!
   end
@@ -376,19 +385,45 @@ describe YAML do
         SafeYAML::OPTIONS.merge!(default_options)
       end
 
-      context "(for example, when symbol deserialization is enabled by default" do
-        let(:default_options) { { :deserialize_symbols => false } }
+      context "(for example, when symbol deserialization is enabled by default)" do
+        let(:default_options) { { :deserialize_symbols => true } }
 
         it "goes with the default option when it is not overridden" do
           silence_warnings do
-            YAML.load(":foo: bar").should == { ":foo" => "bar" }
+            YAML.load(":foo: bar").should == { :foo => "bar" }
           end
         end
 
         it "allows the default option to be overridden on a per-call basis" do
           silence_warnings do
+            YAML.load(":foo: bar", :deserialize_symbols => false).should == { ":foo" => "bar" }
             YAML.load(":foo: bar", :deserialize_symbols => true).should == { :foo => "bar" }
           end
+        end
+      end
+
+      context "(or, for example, when certain tags are whitelisted)" do
+        let(:default_options) {
+          {
+            :deserialize_symbols => true,
+            :whitelisted_tags => SafeYAML::YAML_ENGINE == "psych" ?
+              ["!ruby/object:OpenStruct"] :
+              ["tag:ruby.yaml.org,2002:object:OpenStruct"]
+          }
+        }
+
+        it "goes with the default option when it is not overridden" do
+          result = safe_load_round_trip(OpenStruct.new(:foo => "bar"))
+          result.should be_a(OpenStruct)
+          result.foo.should == "bar"
+        end
+
+        it "allows the default option to be overridden on a per-call basis" do
+          result = safe_load_round_trip(OpenStruct.new(:foo => "bar"), :whitelisted_tags => [])
+          result.should == { "table" => { :foo => "bar" } }
+
+          result = safe_load_round_trip(OpenStruct.new(:foo => "bar"), :deserialize_symbols => false, :whitelisted_tags => [])
+          result.should == { "table" => { ":foo" => "bar" } }
         end
       end
     end
@@ -583,11 +618,6 @@ describe YAML do
     end
 
     context "with a Class as its argument" do
-      def round_trip(object)
-        yaml = object.to_yaml
-        YAML.safe_load(yaml)
-      end
-
       it "should configure correctly" do
         expect { SafeYAML::whitelist! OpenStruct }.to_not raise_error
         SafeYAML::OPTIONS[:whitelisted_tags].grep(/OpenStruct\Z/).should_not be_empty
@@ -599,19 +629,19 @@ describe YAML do
         # necessary for properly assigning OpenStruct attributes
         SafeYAML::OPTIONS[:deserialize_symbols] = true
 
-        result = round_trip(OpenStruct.new(:foo => "bar"))
+        result = safe_load_round_trip(OpenStruct.new(:foo => "bar"))
         result.should be_a(OpenStruct)
         result.foo.should == "bar"
       end
 
       it "works for Ruby ranges" do
         SafeYAML.whitelist!(Range)
-        round_trip(1..10).should == (1..10)
+        safe_load_round_trip(1..10).should == (1..10)
       end
 
       it "works for regular expressions" do
         SafeYAML.whitelist!(Regexp)
-        round_trip(/foo/).should == /foo/
+        safe_load_round_trip(/foo/).should == /foo/
       end
 
       it "works for arbitrary Exception subclasses" do
@@ -625,7 +655,7 @@ describe YAML do
 
         SafeYAML.whitelist!(CustomException)
 
-        ex = round_trip(CustomException.new("blah"))
+        ex = safe_load_round_trip(CustomException.new("blah"))
         ex.should be_a(CustomException)
         ex.custom_message.should == "blah"
       end
