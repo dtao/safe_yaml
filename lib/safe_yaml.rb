@@ -40,7 +40,10 @@ module SafeYAML
 
   def whitelist!(klass)
     raise "#{klass} not a Class" unless klass.is_a?(::Class)
-    klass_name = klass.name or raise "#{klass} cannot be anonymous"
+
+    klass_name = klass.name
+    raise "#{klass} cannot be anonymous" if klass_name.nil? || klass_name.empty?
+
     tag_prefix = case YAML_ENGINE
                  when 'psych' then '!ruby/object'
                  when 'syck'  then 'tag:ruby.yaml.org,2002:object'
