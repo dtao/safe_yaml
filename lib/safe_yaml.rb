@@ -80,12 +80,20 @@ module SafeYAML
     end
 
   else
-    TRUSTED_TAGS = [
-      "tag:yaml.org,2002:str",
-      "tag:yaml.org,2002:int",
+    TRUSTED_TAGS = Set.new([
+      "tag:yaml.org,2002:binary",
+      "tag:yaml.org,2002:bool#no",
+      "tag:yaml.org,2002:bool#yes",
+      "tag:yaml.org,2002:float",
       "tag:yaml.org,2002:float#fix",
+      "tag:yaml.org,2002:int",
+      "tag:yaml.org,2002:map",
+      "tag:yaml.org,2002:null",
+      "tag:yaml.org,2002:seq",
+      "tag:yaml.org,2002:str",
+      "tag:yaml.org,2002:timestamp",
       "tag:yaml.org,2002:timestamp#ymd"
-    ].freeze
+    ]).freeze
 
     def tag_is_explicitly_trusted?(tag)
       TRUSTED_TAGS.include?(tag)
