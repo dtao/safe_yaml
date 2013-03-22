@@ -32,9 +32,9 @@ module SafeYAML
     OPTIONS.clear.merge!(Deep.copy(DEFAULT_OPTIONS))
   end
 
-  def tag_safety_check!(tag)
+  def tag_safety_check!(tag, options)
     return if tag.nil?
-    if OPTIONS[:raise_on_unknown_tag] && !OPTIONS[:whitelisted_tags].include?(tag) && !tag_is_explicitly_trusted?(tag)
+    if options[:raise_on_unknown_tag] && !options[:whitelisted_tags].include?(tag) && !tag_is_explicitly_trusted?(tag)
       raise "Unknown YAML tag '#{tag}'"
     end
   end
@@ -115,41 +115,50 @@ module SafeYAML
 end
 
 module YAML
-  def self.load_with_options(yaml, *filename_and_options)
-    options   = filename_and_options.last || {}
+  def self.load_with_options(yaml, *original_arguments)
+    filename, options = filename_and_options_from_arguments(original_arguments)
     safe_mode = safe_mode_from_options("load", options)
     arguments = [yaml]
-    arguments << filename_and_options.first if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
-    safe_mode == :safe ? safe_load(*arguments) : unsafe_load(*arguments)
+
+    if safe_mode == :safe
+      arguments << filename if SafeYAML::YAML_ENGINE == "psych"
+      arguments << options_for_safe_load(options)
+      safe_load(*arguments)
+    else
+      arguments << filename if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
+      unsafe_load(*arguments)
+    end
   end
 
   def self.load_file_with_options(file, options={})
     safe_mode = safe_mode_from_options("load_file", options)
-    safe_mode == :safe ? safe_load_file(file) : unsafe_load_file(file)
+    if safe_mode == :safe
+      safe_load_file(file, options_for_safe_load(options))
+    else
+      unsafe_load_file(file)
+    end
   end
 
   if SafeYAML::YAML_ENGINE == "psych"
     require "safe_yaml/safe_to_ruby_visitor"
     require "safe_yaml/psych_resolver"
 
-    def self.safe_load(yaml, filename=nil)
-      safe_resolver = SafeYAML::PsychResolver.new
-      tree = if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
-        Psych.parse(yaml, filename)
-      else
+    def self.safe_load(yaml, filename=nil, options={})
+      safe_resolver = SafeYAML::PsychResolver.new(options)
+      tree = SafeYAML::MULTI_ARGUMENT_YAML_LOAD ?
+        Psych.parse(yaml, filename) :
         Psych.parse(yaml)
-      end
       return safe_resolver.resolve_node(tree)
     end
 
-    def self.safe_load_file(filename)
-      File.open(filename, 'r:bom|utf-8') { |f| self.safe_load f, filename }
+    def self.safe_load_file(filename, options={})
+      File.open(filename, 'r:bom|utf-8') { |f| self.safe_load(f, filename, options) }
     end
 
     def self.unsafe_load_file(filename)
       if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
         # https://github.com/tenderlove/psych/blob/v1.3.2/lib/psych.rb#L296-298
-        File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load f, filename }
+        File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load(f, filename) }
       else
         # https://github.com/tenderlove/psych/blob/v1.2.2/lib/psych.rb#L231-233
         self.unsafe_load File.open(filename)
@@ -160,19 +169,19 @@ module YAML
     require "safe_yaml/syck_resolver"
     require "safe_yaml/syck_node_monkeypatch"
 
-    def self.safe_load(yaml)
-      resolver = SafeYAML::SyckResolver.new
+    def self.safe_load(yaml, options={})
+      resolver = SafeYAML::SyckResolver.new(options)
       tree = YAML.parse(yaml)
       return resolver.resolve_node(tree)
     end
 
-    def self.safe_load_file(filename)
-      File.open(filename) { |f| self.safe_load f }
+    def self.safe_load_file(filename, options={})
+      File.open(filename) { |f| self.safe_load(f, options) }
     end
 
     def self.unsafe_load_file(filename)
       # https://github.com/indeyets/syck/blob/master/ext/ruby/lib/yaml.rb#L133-135
-      File.open(filename) { |f| self.unsafe_load f }
+      File.open(filename) { |f| self.unsafe_load(f) }
     end
   end
 
@@ -212,6 +221,19 @@ module YAML
     end
 
     private
+    def filename_and_options_from_arguments(arguments)
+      if arguments.count == 1
+        if arguments.first.is_a?(String)
+          return arguments.first, {}
+        else
+          return nil, arguments.first || {}
+        end
+
+      else
+        return arguments.first, arguments.last || {}
+      end
+    end
+
     def safe_mode_from_options(method, options={})
       if options[:safe].nil?
         safe_mode = SafeYAML::OPTIONS[:default_mode] || :safe
@@ -223,6 +245,12 @@ module YAML
       end
 
       options[:safe] ? :safe : :unsafe
+    end
+
+    def options_for_safe_load(base_options)
+      options = base_options.dup
+      options.delete(:safe)
+      options
     end
 
     def warn_of_deprecated_method(message)

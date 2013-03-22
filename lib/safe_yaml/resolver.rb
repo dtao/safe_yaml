@@ -1,9 +1,10 @@
 module SafeYAML
   class Resolver
-    def initialize
-      @whitelist            = SafeYAML::OPTIONS[:whitelisted_tags] || []
-      @initializers         = SafeYAML::OPTIONS[:custom_initializers] || {}
-      @raise_on_unknown_tag = SafeYAML::OPTIONS[:raise_on_unknown_tag]
+    def initialize(options)
+      @options              = SafeYAML::OPTIONS.merge(options || {})
+      @whitelist            = @options[:whitelisted_tags] || []
+      @initializers         = @options[:custom_initializers] || {}
+      @raise_on_unknown_tag = @options[:raise_on_unknown_tag]
     end
 
     def resolve_node(node)
@@ -55,17 +56,21 @@ module SafeYAML
     end
 
     def resolve_scalar(node)
-      Transform.to_proper_type(self.get_node_value(node), self.value_is_quoted?(node), get_and_check_node_tag(node))
+      Transform.to_proper_type(self.get_node_value(node), self.value_is_quoted?(node), get_and_check_node_tag(node), @options)
     end
 
     def get_and_check_node_tag(node)
       tag = self.get_node_tag(node)
-      SafeYAML.tag_safety_check!(tag)
+      SafeYAML.tag_safety_check!(tag, @options)
       tag
     end
 
     def tag_is_whitelisted?(tag)
       @whitelist.include?(tag)
+    end
+
+    def options
+      @options
     end
 
     private

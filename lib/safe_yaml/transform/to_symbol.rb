@@ -3,8 +3,9 @@ module SafeYAML
     class ToSymbol
       MATCHER = /\A:"?(\w+)"?\Z/.freeze
 
-      def transform?(value)
-        return false unless SafeYAML::OPTIONS[:deserialize_symbols] && MATCHER.match(value)
+      def transform?(value, options=nil)
+        options ||= SafeYAML::OPTIONS
+        return false unless options[:deserialize_symbols] && MATCHER.match(value)
         return true, $1.to_sym
       end
     end

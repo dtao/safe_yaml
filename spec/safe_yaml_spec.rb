@@ -368,6 +368,30 @@ describe YAML do
         end
       end
     end
+
+    context "when options are passed direclty to #load which differ from the defaults" do
+      let(:default_options) { {} }
+
+      before :each do
+        SafeYAML::OPTIONS.merge!(default_options)
+      end
+
+      context "(for example, when symbol deserialization is enabled by default" do
+        let(:default_options) { { :deserialize_symbols => false } }
+
+        it "goes with the default option when it is not overridden" do
+          silence_warnings do
+            YAML.load(":foo: bar").should == { ":foo" => "bar" }
+          end
+        end
+
+        it "allows the default option to be overridden on a per-call basis" do
+          silence_warnings do
+            YAML.load(":foo: bar", :deserialize_symbols => true).should == { :foo => "bar" }
+          end
+        end
+      end
+    end
   end
 
   describe "unsafe_load_file" do
@@ -404,11 +428,13 @@ describe YAML do
   end
 
   describe "load" do
+    let(:options) { {} }
+
     let (:arguments) {
       if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
-        ["foo: bar", nil]
+        ["foo: bar", nil, options]
       else
-        ["foo: bar"]
+        ["foo: bar", options]
       end
     }
 
@@ -426,7 +452,31 @@ describe YAML do
       end
     end
 
-    it "issues a warning if the :safe option is omitted" do
+    context "when the :safe options is specified" do
+      let(:safe_mode) { true }
+      let(:options) { { :safe => safe_mode } }
+
+      it "doesn't issue a warning" do
+        Kernel.should_not_receive(:warn)
+        YAML.load(*arguments)
+      end
+
+      it "calls #safe_load if the :safe option is set to true" do
+        YAML.should_receive(:safe_load)
+        YAML.load(*arguments)
+      end
+
+      context "when the :safe option is set to false" do
+        let(:safe_mode) { false }
+
+        it "calls #unsafe_load if the :safe option is set to false" do
+          YAML.should_receive(:unsafe_load)
+          YAML.load(*arguments)
+        end
+      end
+    end
+
+    it "issues a warning when the :safe option is omitted" do
       silence_warnings do
         Kernel.should_receive(:warn)
         YAML.load(*arguments)
@@ -440,43 +490,28 @@ describe YAML do
       end
     end
 
-    it "doesn't issue a warning as long as the :safe option is specified" do
-      Kernel.should_not_receive(:warn)
-      YAML.load(*(arguments + [{:safe => true}]))
-    end
-
     it "defaults to safe mode if the :safe option is omitted" do
       silence_warnings do
-        YAML.should_receive(:safe_load).with(*arguments)
+        YAML.should_receive(:safe_load)
         YAML.load(*arguments)
       end
     end
 
-    it "calls #safe_load if the :safe option is set to true" do
-      YAML.should_receive(:safe_load).with(*arguments)
-      YAML.load(*(arguments + [{:safe => true}]))
-    end
-
-    it "calls #unsafe_load if the :safe option is set to false" do
-      YAML.should_receive(:unsafe_load).with(*arguments)
-      YAML.load(*(arguments + [{:safe => false}]))
-    end
-
-    context "with arbitrary object deserialization enabled by default" do
+    context "with the default mode set to :unsafe" do
       before :each do
         SafeYAML::OPTIONS[:default_mode] = :unsafe
       end
 
       it "defaults to unsafe mode if the :safe option is omitted" do
         silence_warnings do
-          YAML.should_receive(:unsafe_load).with(*arguments)
+          YAML.should_receive(:unsafe_load)
           YAML.load(*arguments)
         end
       end
 
       it "calls #safe_load if the :safe option is set to true" do
-        YAML.should_receive(:safe_load).with(*arguments)
-        YAML.load(*(arguments + [{:safe => true}]))
+        YAML.should_receive(:safe_load)
+        YAML.load(*(arguments + [{ :safe => true }]))
       end
     end
   end
@@ -498,18 +533,18 @@ describe YAML do
 
     it "defaults to safe mode if the :safe option is omitted" do
       silence_warnings do
-        YAML.should_receive(:safe_load_file).with(filename)
+        YAML.should_receive(:safe_load_file)
         YAML.load_file(filename)
       end
     end
 
     it "calls #safe_load_file if the :safe option is set to true" do
-      YAML.should_receive(:safe_load_file).with(filename)
+      YAML.should_receive(:safe_load_file)
       YAML.load_file(filename, :safe => true)
     end
 
     it "calls #unsafe_load_file if the :safe option is set to false" do
-      YAML.should_receive(:unsafe_load_file).with(filename)
+      YAML.should_receive(:unsafe_load_file)
       YAML.load_file(filename, :safe => false)
     end
 
@@ -520,13 +555,13 @@ describe YAML do
 
       it "defaults to unsafe mode if the :safe option is omitted" do
         silence_warnings do
-          YAML.should_receive(:unsafe_load_file).with(filename)
+          YAML.should_receive(:unsafe_load_file)
           YAML.load_file(filename)
         end
       end
 
       it "calls #safe_load if the :safe option is set to true" do
-        YAML.should_receive(:safe_load_file).with(filename)
+        YAML.should_receive(:safe_load_file)
         YAML.load_file(filename, :safe => true)
       end
     end

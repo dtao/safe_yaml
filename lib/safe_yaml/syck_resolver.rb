@@ -1,6 +1,9 @@
 module SafeYAML
   class SyckResolver < Resolver
-    QUOTE_STYLES = [:quote1, :quote2].freeze
+    QUOTE_STYLES = [
+      :quote1,
+      :quote2
+    ].freeze
 
     NODE_TYPES = {
       Hash   => :map,
@@ -8,12 +11,12 @@ module SafeYAML
       String => :scalar
     }.freeze
 
-    def initialize
-      super()
+    def initialize(options={})
+      super
     end
 
     def native_resolve(node)
-      node.transform
+      node.transform(self.options)
     end
 
     def get_node_type(node)

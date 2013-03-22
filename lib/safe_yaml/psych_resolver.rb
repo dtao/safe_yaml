@@ -8,8 +8,8 @@ module SafeYAML
       Psych::Nodes::Alias    => :alias
     }.freeze
 
-    def initialize
-      super()
+    def initialize(options={})
+      super
       @aliased_nodes = {}
     end
 
