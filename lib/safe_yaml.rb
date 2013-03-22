@@ -10,25 +10,26 @@ require "safe_yaml/transform/to_nil"
 require "safe_yaml/transform/to_symbol"
 require "safe_yaml/transform"
 require "safe_yaml/resolver"
+require "safe_yaml/deep"
 
 module SafeYAML
   MULTI_ARGUMENT_YAML_LOAD = YAML.method(:load).arity != 1
   YAML_ENGINE = defined?(YAML::ENGINE) ? YAML::ENGINE.yamler : "syck"
 
-  DEFAULT_OPTIONS = {
+  DEFAULT_OPTIONS = Deep.freeze({
     :default_mode         => nil,
     :suppress_warnings    => false,
     :deserialize_symbols  => false,
     :whitelisted_tags     => [],
     :custom_initializers  => {},
     :raise_on_unknown_tag => false
-  }.freeze
+  })
 
-  OPTIONS = DEFAULT_OPTIONS.dup
+  OPTIONS = Deep.copy(DEFAULT_OPTIONS)
 
   module_function
   def restore_defaults!
-    OPTIONS.clear.merge!(DEFAULT_OPTIONS)
+    OPTIONS.clear.merge!(Deep.copy(DEFAULT_OPTIONS))
   end
 
   def tag_safety_check!(tag)
