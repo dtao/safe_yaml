@@ -571,18 +571,28 @@ describe YAML do
 
       it "works for Ruby ranges" do
         SafeYAML.whitelist!(Range)
-
-        result = round_trip((1..10))
-        result.should be_a(Range)
-        result.should == (1..10)
+        round_trip(1..10).should == (1..10)
       end
 
       it "works for regular expressions" do
         SafeYAML.whitelist!(Regexp)
+        round_trip(/foo/).should == /foo/
+      end
 
-        result = round_trip(/foo/)
-        result.should be_a(Regexp)
-        result.should == /foo/
+      it "works for arbitrary Exception subclasses" do
+        class CustomException < Exception
+          attr_reader :custom_message
+
+          def initialize(custom_message)
+            @custom_message = custom_message
+          end
+        end
+
+        SafeYAML.whitelist!(CustomException)
+
+        ex = round_trip(CustomException.new("blah"))
+        ex.should be_a(CustomException)
+        ex.custom_message.should == "blah"
       end
     end
   end

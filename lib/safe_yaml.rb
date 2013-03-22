@@ -52,9 +52,12 @@ module SafeYAML
       return
     end
 
+    # Exception is exceptional (har har).
+    tag_class  = klass < Exception ? "exception" : "object"
+
     tag_prefix = case YAML_ENGINE
-                 when "psych" then "!ruby/object"
-                 when "syck"  then "tag:ruby.yaml.org,2002:object"
+                 when "psych" then "!ruby/#{tag_class}"
+                 when "syck"  then "tag:ruby.yaml.org,2002:#{tag_class}"
                  else raise "unknown YAML_ENGINE #{YAML_ENGINE}"
                  end
     OPTIONS[:whitelisted_tags] << "#{tag_prefix}:#{klass_name}"
