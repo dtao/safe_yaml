@@ -33,29 +33,6 @@ describe YAML do
       backdoor.should be_exploited_through_ivars
     end
 
-    context "whitelist!" do
-      context "not a class" do
-        it 'should raise' do
-          expect { SafeYAML::whitelist! :foo }.to raise_error(/not a Class/)
-          SafeYAML::OPTIONS[:whitelisted_tags].should be_empty
-        end
-      end
-
-      context "anonymous class" do
-        it 'should raise' do
-          expect { SafeYAML::whitelist! Class.new }.to raise_error(/cannot be anonymous/)
-          SafeYAML::OPTIONS[:whitelisted_tags].should be_empty
-        end
-      end
-
-      context 'with a Class as its argument' do
-        it 'should configure correctly' do
-          expect { SafeYAML::whitelist! OpenStruct }.to_not raise_error
-          SafeYAML::OPTIONS[:whitelisted_tags].grep(/OpenStruct\Z/).should_not be_empty
-        end
-      end
-    end
-
     context "with special whitelisted tags defined" do
       before :each do
         SafeYAML::whitelist!(OpenStruct)
@@ -547,6 +524,29 @@ describe YAML do
       it "calls #safe_load if the :safe option is set to true" do
         YAML.should_receive(:safe_load_file).with(filename)
         YAML.load_file(filename, :safe => true)
+      end
+    end
+  end
+
+  describe "whitelist!" do
+    context "not a class" do
+      it "should raise" do
+        expect { SafeYAML::whitelist! :foo }.to raise_error(/not a Class/)
+        SafeYAML::OPTIONS[:whitelisted_tags].should be_empty
+      end
+    end
+
+    context "anonymous class" do
+      it "should raise" do
+        expect { SafeYAML::whitelist! Class.new }.to raise_error(/cannot be anonymous/)
+        SafeYAML::OPTIONS[:whitelisted_tags].should be_empty
+      end
+    end
+
+    context "with a Class as its argument" do
+      it "should configure correctly" do
+        expect { SafeYAML::whitelist! OpenStruct }.to_not raise_error
+        SafeYAML::OPTIONS[:whitelisted_tags].grep(/OpenStruct\Z/).should_not be_empty
       end
     end
   end
