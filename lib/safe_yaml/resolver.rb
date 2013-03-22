@@ -8,7 +8,7 @@ module SafeYAML
 
     def resolve_node(node)
       return node if !node
-      return self.native_resolve(node) if tag_is_whitelisted?(node.type_id)
+      return self.native_resolve(node) if tag_is_whitelisted?(self.get_node_tag(node))
 
       case self.get_node_type(node)
       when :root
