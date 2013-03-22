@@ -7,10 +7,9 @@ module SafeYAML
     end
 
     def resolve_node(node)
-      if not node
-        return node
-      end
-      
+      return node if !node
+      return self.native_resolve(node) if tag_is_whitelisted?(node.type_id)
+
       case self.get_node_type(node)
       when :root
         resolve_root(node)
@@ -28,12 +27,9 @@ module SafeYAML
     end
 
     def resolve_map(node)
-      tag = get_and_check_node_tag(node)
-      return self.native_resolve(node) if tag_is_whitelisted?(tag)
-
+      tag  = get_and_check_node_tag(node)
       hash = @initializers.include?(tag) ? @initializers[tag].call : {}
-
-      map = normalize_map(self.get_node_value(node))
+      map  = normalize_map(self.get_node_value(node))
 
       # Take the "<<" key nodes first, as these are meant to approximate a form of inheritance.
       inheritors = map.select { |key_node, value_node| resolve_node(key_node) == "<<" }

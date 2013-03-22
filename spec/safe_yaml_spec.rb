@@ -569,7 +569,7 @@ describe YAML do
         result.foo.should == "bar"
       end
 
-      xit "works for Ruby ranges" do
+      it "works for Ruby ranges" do
         SafeYAML.whitelist!(Range)
 
         result = round_trip((1..10))
@@ -577,7 +577,7 @@ describe YAML do
         result.should == (1..10)
       end
 
-      xit "works for regular expressions" do
+      it "works for regular expressions" do
         SafeYAML.whitelist!(Regexp)
 
         result = round_trip(/foo/)

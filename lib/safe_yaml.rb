@@ -45,12 +45,33 @@ module SafeYAML
     klass_name = klass.name
     raise "#{klass} cannot be anonymous" if klass_name.nil? || klass_name.empty?
 
+    # Whitelist any built-in YAML tags supplied by Syck or Psych.
+    predefined_tag = predefined_tags[klass]
+    if predefined_tag
+      OPTIONS[:whitelisted_tags] << predefined_tag
+      return
+    end
+
     tag_prefix = case YAML_ENGINE
-                 when 'psych' then '!ruby/object'
-                 when 'syck'  then 'tag:ruby.yaml.org,2002:object'
+                 when "psych" then "!ruby/object"
+                 when "syck"  then "tag:ruby.yaml.org,2002:object"
                  else raise "unknown YAML_ENGINE #{YAML_ENGINE}"
                  end
     OPTIONS[:whitelisted_tags] << "#{tag_prefix}:#{klass_name}"
+  end
+
+  def predefined_tags
+    if @predefined_tags.nil?
+      @predefined_tags = {}
+
+      if YAML_ENGINE == "syck"
+        YAML.tagged_classes.each do |tag, klass|
+          @predefined_tags[klass] = tag
+        end
+      end
+    end
+
+    @predefined_tags
   end
 
   if YAML_ENGINE == "psych"
@@ -89,6 +110,7 @@ module YAML
   if SafeYAML::YAML_ENGINE == "psych"
     require "safe_yaml/safe_to_ruby_visitor"
     require "safe_yaml/psych_resolver"
+
     def self.safe_load(yaml, filename=nil)
       safe_resolver = SafeYAML::PsychResolver.new
       tree = if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
