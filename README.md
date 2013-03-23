@@ -61,7 +61,7 @@ This simple example demonstrates the vulnerability:
 
 ```ruby
 yaml = <<-EOYAML
---- !ruby/hash:ExploitableClassBuilder
+--- !ruby/hash:ClassBuilder
 "foo; end; puts %(I'm in yr system!); def bar": "baz"
 EOYAML
 ```
@@ -80,15 +80,20 @@ With SafeYAML, the same attacker would be thwarted:
 Usage
 -----
 
-When you require the safe_yaml gem in your project, `YAML.load` is patched to accept one additional `options` parameter (for Syck and Psych prior to Ruby 1.9.3, this adds a second parameter; for Psych in 1.9.3 and later, it adds a third). The most important of these is the `:safe` option (default: `true`), which controls whether or not to deserialize arbitrary objects when parsing a YAML document. The other options, along with explanations, are as follows.
+When you require the safe_yaml gem in your project, `YAML.load` is patched to accept one additional (optional) `options` parameter. This changes the method signature as follows:
 
-- `:deserialize_symbols` (default: `false`): Controls whether or not YAML will deserialize symbols. It is probably best to only enable this option where necessary, e.g. to make trusted libraries work. Symbols receive special treatment in Ruby and are not garbage collected, which means deserializing them indiscriminately may render your site vulnerable to a DOS attack (hence the default of `false`).
+- for Syck and Psych prior to Ruby 1.9.3: `YAML.load(yaml, options={})`
+- for Psych in 1.9.3 and later: `YAML.load(yaml, filename=nil, options={})`
 
-- `:whitelisted_tags`: Provides a list of YAML tags that designate trusted types, e.g., ones that can be deserialized without worrying about any resulting security vulnerabilities. When any of the given tags are encountered in a YAML document, the associated data will be parsed by the underlying YAML engine (Syck or Psych) for the version of Ruby you are using. See "Whitelisting Trusted Types" below for more information.
+The most important option is the `:safe` option (default: `true`), which controls whether or not to deserialize arbitrary objects when parsing a YAML document. The other options, along with explanations, are as follows.
 
-- `:custom_initializers`: Similar to `whitelisted_tags`, but allows you to provide your own initializers for specified tags rather than using Syck or Psyck.
+- `:deserialize_symbols` (default: `false`): Controls whether or not YAML will deserialize symbols. It is probably best to only enable this option where necessary, e.g. to make trusted libraries work. Symbols receive special treatment in Ruby and are not garbage collected, which means deserializing them indiscriminately may render your site vulnerable to a DOS attack (hence `false` as a default value).
 
-- `:raise_on_unknown_tag` (default: `false`): This option represents the highest possible level of paranoia (not necessarily a bad thing); if the YAML engine encounters any tag other than ones that are automatically trusted by SafeYAML or that you've explicitly whitelisted, it will raise an exception. This may be a good choice if you expect to always be dealing with perfectly safe YAML and want your application to fail loudly upon encountering questionable data.
+- `:whitelisted_tags`: Accepts an array of YAML tags that designate trusted types, e.g., ones that can be deserialized without worrying about any resulting security vulnerabilities. When any of the given tags are encountered in a YAML document, the associated data will be parsed by the underlying YAML engine (Syck or Psych) for the version of Ruby you are using. See the "Whitelisting Trusted Types" section below for more information.
+
+- `:custom_initializers`: Similar to the `:whitelisted_tags` option, but allows you to provide your own initializers for specified tags rather than using Syck or Psyck. Accepts a hash with string tags for keys and lambdas for values.
+
+- `:raise_on_unknown_tag` (default: `false`): Represents the highest possible level of paranoia (not necessarily a bad thing); if the YAML engine encounters any tag other than ones that are automatically trusted by SafeYAML or that you've explicitly whitelisted, it will raise an exception. This may be a good choice if you expect to always be dealing with perfectly safe YAML and want your application to fail loudly upon encountering questionable data.
 
 All of the above options can be set at the global level via `SafeYAML::OPTIONS`. You can also set each one individually per call to `YAML.load`; an option explicitly passed to `load` will take precedence over an option specified globally.
 
@@ -135,7 +140,7 @@ And in case you were wondering: no, this feature will *not* allow would-be attac
 yaml = <<-EOYAML
 --- !ruby/object:OpenStruct 
 table: 
-  :backdoor: !ruby/hash:ExploitableClassBuilder 
+  :backdoor: !ruby/hash:ClassBuilder 
     "foo; end; puts %(I'm in yr system!); def bar": "baz"
 EOYAML
 ```
@@ -146,11 +151,14 @@ EOYAML
 Known Issues
 ------------
 
-If you add SafeYAML to your project and start seeing any errors about missing keys, or you notice mysterious strings that look like `":foo"` (i.e., start with a colon), it's likely you're seeing errors from symbols being saved in YAML format. If you are able to modify the offending code, you might want to consider changing your YAML content to use basic strings instead of symbols. If not, you may need to set the `:deserialize_symbols` option to `true`, either in calls to `YAML.load` or--as a last resort--globally, with `SafeYAML::OPTIONS[:deserialize_symbols]`.
+If you add SafeYAML to your project and start seeing any errors about missing keys, or you notice mysterious strings that look like `":foo"` (i.e., start with a colon), it's likely you're seeing errors from symbols being saved in YAML format. If you are able to modify the offending code, you might want to consider changing your YAML content to use plain vanilla strings instead of symbols. If not, you may need to set the `:deserialize_symbols` option to `true`, either in calls to `YAML.load` or--as a last resort--globally, with `SafeYAML::OPTIONS[:deserialize_symbols]`.
 
 Also be aware that some Ruby libraries, particularly those requiring inter-process communication, leverage YAML's object deserialization functionality and therefore may break or otherwise be impacted by SafeYAML. The following list includes known instances of SafeYAML's interaction with other Ruby gems:
 
-- [**ActiveRecord**](https://github.com/rails/rails/tree/master/activerecord): uses YAML to control serialization of model objects using the `serialize` keyword. If you find that accessing serialized properties on your ActiveRecord models is causing errors, chances are you may need to (a) set the `:deserialize_symbols` option to `true`, (b) whitelist some of the types in your serialized data via `SafeYAML.whitelist!` or the `:whitelisted_tags` option, or (c) both.
+- [**ActiveRecord**](https://github.com/rails/rails/tree/master/activerecord): uses YAML to control serialization of model objects using the `serialize` class method. If you find that accessing serialized properties on your ActiveRecord models is causing errors, chances are you may need to:
+  1. set the `:deserialize_symbols` option to `true`,
+  2. whitelist some of the types in your serialized data via `SafeYAML.whitelist!` or the `:whitelisted_tags` option, or
+  3. both
 - [**Guard**](https://github.com/guard/guard): Uses YAML as a serialization format for notifications. The data serialized uses symbolic keys, so setting `SafeYAML::OPTIONS[:deserialize_symbols] = true` is necessary to allow Guard to work.
 - [**sidekiq**](https://github.com/mperham/sidekiq): Uses a YAML configiuration file with symbolic keys, so setting `SafeYAML::OPTIONS[:deserialize_symbols] = true` should allow it to work.
 
@@ -159,7 +167,9 @@ The above list will grow over time, as more issues are discovered.
 Caveat
 ------
 
-This gem is quite young, and so the API may (read: *will*) change in future versions. The goal of the gem is to make it as easy as possible to protect existing applications from object deserialization exploits. Any and all feedback is more than welcome.
+My intention is to eventually adopt [semantic versioning](http://semver.org/) with this gem, if it ever gets to version 1.0 (i.e., doesn't become obsolete by then). Since it isn't there yet, that means that API may well change from one version to the next. Please keep that in mind if you are using it in your application.
+
+To be clear: my *goal* is for SafeYAML to make it as easy as possible to protect existing applications from object deserialization exploits. Any and all feedback is more than welcome!
 
 Requirements
 ------------
