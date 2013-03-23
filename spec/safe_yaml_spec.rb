@@ -78,18 +78,27 @@ describe YAML do
 
     context "for YAML engine #{SafeYAML::YAML_ENGINE}" do
       if SafeYAML::YAML_ENGINE == "psych"
-        let(:arguments) {
-          if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
-            ["foo: bar", nil]
-          else
-            ["foo: bar"]
-          end
-        }
+        let(:options) { nil }
+        let(:arguments) { ["foo: bar", nil, options] }
 
-        it "uses Psych internally to parse YAML" do
-          Psych.should_receive(:parse).with(*arguments)
-          # This won't work now; we just want to ensure Psych::Parser#parse was in fact called.
-          YAML.safe_load(*arguments) rescue nil
+        context "when no tags are whitelisted" do
+          it "constructs a SafeYAML::PsychHandler to resolve nodes as they're parsed, for optimal performance" do
+            Psych::Parser.should_receive(:new).with an_instance_of(SafeYAML::PsychHandler)
+            # This won't work now; we just want to ensure Psych::Parser#parse was in fact called.
+            YAML.safe_load(*arguments) rescue nil
+          end
+        end
+
+        context "when whitelisted tags are specified" do
+          let(:options) {
+            { :whitelisted_tags => ["foo"] }
+          }
+
+          it "instead uses Psych to construct a full tree before examining the nodes" do
+            Psych.should_receive(:parse)
+            # This won't work now; we just want to ensure Psych::Parser#parse was in fact called.
+            YAML.safe_load(*arguments) rescue nil
+          end
         end
       end
 

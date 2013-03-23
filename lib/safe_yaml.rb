@@ -146,15 +146,27 @@ module YAML
   end
 
   if SafeYAML::YAML_ENGINE == "psych"
-    require "safe_yaml/safe_to_ruby_visitor"
+    require "safe_yaml/psych_handler"
     require "safe_yaml/psych_resolver"
+    require "safe_yaml/safe_to_ruby_visitor"
 
     def self.safe_load(yaml, filename=nil, options={})
-      safe_resolver = SafeYAML::PsychResolver.new(options)
-      tree = SafeYAML::MULTI_ARGUMENT_YAML_LOAD ?
-        Psych.parse(yaml, filename) :
-        Psych.parse(yaml)
-      return safe_resolver.resolve_node(tree)
+      # If the user hasn't whitelisted any tags, we can go with this implementation which is
+      # significantly faster.
+      if (options && options[:whitelisted_tags] || SafeYAML::OPTIONS[:whitelisted_tags]).empty?
+        safe_handler = SafeYAML::PsychHandler.new(options)
+        arguments_for_parse = [yaml]
+        arguments_for_parse << filename if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
+        Psych::Parser.new(safe_handler).parse(*arguments_for_parse)
+        return safe_handler.result || false
+
+      else
+        safe_resolver = SafeYAML::PsychResolver.new(options)
+        tree = SafeYAML::MULTI_ARGUMENT_YAML_LOAD ?
+          Psych.parse(yaml, filename) :
+          Psych.parse(yaml)
+        return safe_resolver.resolve_node(tree)
+      end
     end
 
     def self.safe_load_file(filename, options={})
@@ -176,7 +188,7 @@ module YAML
     require "safe_yaml/syck_node_monkeypatch"
 
     def self.safe_load(yaml, options={})
-      resolver = SafeYAML::SyckResolver.new(options)
+      resolver = SafeYAML::SyckResolver.new(SafeYAML::OPTIONS.merge(options || {}))
       tree = YAML.parse(yaml)
       return resolver.resolve_node(tree)
     end
