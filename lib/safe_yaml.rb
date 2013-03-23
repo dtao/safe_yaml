@@ -208,36 +208,6 @@ module YAML
     alias_method :load, :load_with_options
     alias_method :load_file, :load_file_with_options
 
-    def enable_symbol_parsing?
-      warn_of_deprecated_method("set the SafeYAML::OPTIONS[:deserialize_symbols] option instead")
-      SafeYAML::OPTIONS[:deserialize_symbols]
-    end
-
-    def enable_symbol_parsing!
-      warn_of_deprecated_method("set the SafeYAML::OPTIONS[:deserialize_symbols] option instead")
-      SafeYAML::OPTIONS[:deserialize_symbols] = true
-    end
-
-    def disable_symbol_parsing!
-      warn_of_deprecated_method("set the SafeYAML::OPTIONS[:deserialize_symbols] option instead")
-      SafeYAML::OPTIONS[:deserialize_symbols] = false
-    end
-
-    def enable_arbitrary_object_deserialization?
-      warn_of_deprecated_method("set the SafeYAML::OPTIONS[:default_mode] to either :safe or :unsafe")
-      SafeYAML::OPTIONS[:default_mode] == :unsafe
-    end
-
-    def enable_arbitrary_object_deserialization!
-      warn_of_deprecated_method("set the SafeYAML::OPTIONS[:default_mode] to either :safe or :unsafe")
-      SafeYAML::OPTIONS[:default_mode] = :unsafe
-    end
-
-    def disable_arbitrary_object_deserialization!
-      warn_of_deprecated_method("set the SafeYAML::OPTIONS[:default_mode] to either :safe or :unsafe")
-      SafeYAML::OPTIONS[:default_mode] = :safe
-    end
-
     private
     def filename_and_options_from_arguments(arguments)
       if arguments.count == 1
@@ -269,11 +239,6 @@ module YAML
       options = base_options.dup
       options.delete(:safe)
       options
-    end
-
-    def warn_of_deprecated_method(message)
-      method = caller.first[/`([^']*)'$/, 1]
-      Kernel.warn("The method 'YAML.#{method}' is deprecated and will be removed in the next release of SafeYAML -- #{message}.")
     end
   end
 end
