@@ -5,7 +5,7 @@ SafeYAML
 
 The **SafeYAML** gem provides an alternative implementation of `YAML.load` suitable for accepting user input in Ruby applications. Unlike Ruby's built-in implementation of `YAML.load`, SafeYAML's version will not expose apps to arbitrary code execution exploits (such as [the ones discovered](http://www.reddit.com/r/netsec/comments/167c11/serious_vulnerability_in_ruby_on_rails_allowing/) [in Rails in early 2013](http://www.h-online.com/open/news/item/Rails-developers-close-another-extremely-critical-flaw-1793511.html)).
 
-**If you encounter any issues with SafeYAML, check out the 'Commin Issues' section below.** If you don't see anything that addresses the problem you're experiencing, by all means, [create an issue](https://github.com/dtao/safe_yaml/issues/new)!
+**If you encounter any issues with SafeYAML, check out the 'Common Issues' section below.** If you don't see anything that addresses the problem you're experiencing, by all means, [create an issue](https://github.com/dtao/safe_yaml/issues/new)!
 
 Installation
 ------------
@@ -25,12 +25,12 @@ Or install it yourself as:
 Configuration
 -------------
 
-Configuring SafeYAML should be quick. In most cases, you probably will only have to think about two things:
+Configuring SafeYAML should be quick. In most cases, you will probably only have to think about two things:
 
-1. Do you want the `YAML` module's *default* behavior to allow or disallow arbitrary object deserialization? Set the `SafeYAML::OPTIONS[:default_mode]` option to either `:safe` or `:unsafe` to control this. If you do neither, SafeYAML will default to `:safe` mode but will issue a warning the first time you call `YAML.load`.
-2. Do you want to allow symbol deserialization by default or not? Set the `SafeYAML::OPTIONS[:deserialize_symbols]` option to `true` or `false` to control this. The default is `false`, which means that SafeYAML will deserialize symbols in YAML documents as strings.
+1. What do you want the `YAML` module's *default* behavior to be? Set the `SafeYAML::OPTIONS[:default_mode]` option to either `:safe` or `:unsafe` to control this. If you do neither, SafeYAML will default to `:safe` mode but will issue a warning the first time you call `YAML.load`.
+2. Do you want to allow symbols by default? Set the `SafeYAML::OPTIONS[:deserialize_symbols]` option to `true` or `false` to control this. The default is `false`, which means that SafeYAML will deserialize symbols in YAML documents as strings.
 
-For more information on these and other options, see the "Usage" section below.
+For more information on these and other options, see the "Usage" section down below.
 
 Explanation
 -----------
