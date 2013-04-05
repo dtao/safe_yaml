@@ -11,6 +11,7 @@ require "safe_yaml/transform/to_symbol"
 require "safe_yaml/transform"
 require "safe_yaml/resolver"
 require "safe_yaml/deep"
+require "safe_yaml/syck_hack" if defined?(JRUBY_VERSION)
 
 module SafeYAML
   MULTI_ARGUMENT_YAML_LOAD = YAML.method(:load).arity != 1
