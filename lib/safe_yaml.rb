@@ -1,4 +1,11 @@
 require "yaml"
+
+# This needs to be defined up front in case any internal classes need to base
+# their behavior off of this.
+module SafeYAML
+  YAML_ENGINE = defined?(YAML::ENGINE) ? YAML::ENGINE.yamler : "syck"
+end
+
 require "safe_yaml/parse/hexadecimal"
 require "safe_yaml/parse/sexagesimal"
 require "safe_yaml/parse/date"
@@ -16,7 +23,6 @@ require "safe_yaml/syck_hack" if defined?(JRUBY_VERSION)
 
 module SafeYAML
   MULTI_ARGUMENT_YAML_LOAD = YAML.method(:load).arity != 1
-  YAML_ENGINE = defined?(YAML::ENGINE) ? YAML::ENGINE.yamler : "syck"
 
   DEFAULT_OPTIONS = Deep.freeze({
     :default_mode         => nil,

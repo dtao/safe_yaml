@@ -9,6 +9,12 @@ module ResolverSpecs
         @result = resolver.resolve_node(tree)
       end
 
+      # Isn't this how I should've been doing it all along?
+      def parse_and_test(yaml)
+        parse(yaml)
+        @result.should == YAML.unsafe_load(yaml)
+      end
+
       context "by default" do
         it "translates maps to hashes" do
           parse <<-YAML
@@ -68,8 +74,18 @@ module ResolverSpecs
           result.should == [true, true, false, false]
         end
 
-        it "only allows lowercase, title-case, or fully-capitalized variations of 'true' and 'false'" do
+        it "translates valid nulls to nil" do
           parse <<-YAML
+            - 
+            - ~
+            - null
+          YAML
+
+          result.should == [nil] * 3
+        end
+
+        it "matches the behavior of the underlying YAML engine w/ respect to capitalization of boolean values" do
+          parse_and_test <<-YAML
             - true
             - True
             - TRUE
@@ -81,28 +97,20 @@ module ResolverSpecs
             - FALse
           YAML
 
-          result.should == [true, true, true, "tRue", "TRue", false, false, "fAlse", "FALse"]
+          # using Syck: [true, true, true, "tRue", "TRue", false, false, "fAlse", "FALse"]
+          # using Psych: all booleans
         end
 
-        it "translates valid nulls to nil" do
-          parse <<-YAML
-            - 
-            - ~
-            - null
-          YAML
-
-          result.should == [nil] * 3
-        end
-
-        it "only allows lowercase, title-case, or fully-capitalized variations of 'null'" do
-          parse <<-YAML
+        it "matches the behavior of the underlying YAML engine w/ respect to capitalization of nil values" do
+          parse_and_test <<-YAML
             - Null
             - NULL
             - nUll
             - NUll
           YAML
 
-          result.should == [nil, nil, "nUll", "NUll"]
+          # using Syck: [nil, nil, "nUll", "NUll"]
+          # using Psych: all nils
         end
 
         it "translates quoted empty strings to strings (not nil)" do
