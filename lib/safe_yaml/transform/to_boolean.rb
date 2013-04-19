@@ -1,18 +1,20 @@
 module SafeYAML
   class Transform
     class ToBoolean
-      PREDEFINED_VALUES = {
+      include TransformationMap
+
+      set_predefined_values({
         "yes"   => true,
         "on"    => true,
         "true"  => true,
         "no"    => false,
         "off"   => false,
         "false" => false
-      }.freeze
+      })
 
       def transform?(value)
-        key = value.downcase
-        return PREDEFINED_VALUES.include?(key), PREDEFINED_VALUES[key]
+        return false if value.length > 5
+        return PREDEFINED_VALUES.include?(value), PREDEFINED_VALUES[value]
       end
     end
   end

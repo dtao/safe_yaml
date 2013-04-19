@@ -1,15 +1,17 @@
 module SafeYAML
   class Transform
     class ToNil
-      PREDEFINED_VALUES = {
+      include TransformationMap
+
+      set_predefined_values({
         ""      => nil,
         "~"     => nil,
         "null"  => nil,
-      }.freeze
+      })
 
       def transform?(value)
-        key = value.downcase
-        return PREDEFINED_VALUES.include?(key), PREDEFINED_VALUES[key]
+        return false if value.length > 4
+        return PREDEFINED_VALUES.include?(value), PREDEFINED_VALUES[value]
       end
     end
   end

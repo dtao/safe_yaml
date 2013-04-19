@@ -68,6 +68,22 @@ module ResolverSpecs
           result.should == [true, true, false, false]
         end
 
+        it "only allows lowercase, title-case, or fully-capitalized variations of 'true' and 'false'" do
+          parse <<-YAML
+            - true
+            - True
+            - TRUE
+            - tRue
+            - TRue
+            - False
+            - FALSE
+            - fAlse
+            - FALse
+          YAML
+
+          result.should == [true, true, true, "tRue", "TRue", false, false, "fAlse", "FALse"]
+        end
+
         it "translates valid nulls to nil" do
           parse <<-YAML
             - 
@@ -76,6 +92,17 @@ module ResolverSpecs
           YAML
 
           result.should == [nil] * 3
+        end
+
+        it "only allows lowercase, title-case, or fully-capitalized variations of 'null'" do
+          parse <<-YAML
+            - Null
+            - NULL
+            - nUll
+            - NUll
+          YAML
+
+          result.should == [nil, nil, "nUll", "NUll"]
         end
 
         it "translates quoted empty strings to strings (not nil)" do
