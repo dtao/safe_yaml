@@ -384,6 +384,12 @@ describe YAML do
             "hash"    => {}
           }
         end
+
+        it "does not raise an exception on the non-specific '!' tag" do
+          result = nil
+          expect { result = YAML.safe_load "--- ! 'foo'" }.to_not raise_error
+          result.should == "foo"
+        end
       end
     end
 

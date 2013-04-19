@@ -2,6 +2,7 @@ require "yaml"
 require "safe_yaml/parse/hexadecimal"
 require "safe_yaml/parse/sexagesimal"
 require "safe_yaml/parse/date"
+require "safe_yaml/transform/transformation_map"
 require "safe_yaml/transform/to_boolean"
 require "safe_yaml/transform/to_date"
 require "safe_yaml/transform/to_float"
@@ -34,7 +35,7 @@ module SafeYAML
   end
 
   def tag_safety_check!(tag, options)
-    return if tag.nil?
+    return if tag.nil? || tag == "!"
     if options[:raise_on_unknown_tag] && !options[:whitelisted_tags].include?(tag) && !tag_is_explicitly_trusted?(tag)
       raise "Unknown YAML tag '#{tag}'"
     end
