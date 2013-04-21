@@ -6,6 +6,7 @@ module SafeYAML
   YAML_ENGINE = defined?(YAML::ENGINE) ? YAML::ENGINE.yamler : "syck"
 end
 
+require "safe_yaml/deep"
 require "safe_yaml/parse/hexadecimal"
 require "safe_yaml/parse/sexagesimal"
 require "safe_yaml/parse/date"
@@ -18,7 +19,6 @@ require "safe_yaml/transform/to_nil"
 require "safe_yaml/transform/to_symbol"
 require "safe_yaml/transform"
 require "safe_yaml/resolver"
-require "safe_yaml/deep"
 require "safe_yaml/syck_hack" if defined?(JRUBY_VERSION)
 
 module SafeYAML
