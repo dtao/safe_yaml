@@ -1,2 +1,4 @@
+.perft-config
 Gemfile.lock
 dist/
+spec/perf_test.yml
