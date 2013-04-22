@@ -13,6 +13,10 @@ describe SafeYAML::Transform::ToFloat do
     subject.transform?("20.00\nNOT A FLOAT").should be_false
   end
 
+  it "allows leading spaces" do
+    subject.transform?("  3.14").should == [true, 3.14]
+  end
+
   it "correctly parses all formats in the YAML spec" do
     # canonical
     subject.transform?("6.8523015e+5").should == [true, 685230.15]

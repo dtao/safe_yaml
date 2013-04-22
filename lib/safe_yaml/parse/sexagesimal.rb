@@ -1,8 +1,8 @@
 module SafeYAML
   class Parse
     class Sexagesimal
-      INTEGER_MATCHER = /\A[-+]?[0-9][0-9_]*(:[0-5]?[0-9])+\Z/.freeze
-      FLOAT_MATCHER = /\A[-+]?[0-9][0-9_]*(:[0-5]?[0-9])+\.[0-9_]*\Z/.freeze
+      INTEGER_MATCHER = /\A\s*[-+]?[0-9][0-9_]*(:[0-5]?[0-9])+\s*\Z/.freeze
+      FLOAT_MATCHER = /\A\s*[-+]?[0-9][0-9_]*(:[0-5]?[0-9])+\.[0-9_]*\s*\Z/.freeze
 
       def self.value(value)
         before_decimal, after_decimal = value.split(".")

@@ -1,7 +1,7 @@
 module SafeYAML
   class Parse
     class Hexadecimal
-      MATCHER = /\A[-+]?0x[0-9a-fA-F_]+\Z/.freeze
+      MATCHER = /\A\s*[-+]?0x[0-9a-fA-F_]+\s*\Z/.freeze
 
       def self.value(value)
         # This is safe to do since we already validated the value.

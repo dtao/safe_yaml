@@ -2,12 +2,12 @@ module SafeYAML
   class Parse
     class Date
       # This one's easy enough :)
-      DATE_MATCHER = /\A(\d{4})-(\d{2})-(\d{2})\Z/.freeze
+      DATE_MATCHER = /\A\s*(\d{4})-(\d{2})-(\d{2})\s*\Z/.freeze
 
       # This unbelievable little gem is taken basically straight from the YAML spec, but made
       # slightly more readable (to my poor eyes at least) to me:
       # http://yaml.org/type/timestamp.html
-      TIME_MATCHER = /\A\d{4}-\d{1,2}-\d{1,2}(?:[Tt]|\s+)\d{1,2}:\d{2}:\d{2}(?:\.\d*)?\s*(?:Z|[-+]\d{1,2}(?::?\d{2})?)?\Z/.freeze
+      TIME_MATCHER = /\A\s*\d{4}-\d{1,2}-\d{1,2}(?:[Tt]|\s+)\d{1,2}:\d{2}:\d{2}(?:\.\d*)?\s*(?:Z|[-+]\d{1,2}(?::?\d{2})?)?\s*\Z/.freeze
 
       SECONDS_PER_DAY = 60 * 60 * 24
       MICROSECONDS_PER_SECOND = 1000000

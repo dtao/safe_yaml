@@ -16,7 +16,7 @@ module SafeYAML
     def self.to_guessed_type(value, quoted=false, options=nil)
       return value if quoted
 
-      if value.is_a?(String) && (value.empty? || TRANSFORMABLE_PREFIXES.include?(value[0]))
+      if value.is_a?(String) && (value.empty? || TRANSFORMABLE_PREFIXES.include?(first_non_empty_char(value)))
         TRANSFORMERS.each do |transformer|
           success, transformed_value = transformer.method(:transform?).arity == 1 ?
             transformer.transform?(value) :
@@ -38,6 +38,16 @@ module SafeYAML
       else
         self.to_guessed_type(value, quoted, options)
       end
+    end
+
+    private
+
+    def self.first_non_empty_char(string)
+      string.each_char do |char|
+        return char if char != " "
+      end
+
+      nil
     end
   end
 end

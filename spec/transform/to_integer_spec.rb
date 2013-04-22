@@ -13,6 +13,10 @@ describe SafeYAML::Transform::ToInteger do
     subject.transform?("10\nNOT AN INTEGER").should be_false
   end
 
+  it "allows leading spaces" do
+    subject.transform?("  10").should == [true, 10]
+  end
+
   it "correctly parses numbers in octal format" do
     subject.transform?("010").should == [true, 8]
   end
