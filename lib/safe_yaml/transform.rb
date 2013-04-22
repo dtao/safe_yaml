@@ -11,10 +11,12 @@ module SafeYAML
       Transform::ToDate.new
     ]
 
+    TRANSFORMABLE_PREFIXES = Set.new("-+0123456789.~YyNnTtFf:".chars)
+
     def self.to_guessed_type(value, quoted=false, options=nil)
       return value if quoted
 
-      if value.is_a?(String)
+      if value.is_a?(String) && (value.empty? || TRANSFORMABLE_PREFIXES.include?(value[0]))
         TRANSFORMERS.each do |transformer|
           success, transformed_value = transformer.method(:transform?).arity == 1 ?
             transformer.transform?(value) :
