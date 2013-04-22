@@ -40,3 +40,8 @@ matrix:
       env: YAMLER=syck
     - rvm: jruby-18mode
       env: YAMLER=syck
+
+branches:
+  only:
+    - master
+
