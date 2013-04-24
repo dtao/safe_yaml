@@ -6,6 +6,7 @@ module SafeYAML
   YAML_ENGINE = defined?(YAML::ENGINE) ? YAML::ENGINE.yamler : "syck"
 end
 
+require "set"
 require "safe_yaml/deep"
 require "safe_yaml/parse/hexadecimal"
 require "safe_yaml/parse/sexagesimal"
