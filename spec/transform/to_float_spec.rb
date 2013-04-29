@@ -17,6 +17,10 @@ describe SafeYAML::Transform::ToFloat do
     subject.transform?("  3.14").should == [true, 3.14]
   end
 
+  it "allows commas in numbers" do
+    subject.transform?("1,000.25").should == [true, 1000.25]
+  end
+
   it "correctly parses all formats in the YAML spec" do
     # canonical
     subject.transform?("6.8523015e+5").should == [true, 685230.15]

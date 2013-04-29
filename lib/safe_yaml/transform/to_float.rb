@@ -16,10 +16,10 @@ module SafeYAML
         ".NAN"  => NaN,
       }.freeze
 
-      MATCHER = /\A\s*[-+]?(?:\d[\d_]*)?\.[\d_]+(?:[eE][-+][\d]+)?\s*\Z/.freeze
+      MATCHER = /\A\s*[-+]?(?:\d[\d_,]*)?\.[\d_]+(?:[eE][-+][\d]+)?\s*\Z/.freeze
 
       def transform?(value)
-        return true, Float(value) if MATCHER.match(value)
+        return true, Float(value.gsub(",", "")) if MATCHER.match(value)
         try_edge_cases?(value)
       end
 
