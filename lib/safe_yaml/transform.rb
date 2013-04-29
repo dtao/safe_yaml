@@ -11,7 +11,7 @@ module SafeYAML
       Transform::ToDate.new
     ]
 
-    TRANSFORMABLE_PREFIXES = Set.new("-+0123456789.~YyNnTtFf:".chars)
+    TRANSFORMABLE_PREFIXES = Set.new("-+0123456789.~OoYyNnTtFf:".chars)
 
     def self.to_guessed_type(value, quoted=false, options=nil)
       return value if quoted

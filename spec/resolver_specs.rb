@@ -67,11 +67,13 @@ module ResolverSpecs
           parse <<-YAML
             - yes
             - true
+            - on
             - no
             - false
+            - off
           YAML
 
-          result.should == [true, true, false, false]
+          result.should == [true, true, true, false, false, false]
         end
 
         it "translates valid nulls to nil" do
