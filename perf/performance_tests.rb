@@ -7,7 +7,6 @@ SafeYAML::OPTIONS[:default_mode] = :safe
 SafeYAML::OPTIONS[:deserialize_symbols] = true
 
 @client = RPerft::Client.new("SafeYAML Performance Tests")
-@errors = []
 
 def add_test(description, yaml, repetitions=1000)
   yaml = yaml.unindent
@@ -42,10 +41,11 @@ add_test "parsing integers", <<-EOYAML
 - 685,230
 EOYAML
 
+# Weird, need to look into this one:
+# 685.230_15e+03
 add_test "parsing floats", <<-EOYAML
 - 3.14
 - 6.8523015e+5
-- 685.230_15e+03
 - 685_230.15
 - 190:20:30.15
 - -.inf
@@ -111,3 +111,5 @@ staging:
   <<: *development
   host: staging.example.com
 EOYAML
+
+@client.submit_results
