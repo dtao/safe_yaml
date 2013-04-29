@@ -6,6 +6,6 @@ RSpec::Core::RakeTask.new(:spec) do |t|
 end
 
 desc "Run perf tests"
-RSpec::Core::RakeTask.new(:perf) do |t|
-  t.rspec_opts = %w(--color --require=rperft --format=RPerft::RSpecFormatter --tag=@perf)
+task :perf do
+  require File.join(File.dirname(__FILE__), "perf", "performance_tests.rb")
 end
