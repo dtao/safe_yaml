@@ -17,6 +17,10 @@ describe SafeYAML::Transform::ToInteger do
     subject.transform?("  10").should == [true, 10]
   end
 
+  it "allows commas in the number" do
+    subject.transform?("1,000").should == [true, 1000]
+  end
+
   it "correctly parses numbers in octal format" do
     subject.transform?("010").should == [true, 8]
   end

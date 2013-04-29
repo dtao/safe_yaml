@@ -1,12 +1,12 @@
 module SafeYAML
   class Transform
     class ToInteger
-      MATCHERS = [
-        /\A\s*[-+]?[1-9][0-9_]*\s*\Z/.freeze, # decimal
-        /\A\s*0[0-7]+\s*\Z/.freeze,           # octal
-        /\A\s*0x[0-9a-f]+\s*\Z/i.freeze,      # hexadecimal
-        /\A\s*0b[01_]+\s*\Z/.freeze           # binary
-      ].freeze
+      MATCHERS = Deep.freeze([
+        /\A\s*[-+]?[1-9][0-9_]*\s*\Z/, # decimal
+        /\A\s*0[0-7]+\s*\Z/,           # octal
+        /\A\s*0x[0-9a-f]+\s*\Z/i,      # hexadecimal
+        /\A\s*0b[01_]+\s*\Z/           # binary
+      ])
 
       def transform?(value)
         MATCHERS.each do |matcher|
