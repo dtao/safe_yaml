@@ -390,6 +390,24 @@ describe YAML do
           expect { result = YAML.safe_load "--- ! 'foo'" }.to_not raise_error
           result.should == "foo"
         end
+
+        context "with whitelisted custom class" do
+          class SomeClass
+            attr_accessor :foo
+          end
+          let(:instance) { SomeClass.new }
+
+          before do
+            SafeYAML::whitelist!(SomeClass)
+            instance.foo = 'with trailing whitespace: '
+          end
+
+          it "does not raise an exception on the non-specific '!' tag" do
+            result = nil
+            expect { result = YAML.safe_load(instance.to_yaml) }.to_not raise_error
+            result.foo.should == 'with trailing whitespace: '
+          end
+        end
       end
     end
 
