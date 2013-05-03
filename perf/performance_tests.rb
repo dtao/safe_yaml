@@ -15,13 +15,13 @@ def add_test(description, yaml, repetitions=1000)
 
   safe_result.should == expected_result
 
-  @client.run_test(description, :tags => ["unsafe"]) do
+  @client.run_test(description, :tags => ["unsafe", "ruby-#{RUBY_VERSION}"]) do
     repetitions.times do
       YAML.unsafe_load(yaml)
     end
   end
 
-  @client.run_test(description, :tags => ["safe"]) do
+  @client.run_test(description, :tags => ["safe", "ruby-#{RUBY_VERSION}"]) do
     repetitions.times do
       YAML.safe_load(yaml)
     end
