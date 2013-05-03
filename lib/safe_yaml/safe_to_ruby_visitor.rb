@@ -7,8 +7,8 @@ module SafeYAML
 
     def accept(node)
       if node.tag
-        return super if @resolver.tag_is_whitelisted?(node.tag) || node.tag == "!"
-        raise "Unknown YAML tag '#{node.tag}'" if @resolver.options[:raise_on_unknown_tag]
+        SafeYAML.tag_safety_check!(node.tag, @resolver.options)
+        return super
       end
 
       @resolver.resolve_node(node)
