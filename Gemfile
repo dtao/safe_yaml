@@ -7,7 +7,7 @@ group :development do
   gem "heredoc_unindent"
   gem "rake"
   gem "randy"
-  gem "rperft", :git => "git://github.com/dtao/RPerft.git"
+  gem "rperft", ">= 0.0.2"
   gem "rspec"
   gem "travis-lint"
 end
