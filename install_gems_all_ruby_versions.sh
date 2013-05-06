@@ -13,3 +13,6 @@ bundle install
 
 rvm use 2.0.0@safe_yaml
 bundle install
+
+rvm use jruby@safe_yaml
+bundle install

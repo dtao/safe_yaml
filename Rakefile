@@ -8,7 +8,7 @@ require "safe_yaml"
 
 desc "Run specs"
 RSpec::Core::RakeTask.new(:spec) do |t|
-  puts "Running specs in Ruby #{RUBY_VERSION} with '#{SafeYAML::YAML_ENGINE}' YAML engine."
+  puts "Running specs in Ruby #{RUBY_VERSION} on #{RUBY_PLATFORM} with '#{SafeYAML::YAML_ENGINE}' YAML engine."
   t.rspec_opts = %w(--color)
 end
 

@@ -19,3 +19,6 @@ YAMLER=psych bundle exec rake perf[true]
 
 rvm use 2.0.0@safe_yaml
 YAMLER=psych bundle exec rake perf[true]
+
+rvm use jruby@safe_yaml
+bundle exec rake perf[true]

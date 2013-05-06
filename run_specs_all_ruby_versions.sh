@@ -19,3 +19,6 @@ YAMLER=psych rake spec
 
 rvm use 2.0.0@safe_yaml
 YAMLER=psych rake spec
+
+rvm use jruby@safe_yaml
+rake spec
