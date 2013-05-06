@@ -15,6 +15,6 @@ end
 desc "Run perf tests"
 task :perf, :append_perf_test_results do |t, args|
   ENV["APPEND_PERF_TEST_RESULTS"] = args[:append_perf_test_results]
-  puts "Running performance tests in Ruby #{RUBY_VERSION} with '#{SafeYAML::YAML_ENGINE}' YAML engine."
+  puts "Running performance tests in Ruby #{RUBY_VERSION} on #{RUBY_PLATFORM} with '#{SafeYAML::YAML_ENGINE}' YAML engine."
   require File.join(File.dirname(__FILE__), "perf", "performance_tests.rb")
 end
