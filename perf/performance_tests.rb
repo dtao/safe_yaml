@@ -108,4 +108,4 @@ staging:
   host: staging.example.com
 EOYAML
 
-@client.submit_results(:append => ENV["APPEND_PERF_TEST_RESULTS"])
+@client.submit_results(:append => ENV["APPEND_PERF_TEST_RESULTS"], :version => SafeYAML::VERSION)
