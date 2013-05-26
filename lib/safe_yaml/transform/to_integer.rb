@@ -2,10 +2,10 @@ module SafeYAML
   class Transform
     class ToInteger
       MATCHERS = Deep.freeze([
-        /\A[-+]?[1-9][0-9_,]*\Z/, # decimal
-        /\A0[0-7]+\Z/,            # octal
-        /\A0x[0-9a-f]+\Z/i,       # hexadecimal
-        /\A0b[01_]+\Z/            # binary
+        /\A[-+]?(0|([1-9][0-9_,]*))\Z/, # decimal
+        /\A0[0-7]+\Z/,                  # octal
+        /\A0x[0-9a-f]+\Z/i,             # hexadecimal
+        /\A0b[01_]+\Z/                  # binary
       ])
 
       def transform?(value)
