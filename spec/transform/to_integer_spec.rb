@@ -29,6 +29,10 @@ describe SafeYAML::Transform::ToInteger do
     subject.transform?("09").should be_false
   end
 
+  it "correctly parses 0 in decimal" do
+    subject.transform?("0").should == [true, 0]
+  end
+
   it "defaults to a string for a number that resembles hexadecimal format but is not" do
     subject.transform?("0x1G").should be_false
   end
@@ -42,7 +46,7 @@ describe SafeYAML::Transform::ToInteger do
 
     # octal
     subject.transform?("02472256").should == [true, 685230]
-    
+
     # hexadecimal:
     subject.transform?("0x_0A_74_AE").should == [true, 685230]
 
