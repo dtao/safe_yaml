@@ -1,12 +1,16 @@
 module SafeYAML
   class Transform
     class ToSymbol
-      MATCHER = /\A:"?(\w+)"?\Z/.freeze
+      def transform?(value, options=SafeYAML::OPTIONS)
+        if options[:deserialize_symbols] && value =~ /\A:./
+          if value =~ /\A:(["'])(.*)\1\Z/
+            return true, $2.sub(/^:/, "").to_sym
+          else
+            return true, value.sub(/^:/, "").to_sym
+          end
+        end
 
-      def transform?(value, options=nil)
-        options ||= SafeYAML::OPTIONS
-        return false unless options[:deserialize_symbols] && MATCHER.match(value)
-        return true, $1.to_sym
+        return false
       end
     end
   end

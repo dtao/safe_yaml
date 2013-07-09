@@ -27,6 +27,14 @@ describe SafeYAML::Transform::ToSymbol do
     with_symbol_deserialization { subject.transform?(':"foo"')[0].should be_true }
   end
 
+  it "returns true when the value matches a valid String+Symbol with 's" do
+    with_symbol_deserialization { subject.transform?(":'foo'")[0].should be_true }
+  end
+
+  it "returns true when the value has special characters and is wrapped in a String" do
+    with_symbol_deserialization { subject.transform?(':"foo.bar"')[0].should be_true }
+  end
+
   it "returns false when symbol deserialization is disabled" do
     without_symbol_deserialization { subject.transform?(":foo").should be_false }
   end
@@ -38,12 +46,6 @@ describe SafeYAML::Transform::ToSymbol do
   it "returns false when the symbol does not begin the line" do
     with_symbol_deserialization do
       subject.transform?("NOT A SYMBOL\n:foo").should be_false
-    end
-  end
-
-  it "returns false when the symbol does not end the line" do
-    with_symbol_deserialization do
-      subject.transform?(":foo\nNOT A SYMBOL").should be_false
     end
   end
 end
