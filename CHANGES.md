@@ -1,3 +1,13 @@
+0.9.4
+-----
+
+- corrected handling of symbols
+
+0.9.3
+-----
+
+- fixed permissions :(
+
 0.9.2
 -----
 
