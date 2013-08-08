@@ -3,8 +3,8 @@
 
 - fixed permissions AGAIN
 
-0.9.4 (yanked)
---------------
+0.9.4
+-----
 
 - corrected handling of symbols
 
@@ -13,8 +13,8 @@
 
 - fixed permissions :(
 
-0.9.2 (yanked)
---------------
+0.9.2
+-----
 
 - fixed error w/ parsing "!" when whitelisting tags
 - fixed parsing of the number 0 (d'oh!)
