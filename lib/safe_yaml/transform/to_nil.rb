@@ -6,7 +6,7 @@ module SafeYAML
       set_predefined_values({
         ""      => nil,
         "~"     => nil,
-        "null"  => nil,
+        "null"  => nil
       })
 
       def transform?(value)

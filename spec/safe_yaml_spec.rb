@@ -115,6 +115,8 @@ describe YAML do
       result = YAML.safe_load <<-YAML.unindent
         foo:
           number: 1
+          boolean: true
+          nil: ~
           string: Hello, there!
           symbol: :blah
           sequence:
@@ -124,9 +126,11 @@ describe YAML do
 
       result.should == {
         "foo" => {
-          "number" => 1,
-          "string" => "Hello, there!",
-          "symbol" => ":blah",
+          "number"   => 1,
+          "boolean"  => true,
+          "nil"      => nil,
+          "string"   => "Hello, there!",
+          "symbol"   => ":blah",
           "sequence" => ["hi", "bye"]
         }
       }
@@ -255,8 +259,18 @@ describe YAML do
     end
     
     it "returns false when parsing an empty document" do
-      result = YAML.safe_load ""
-      result.should == false
+      [
+        YAML.safe_load(""),
+        YAML.safe_load("     "),
+        YAML.safe_load("\n")
+      ].should == [false, false, false]
+    end
+
+    it "returns nil when parsing a single value representing nil" do
+      [
+        YAML.safe_load("~"),
+        YAML.safe_load("null")
+      ].should == [nil, nil]
     end
 
     context "with custom initializers defined" do
