@@ -1,3 +1,8 @@
+0.9.6
+-----
+
+- fixed handling of files with trailing content (after closing `---`)
+
 0.9.5
 -----
 
