@@ -44,6 +44,16 @@ module SafeYAML
           @current_key = nil
         end
 
+      elsif @current_structure.nil?
+        # It appears that a YAML document may containing trailing text that should not be considered
+        # part of the serialized data. See issue 48:
+        #
+        # https://github.com/dtao/safe_yaml/issues/48
+        #
+        # I need to investigate this a bit further; but for now just explicitly ignoring nil should
+        # fix the issue (since in theory the only scenario where this would happen is after the
+        # serialized structure has "closed").
+
       else
         raise "Don't know how to add to a #{@current_structure.class}!"
       end

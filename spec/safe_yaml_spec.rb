@@ -647,6 +647,13 @@ describe YAML do
         YAML.load_file(filename, :safe => true)
       end
     end
+
+    it "handles files starting with --- (see issue #48)" do
+      YAML.load_file("spec/issue48.yml", :safe => true).should == {
+        "title" => "Blah",
+        "key"   => "value"
+      }
+    end
   end
 
   describe "whitelist!" do
