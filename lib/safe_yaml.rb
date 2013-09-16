@@ -160,7 +160,7 @@ module YAML
     require "safe_yaml/safe_to_ruby_visitor"
 
     def self.safe_load(yaml, filename=nil, options={})
-      return false if yaml =~ /^\s*$/
+      return false if yaml =~ /\A\s*\Z/
 
       # If the user hasn't whitelisted any tags, we can go with this implementation which is
       # significantly faster.

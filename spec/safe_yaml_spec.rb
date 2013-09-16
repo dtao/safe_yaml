@@ -654,6 +654,14 @@ describe YAML do
         "key"   => "value"
       }
     end
+
+    it "handles content starting with --- (see issue #48)" do
+      yaml = File.read("spec/issue48.yml")
+      YAML.load(yaml, :safe => true).should == {
+        "title" => "Blah",
+        "key"   => "value"
+      }
+    end
   end
 
   describe "whitelist!" do
