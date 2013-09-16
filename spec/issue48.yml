@@ -3,4 +3,11 @@ title: Blah
 key: value
 ---
 
-Hey, here are some words!
+Let's say this is some document with YAML frontmatter. I'm going to inject a bunch of YAML-looking stuff below and it should all just get ignored.
+
+foo: bar
+
+- foo
+- bar
+42
+~
