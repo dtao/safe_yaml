@@ -3,8 +3,9 @@ require "base64"
 
 module SafeYAML
   class PsychHandler < Psych::Handler
-    def initialize(options)
+    def initialize(options, &block)
       @options      = SafeYAML::OPTIONS.merge(options || {})
+      @block        = block
       @initializers = @options[:custom_initializers] || {}
       @anchors      = {}
       @stack        = []
@@ -64,15 +65,11 @@ module SafeYAML
     end
 
     def scalar(value, anchor, tag, plain, quoted, style)
-      return if @document_ended
       add_to_current_structure(value, anchor, quoted, tag)
     end
 
-    def start_document(version, tag_directives, implicit)
-    end
-
     def end_document(implicit)
-      @document_ended = true
+      @block.call(@result)
     end
 
     def start_mapping(anchor, tag, implicit, style)

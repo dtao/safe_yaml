@@ -165,11 +165,12 @@ module YAML
       # If the user hasn't whitelisted any tags, we can go with this implementation which is
       # significantly faster.
       if (options && options[:whitelisted_tags] || SafeYAML::OPTIONS[:whitelisted_tags]).empty?
-        safe_handler = SafeYAML::PsychHandler.new(options)
+        safe_handler = SafeYAML::PsychHandler.new(options) do |result|
+          return result
+        end
         arguments_for_parse = [yaml]
         arguments_for_parse << filename if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
         Psych::Parser.new(safe_handler).parse(*arguments_for_parse)
-        return safe_handler.result
 
       else
         safe_resolver = SafeYAML::PsychResolver.new(options)
