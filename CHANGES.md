@@ -1,3 +1,9 @@
+0.9.7
+-----
+
+- made handling of document frontmatter more robust
+- added more descriptive message to the warning for omitting the :safe option
+
 0.9.6
 -----
 
