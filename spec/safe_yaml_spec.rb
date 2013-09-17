@@ -257,7 +257,7 @@ describe YAML do
         "grandcustom" => { "foo" => "foo", "bar" => "custom_bar", "baz" => "custom_baz" }
       }
     end
-    
+
     it "returns false when parsing an empty document" do
       [
         YAML.safe_load(""),
@@ -506,6 +506,10 @@ describe YAML do
     it "does NOT allow exploits through objects defined in YAML w/ !ruby/object" do
       object = YAML.safe_load_file "spec/exploit.1.9.2.yaml"
       object.should_not be_a(ExploitableBackDoor)
+    end
+    
+    it "returns false when parsing an empty file" do
+      YAML.safe_load_file("spec/issue49.yml").should == false
     end
   end
 

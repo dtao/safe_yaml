@@ -11,10 +11,11 @@ module SafeYAML
       @stack        = []
       @current_key  = nil
       @result       = nil
+      @begun        = false
     end
 
     def result
-      @result
+      @begun ? @result : false
     end
 
     def add_to_current_structure(value, anchor=nil, quoted=nil, tag=nil)
@@ -22,7 +23,8 @@ module SafeYAML
 
       @anchors[anchor] = value if anchor
 
-      if @result.nil?
+      if !@begun
+        @begun = true
         @result = value
         @current_structure = @result
         return
