@@ -56,7 +56,7 @@ module SafeYAML
     end
 
     def streaming?
-      false
+      true
     end
 
     # event handlers
