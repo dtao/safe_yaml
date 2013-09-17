@@ -649,14 +649,14 @@ describe YAML do
     end
 
     it "handles files starting with --- (see issue #48)" do
-      YAML.load_file("spec/issue48.yml", :safe => true).should == {
+      YAML.load_file("spec/issue48.txt", :safe => true).should == {
         "title" => "Blah",
         "key"   => "value"
       }
     end
 
     it "handles content starting with --- (see issue #48)" do
-      yaml = File.read("spec/issue48.yml")
+      yaml = File.read("spec/issue48.txt")
       YAML.load(yaml, :safe => true).should == {
         "title" => "Blah",
         "key"   => "value"
