@@ -237,10 +237,17 @@ module YAML
     def safe_mode_from_options(method, options={})
       if options[:safe].nil?
         safe_mode = SafeYAML::OPTIONS[:default_mode] || :safe
+
         if SafeYAML::OPTIONS[:default_mode].nil? && !SafeYAML::OPTIONS[:suppress_warnings]
-          Kernel.warn "Called '#{method}' without the :safe option -- defaulting to #{safe_mode} mode."
+
+          Kernel.warn <<-EOWARNING.gsub(/^\s+/, '')
+            Called '#{method}' without the :safe option -- defaulting to #{safe_mode} mode.
+            You can avoid this warning in the future by setting the SafeYAML::OPTIONS[:default_mode] option (to :safe or :unsafe).
+          EOWARNING
+
           SafeYAML::OPTIONS[:suppress_warnings] = true
         end
+
         return safe_mode
       end
 
