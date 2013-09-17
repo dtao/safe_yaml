@@ -181,7 +181,15 @@ module YAML
     end
 
     def self.safe_load_file(filename, options={})
-      File.open(filename, 'r:bom|utf-8') { |f| self.safe_load(f, filename, options) }
+      if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
+        File.open(filename, 'r:bom|utf-8') { |f| self.safe_load(f, filename, options) }
+
+      else
+        # Ruby pukes on 1.9.2 if we try to open an empty file w/ 'r:bom|utf-8';
+        # so we'll not specify those flags here. This mirrors the behavior for
+        # unsafe_load_file so it's probably preferable anyway.
+        self.safe_load File.open(filename), nil, options
+      end
     end
 
     def self.unsafe_load_file(filename)
