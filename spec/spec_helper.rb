@@ -10,7 +10,12 @@ if ENV["YAMLER"] && defined?(YAML::ENGINE)
   puts "Running specs in Ruby #{RUBY_VERSION} with '#{YAML::ENGINE.yamler}' YAML engine."
 end
 
-require "safe_yaml"
+# Caching references to these methods before loading safe_yaml in order to test
+# that they aren't touched unless you actually require safe_yaml (see yaml_spec.rb).
+ORIGINAL_YAML_LOAD      = YAML.method(:load)
+ORIGINAL_YAML_LOAD_FILE = YAML.method(:load_file)
+
+require "safe_yaml/load"
 require "ostruct"
 require "hashie"
 require "heredoc_unindent"

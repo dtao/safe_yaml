@@ -4,6 +4,11 @@ module ResolverSpecs
       let(:resolver) { nil }
       let(:result) { @result }
 
+      before :each do
+        # See the comment in the first before :each block in safe_yaml_spec.rb.
+        require "safe_yaml"
+      end
+
       def parse(yaml)
         tree = YAML.parse(yaml.unindent)
         @result = resolver.resolve_node(tree)

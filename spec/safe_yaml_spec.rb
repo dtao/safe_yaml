@@ -1,7 +1,5 @@
 require File.join(File.dirname(__FILE__), "spec_helper")
 
-require "exploitable_back_door"
-
 describe YAML do
   # Essentially stolen from:
   # https://github.com/rails/rails/blob/3-2-stable/activesupport/lib/active_support/core_ext/kernel/reporting.rb#L10-25
@@ -21,6 +19,12 @@ describe YAML do
   end
 
   before :each do
+    # Need to require this here (as opposed to somewhere up higher in the file)
+    # to ensure that safe_yaml isn't loaded and therefore YAML isn't monkey-
+    # patched, for tests that require only safe_yaml/load.
+    require "safe_yaml"
+    require "exploitable_back_door"
+
     SafeYAML.restore_defaults!
   end
 

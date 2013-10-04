@@ -97,6 +97,15 @@ The most important option is the `:safe` option (default: `true`), which control
 
 All of the above options can be set at the global level via `SafeYAML::OPTIONS`. You can also set each one individually per call to `YAML.load`; an option explicitly passed to `load` will take precedence over an option specified globally.
 
+What if I don't *want* to patch `YAML`?
+---------------------------------------
+
+[Excellent question](https://github.com/dtao/safe_yaml/issues/47)! You can also get the methods `SafeYAML.load` and `SafeYAML.load_file` without touching the `YAML` module at all like this:
+
+    require "safe_yaml/load"
+
+This way, you can use `SafeYAML.load` to parse YAML that *you* don't trust, without affecting the rest of an application (if you're developing a library, for example).
+
 Supported Types
 ---------------
 
