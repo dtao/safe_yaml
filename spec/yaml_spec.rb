@@ -3,7 +3,7 @@
 require File.join(File.dirname(__FILE__), "spec_helper")
 
 describe YAML do
-  context "when you've only required safe_yaml/safe_load", :libraries => true do
+  context "when you've only required safe_yaml/load", :libraries => true do
     it "YAML.load doesn't get monkey patched" do
       YAML.method(:load).should == ORIGINAL_YAML_LOAD
     end
