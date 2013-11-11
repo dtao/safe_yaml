@@ -1,7 +1,7 @@
 module SafeYAML
   class SafeToRubyVisitor < Psych::Visitors::ToRuby
     def initialize(resolver)
-      super()
+      super
       @resolver = resolver
     end
 
