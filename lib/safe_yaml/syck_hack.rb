@@ -21,6 +21,8 @@ module YAML
   # JRuby's "Syck" is called "Yecht"
   elsif defined? YAML::Yecht
     Syck = YAML::Yecht
+  elsif !defined? YAML::Syck
+    module Syck; end
   end
 end
 
