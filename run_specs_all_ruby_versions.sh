@@ -21,7 +21,7 @@ rvm use 2.0.0@safe_yaml
 YAMLER=psych rake spec
 
 rvm use jruby@safe_yaml
-JRUBY_OPTS=--1.9 rake spec
+JRUBY_OPTS=--1.8 rake spec
 
 rvm use jruby@safe_yaml
-JRUBY_OPTS=--2.0 rake spec
+JRUBY_OPTS=--1.9 rake spec
