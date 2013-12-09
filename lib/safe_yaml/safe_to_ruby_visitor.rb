@@ -1,7 +1,15 @@
 module SafeYAML
   class SafeToRubyVisitor < Psych::Visitors::ToRuby
+    INITIALIZE_ARITY = superclass.method(:initialize).arity
+
     def initialize(resolver)
-      super
+      case INITIALIZE_ARITY
+      when -1, 0
+        super()
+      else
+        super
+      end
+
       @resolver = resolver
     end
 
