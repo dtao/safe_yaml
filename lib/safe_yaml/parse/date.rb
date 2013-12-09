@@ -17,10 +17,18 @@ module SafeYAML
       # reasonably -- to seconds.
       SEC_FRACTION_MULTIPLIER = RUBY_VERSION == "1.8.7" ? (SECONDS_PER_DAY * MICROSECONDS_PER_SECOND) : MICROSECONDS_PER_SECOND
 
+      # The DateTime class has a #to_time method in Ruby 1.9+;
+      # Before that we'll just need to convert DateTime to Time ourselves.
+      TO_TIME_AVAILABLE = DateTime.new.respond_to?(:to_time)
+
       def self.value(value)
         d = DateTime.parse(value)
+
+        return d.to_time if TO_TIME_AVAILABLE
+
         usec = d.sec_fraction * SEC_FRACTION_MULTIPLIER
-        Time.utc(d.year, d.month, d.day, d.hour, d.min, d.sec, usec) - (d.offset * SECONDS_PER_DAY)
+        time = Time.utc(d.year, d.month, d.day, d.hour, d.min, d.sec, usec) - (d.offset * SECONDS_PER_DAY)
+        time.getlocal
       end
     end
   end

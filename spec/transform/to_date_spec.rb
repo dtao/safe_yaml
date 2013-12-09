@@ -31,4 +31,11 @@ describe SafeYAML::Transform::ToDate do
       result.should == Time.utc(2001, 12, 15, 2, 59, 43, 100000)
     end
   end
+
+  it "converts times to the local timezone" do
+    success, result = subject.transform?("2012-12-01 10:33:45 +11:00")
+    success.should be_true
+    result.should == Time.utc(2012, 11, 30, 23, 33, 45)
+    result.gmt_offset.should == Time.now.gmt_offset
+  end
 end
