@@ -10,6 +10,10 @@ if ENV["YAMLER"] && defined?(YAML::ENGINE)
   puts "Running specs in Ruby #{RUBY_VERSION} with '#{YAML::ENGINE.yamler}' YAML engine."
 end
 
+if defined?(JRUBY_VERSION) && ENV["JRUBY_OPTS"]
+  puts "Running JRuby in #{RUBY_VERSION} mode."
+end
+
 # Caching references to these methods before loading safe_yaml in order to test
 # that they aren't touched unless you actually require safe_yaml (see yaml_spec.rb).
 ORIGINAL_YAML_LOAD      = YAML.method(:load)
