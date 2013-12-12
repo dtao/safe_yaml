@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.email         = "daniel.tao@gmail.com"
   gem.description   = %q{Parse YAML safely, without that pesky arbitrary object deserialization vulnerability}
   gem.summary       = %q{SameYAML provides an alternative implementation of YAML.load suitable for accepting user input in Ruby applications.}
-  gem.homepage      = "http://dtao.github.com/safe_yaml/"
+  gem.homepage      = "https://github.com/dtao/safe_yaml"
   gem.license       = "MIT"
   gem.files         = `git ls-files`.split($\)
   gem.test_files    = gem.files.grep(%r{^spec/})
