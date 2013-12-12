@@ -14,5 +14,8 @@ bundle install
 rvm use 2.0.0
 bundle install
 
+rvm use ruby-head
+bundle install
+
 rvm use jruby
 bundle install
