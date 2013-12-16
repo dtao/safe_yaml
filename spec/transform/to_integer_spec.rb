@@ -56,4 +56,9 @@ describe SafeYAML::Transform::ToInteger do
     # sexagesimal
     subject.transform?("190:20:30").should == [true, 685230]
   end
+
+  # see https://github.com/dtao/safe_yaml/pull/51
+  it "strips out underscores before parsing decimal values" do
+    subject.transform?("_850_").should == [true, 850]
+  end
 end
