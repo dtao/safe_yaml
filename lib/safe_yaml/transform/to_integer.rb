@@ -9,7 +9,8 @@ module SafeYAML
       ])
 
       def transform?(value)
-        MATCHERS.each do |matcher|
+        MATCHERS.each_with_index do |matcher, idx|
+          value = value.gsub("_", "") if idx == 0
           return true, Integer(value.gsub(",", "")) if matcher.match(value)
         end
         try_edge_cases?(value)
