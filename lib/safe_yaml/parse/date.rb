@@ -29,8 +29,6 @@ module SafeYAML
         usec = d.sec_fraction * SEC_FRACTION_MULTIPLIER
         time = Time.utc(d.year, d.month, d.day, d.hour, d.min, d.sec, usec) - (d.offset * SECONDS_PER_DAY)
         time.getlocal
-      rescue ArgumentError
-        value.to_s
       end
     end
   end

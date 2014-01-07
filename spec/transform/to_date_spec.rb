@@ -38,4 +38,23 @@ describe SafeYAML::Transform::ToDate do
     result.should == Time.utc(2012, 11, 30, 23, 33, 45)
     result.gmt_offset.should == Time.now.gmt_offset
   end
+
+  it "returns strings for invalid dates" do
+    subject.transform?("0000-00-00").should == [true, "0000-00-00"]
+    subject.transform?("2013-13-01").should == [true, "2013-13-01"]
+    subject.transform?("2014-01-32").should == [true, "2014-01-32"]
+  end
+
+  it "returns strings for invalid date/times" do
+    subject.transform?("0000-00-00 00:00:00 -0000").should == [true, "0000-00-00 00:00:00 -0000"]
+    subject.transform?("2013-13-01 21:59:43 -05:00").should == [true, "2013-13-01 21:59:43 -05:00"]
+    subject.transform?("2013-01-32 21:59:43 -05:00").should == [true, "2013-01-32 21:59:43 -05:00"]
+    subject.transform?("2013-01-30 25:59:43 -05:00").should == [true, "2013-01-30 25:59:43 -05:00"]
+    subject.transform?("2013-01-30 21:69:43 -05:00").should == [true, "2013-01-30 21:69:43 -05:00"]
+
+    # Interesting. It seems that in some older Ruby versions, the below actually parses successfully
+    # w/ DateTime.parse; but it fails w/ YAML.load. Whom to follow???
+
+    # subject.transform?("2013-01-30 21:59:63 -05:00").should == [true, "2013-01-30 21:59:63 -05:00"]
+  end
 end
