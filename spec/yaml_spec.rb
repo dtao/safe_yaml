@@ -1,6 +1,6 @@
 # See https://github.com/dtao/safe_yaml/issues/47
 
-require File.join(File.dirname(__FILE__), "spec_helper")
+require "spec_helper"
 
 describe YAML do
   context "when you've only required safe_yaml/load", :libraries => true do

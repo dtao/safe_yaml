@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), "..", "spec_helper")
+require "spec_helper"
 
 describe SafeYAML::Transform::ToSymbol do
   def with_symbol_deserialization_value(value)

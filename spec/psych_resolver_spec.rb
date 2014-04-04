@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), "spec_helper")
+require "spec_helper"
 
 if SafeYAML::YAML_ENGINE == "psych"
   require "safe_yaml/psych_resolver"

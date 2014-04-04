@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), "..", "spec_helper")
+require "spec_helper"
 
 describe SafeYAML::Transform::ToFloat do
   it "returns true when the value matches a valid Float" do
