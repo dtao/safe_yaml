@@ -62,7 +62,28 @@ module SafeYAML
 
   OPTIONS = Deep.copy(DEFAULT_OPTIONS)
 
+  PREDEFINED_TAGS = {}
+
+  if YAML_ENGINE == "syck"
+    YAML.tagged_classes.each do |tag, klass|
+      PREDEFINED_TAGS[klass] = tag
+    end
+
+  else
+    # Special tags appear to be hard-coded in Psych:
+    # https://github.com/tenderlove/psych/blob/v1.3.4/lib/psych/visitors/to_ruby.rb
+    # Fortunately, there aren't many that SafeYAML doesn't already support.
+    PREDEFINED_TAGS.merge!({
+      Exception => "!ruby/exception",
+      Range     => "!ruby/range",
+      Regexp    => "!ruby/regexp",
+    })
+  end
+
+  Deep.freeze(PREDEFINED_TAGS)
+
   module_function
+
   def restore_defaults!
     OPTIONS.clear.merge!(Deep.copy(DEFAULT_OPTIONS))
   end
@@ -87,7 +108,7 @@ module SafeYAML
     raise "#{klass} cannot be anonymous" if klass_name.nil? || klass_name.empty?
 
     # Whitelist any built-in YAML tags supplied by Syck or Psych.
-    predefined_tag = predefined_tags[klass]
+    predefined_tag = PREDEFINED_TAGS[klass]
     if predefined_tag
       OPTIONS[:whitelisted_tags] << predefined_tag
       return
@@ -102,30 +123,6 @@ module SafeYAML
                  else raise "unknown YAML_ENGINE #{YAML_ENGINE}"
                  end
     OPTIONS[:whitelisted_tags] << "#{tag_prefix}:#{klass_name}"
-  end
-
-  def predefined_tags
-    if @predefined_tags.nil?
-      @predefined_tags = {}
-
-      if YAML_ENGINE == "syck"
-        YAML.tagged_classes.each do |tag, klass|
-          @predefined_tags[klass] = tag
-        end
-
-      else
-        # Special tags appear to be hard-coded in Psych:
-        # https://github.com/tenderlove/psych/blob/v1.3.4/lib/psych/visitors/to_ruby.rb
-        # Fortunately, there aren't many that SafeYAML doesn't already support.
-        @predefined_tags.merge!({
-          Exception => "!ruby/exception",
-          Range     => "!ruby/range",
-          Regexp    => "!ruby/regexp",
-        })
-      end
-    end
-
-    @predefined_tags
   end
 
   if YAML_ENGINE == "psych"
