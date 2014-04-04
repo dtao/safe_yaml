@@ -17,9 +17,6 @@ module SafeYAML
       # reasonably -- to seconds.
       SEC_FRACTION_MULTIPLIER = RUBY_VERSION == "1.8.7" ? (SECONDS_PER_DAY * MICROSECONDS_PER_SECOND) : MICROSECONDS_PER_SECOND
 
-      # For some reason it seems that Time#getlocal doesn't take into account DST?
-      LOCAL_GMT_OFFSET = self.get_local_gmt_offset
-
       # The DateTime class has a #to_time method in Ruby 1.9+;
       # Before that we'll just need to convert DateTime to Time ourselves.
       TO_TIME_AVAILABLE = DateTime.instance_methods.include?(:to_time)
@@ -27,21 +24,11 @@ module SafeYAML
       def self.value(value)
         d = DateTime.parse(value)
 
-        time = if TO_TIME_AVAILABLE
-          d.to_time
-        else
-          usec = d.sec_fraction * SEC_FRACTION_MULTIPLIER
-          Time.utc(d.year, d.month, d.day, d.hour, d.min, d.sec, usec) - (d.offset * SECONDS_PER_DAY)
-        end
+        return d.to_time if TO_TIME_AVAILABLE
 
-        time.getlocal(LOCAL_GMT_OFFSET)
-      end
-
-      def self.get_local_gmt_offset
-        local_time = Time.now
-        local_gmt_offset = local_time.gmt_offset
-        local_gmt_offset += SECONDS_PER_DAY if time.dst?
-        local_gmt_offset
+        usec = d.sec_fraction * SEC_FRACTION_MULTIPLIER
+        time = Time.utc(d.year, d.month, d.day, d.hour, d.min, d.sec, usec) - (d.offset * SECONDS_PER_DAY)
+        time.getlocal
       end
     end
   end
