@@ -18,12 +18,12 @@ module ResolverSpecs
       def parse_and_test(yaml)
         safe_result = parse(yaml)
 
-        exception_thrown = false
+        exception_thrown = nil
 
         unsafe_result = begin
           YAML.unsafe_load(yaml)
-        rescue
-          exception_thrown = true
+        rescue Exception => e
+          exception_thrown = e
         end
 
         if exception_thrown
@@ -35,7 +35,8 @@ module ResolverSpecs
           Kernel.warn "#{yaml.unindent}\n"
           Kernel.warn "SafeYAML result:"
           Kernel.warn "#{safe_result.inspect}\n"
-          Kernel.warn "#{SafeYAML::YAML_ENGINE} threw error\n"
+          Kernel.warn "#{SafeYAML::YAML_ENGINE} result:"
+          Kernel.warn "#{exception_thrown.inspect}\n"
 
         else
           safe_result.should == unsafe_result
