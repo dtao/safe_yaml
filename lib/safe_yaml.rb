@@ -33,19 +33,17 @@ module YAML
     SafeYAML.load_file(*args)
   end
 
-  def self.unsafe_load_file(filename)
-    if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
+  if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
+    def self.unsafe_load_file(filename)
       # https://github.com/tenderlove/psych/blob/v1.3.2/lib/psych.rb#L296-298
       File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load(f, filename) }
-    else
+    end
+
+  else
+    def self.unsafe_load_file(filename)
       # https://github.com/tenderlove/psych/blob/v1.2.2/lib/psych.rb#L231-233
       self.unsafe_load File.open(filename)
     end
-  end
-
-  def self.unsafe_load_file(filename)
-    # https://github.com/indeyets/syck/blob/master/ext/ruby/lib/yaml.rb#L133-135
-    File.open(filename) { |f| self.unsafe_load(f) }
   end
 
   class << self
