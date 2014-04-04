@@ -36,7 +36,7 @@ describe SafeYAML::Transform::ToDate do
     success, result = subject.transform?("2012-12-01 10:33:45 +11:00")
     success.should be_true
     result.should == Time.utc(2012, 11, 30, 23, 33, 45)
-    result.gmt_offset.should == Time.now.gmt_offset
+    result.gmt_offset.should == Time.local(2012, 11, 30).gmt_offset
   end
 
   it "returns strings for invalid dates" do
