@@ -7,12 +7,19 @@ $LOAD_PATH << File.join(HERE, "support")
 require "yaml"
 if ENV["YAMLER"] && defined?(YAML::ENGINE)
   YAML::ENGINE.yamler = ENV["YAMLER"]
-  puts "Running specs in Ruby #{RUBY_VERSION} with '#{YAML::ENGINE.yamler}' YAML engine."
 end
 
-if defined?(JRUBY_VERSION) && ENV["JRUBY_OPTS"]
-  puts "Running JRuby in #{RUBY_VERSION} mode."
-end
+ruby_version = defined?(JRUBY_VERSION) ? "JRuby #{JRUBY_VERSION} in #{RUBY_VERSION} mode" : "Ruby #{RUBY_VERSION}"
+yaml_engine = defined?(YAML::ENGINE) ? YAML::ENGINE.yamler : "syck"
+libyaml_version = yaml_engine == "psych" && Psych.const_defined?("LIBYAML_VERSION", false) ? Psych::LIBYAML_VERSION : "N/A"
+
+puts <<-EOM
+
+  Running #{ruby_version} with '#{yaml_engine}' YAML engine.
+  YAML engine version: #{YAML::VERSION}
+  libyaml version: #{libyaml_version}
+
+EOM
 
 # Caching references to these methods before loading safe_yaml in order to test
 # that they aren't touched unless you actually require safe_yaml (see yaml_spec.rb).
