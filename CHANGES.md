@@ -1,3 +1,17 @@
+1.0.1
+-----
+
+- fixed handling for strings that look like (invalid) dates
+
+1.0.0
+-----
+
+- updated date parsing to use local timezone
+- **now requiring "safe_yaml/load" provides `SafeYAML.load` without clobbering `YAML`**
+- fixed handling of empty files
+- fixed some (edge case) integer parsing bugs
+- fixed some JRuby-specific issues
+
 0.9.7
 -----
 
