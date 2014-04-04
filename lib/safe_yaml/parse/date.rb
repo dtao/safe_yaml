@@ -19,7 +19,7 @@ module SafeYAML
 
       # The DateTime class has a #to_time method in Ruby 1.9+;
       # Before that we'll just need to convert DateTime to Time ourselves.
-      TO_TIME_AVAILABLE = DateTime.new.respond_to?(:to_time)
+      TO_TIME_AVAILABLE = DateTime.instance_methods.include?(:to_time)
 
       def self.value(value)
         d = DateTime.parse(value)
