@@ -16,8 +16,30 @@ module ResolverSpecs
 
       # Isn't this how I should've been doing it all along?
       def parse_and_test(yaml)
-        parse(yaml)
-        @result.should == YAML.unsafe_load(yaml)
+        safe_result = parse(yaml)
+
+        exception_thrown = false
+
+        unsafe_result = begin
+          YAML.unsafe_load(yaml)
+        rescue
+          exception_thrown = true
+        end
+
+        if exception_thrown
+          # If the underlying YAML parser (e.g. Psych) threw an exception, I'm
+          # honestly not sure what the right thing to do is. For now I'll just
+          # print a warning. Should SafeYAML fail when Psych fails?
+          Kernel.warn "\n"
+          Kernel.warn "Discrepancy between SafeYAML and #{SafeYAML::YAML_ENGINE} on input:\n"
+          Kernel.warn "#{yaml.unindent}\n"
+          Kernel.warn "SafeYAML result:"
+          Kernel.warn "#{safe_result.inspect}\n"
+          Kernel.warn "#{SafeYAML::YAML_ENGINE} threw error\n"
+
+        else
+          safe_result.should == unsafe_result
+        end
       end
 
       context "by default" do
