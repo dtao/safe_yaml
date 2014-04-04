@@ -1,3 +1,8 @@
+1.0.2
+-----
+
+- added warning when using Psych + an older version of libyaml
+
 1.0.1
 -----
 
