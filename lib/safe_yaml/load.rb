@@ -4,7 +4,33 @@ require "yaml"
 # their behavior off of this.
 module SafeYAML
   YAML_ENGINE = defined?(YAML::ENGINE) ? YAML::ENGINE.yamler : "syck"
+  LIBYAML_VERSION = YAML_ENGINE == "psych" && Psych.const_defined?("LIBYAML_VERSION", false) ? Psych::LIBYAML_VERSION : nil
+
+  def self.check_libyaml_version
+    if YAML_ENGINE == "psych" && (LIBYAML_VERSION.nil? || LIBYAML_VERSION < "0.1.6")
+      Kernel.warn <<-EOWARNING.gsub(/^ +/, '  ')
+
+        \e[33mSafeYAML Warning\e[39m
+        \e[33m----------------\e[39m
+
+        \e[31mYou appear to have an outdated version of libyaml (#{LIBYAML_VERSION}) installed on your system.\e[39m
+
+        Prior to 0.1.6, libyaml is vulnerable to a heap overflow exploit from malicious YAML payloads.
+
+        For more info, see:
+        https://www.ruby-lang.org/en/news/2014/03/29/heap-overflow-in-yaml-uri-escape-parsing-cve-2014-2525/
+
+        The easiest thing to do right now is probably to update Psych to the latest version and enable
+        the 'bundled-libyaml' option, which will install a vendored libyaml with the vulnerability patched:
+
+        \e[32mgem install psych -- --enable-bundled-libyaml\e[39m
+
+      EOWARNING
+    end
+  end
 end
+
+SafeYAML.check_libyaml_version
 
 require "set"
 require "safe_yaml/deep"

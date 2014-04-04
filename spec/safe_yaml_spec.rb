@@ -32,6 +32,47 @@ describe YAML do
     SafeYAML.restore_defaults!
   end
 
+  describe "check_libyaml_version" do
+    REAL_YAML_ENGINE = SafeYAML::YAML_ENGINE
+    REAL_LIBYAML_VERSION = SafeYAML::LIBYAML_VERSION
+
+    after :each do
+      silence_warnings do
+        SafeYAML::YAML_ENGINE = REAL_YAML_ENGINE
+        SafeYAML::LIBYAML_VERSION = REAL_LIBYAML_VERSION
+      end
+    end
+
+    def test_check_libyaml_version(warning_expected, yaml_engine, libyaml_version=nil)
+      silence_warnings do
+        SafeYAML.const_set("YAML_ENGINE", yaml_engine)
+        SafeYAML.const_set("LIBYAML_VERSION", libyaml_version)
+        Kernel.send(warning_expected ? :should_receive : :should_not_receive, :warn)
+        SafeYAML.check_libyaml_version
+      end
+    end
+
+    it "issues no warnings when 'Syck' is the YAML engine" do
+      test_check_libyaml_version(false, "syck")
+    end
+
+    it "issues a warning if Psych::LIBYAML_VERSION is not defined" do
+      test_check_libyaml_version(true, "psych")
+    end
+
+    it "issues a warning if Psych::LIBYAML_VERSION is < 0.1.6" do
+      test_check_libyaml_version(true, "psych", "0.1.5")
+    end
+
+    it "issues no warning if Psych::LIBYAML_VERSION is == 0.1.6" do
+      test_check_libyaml_version(false, "psych", "0.1.6")
+    end
+
+    it "issues no warning if Psych::LIBYAML_VERSION is > 0.1.6" do
+      test_check_libyaml_version(false, "psych", "1.0.0")
+    end
+  end
+
   describe "unsafe_load" do
     if SafeYAML::YAML_ENGINE == "psych" && RUBY_VERSION >= "1.9.3"
       it "allows exploits through objects defined in YAML w/ !ruby/hash via custom :[]= methods" do
