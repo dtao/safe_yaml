@@ -11,7 +11,9 @@ module SafeYAML
   SAFE_LIBYAML_VERSION = Gem::Version.new("0.1.6")
 
   def self.check_libyaml_version
-    if YAML_ENGINE == "psych" && Gem::Version.new(LIBYAML_VERSION || "0") < SAFE_LIBYAML_VERSION && !libyaml_patched?
+    old_libyaml_version = YAML_ENGINE == "psych" && Gem::Version.new(LIBYAML_VERSION || "0") < SAFE_LIBYAML_VERSION
+
+    if old_libyaml_version && !defined?(JRUBY_VERSION) && !libyaml_patched?
       Kernel.warn <<-EOWARNING.gsub(/^ +/, '  ')
 
         \e[33mSafeYAML Warning\e[39m
