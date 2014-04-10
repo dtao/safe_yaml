@@ -1,3 +1,4 @@
+require "set"
 require "yaml"
 
 # This needs to be defined up front in case any internal classes need to base
@@ -6,14 +7,17 @@ module SafeYAML
   YAML_ENGINE = defined?(YAML::ENGINE) ? YAML::ENGINE.yamler : "syck"
   LIBYAML_VERSION = YAML_ENGINE == "psych" && Psych.const_defined?("LIBYAML_VERSION", false) ? Psych::LIBYAML_VERSION : nil
 
+  # Do proper version comparison (e.g. so 0.1.10 is >= 0.1.6)
+  SAFE_LIBYAML_VERSION = Gem::Version.new("0.1.6")
+
   def self.check_libyaml_version
-    if YAML_ENGINE == "psych" && (LIBYAML_VERSION.nil? || LIBYAML_VERSION < "0.1.6")
+    if YAML_ENGINE == "psych" && Gem::Version.new(LIBYAML_VERSION || "0") < SAFE_LIBYAML_VERSION && !libyaml_patched?
       Kernel.warn <<-EOWARNING.gsub(/^ +/, '  ')
 
         \e[33mSafeYAML Warning\e[39m
         \e[33m----------------\e[39m
 
-        \e[31mYou appear to have an outdated version of libyaml (#{LIBYAML_VERSION}) installed on your system.\e[39m
+        \e[31mYou may have an outdated version of libyaml (#{LIBYAML_VERSION}) installed on your system.\e[39m
 
         Prior to 0.1.6, libyaml is vulnerable to a heap overflow exploit from malicious YAML payloads.
 
@@ -28,11 +32,30 @@ module SafeYAML
       EOWARNING
     end
   end
+
+  KNOWN_PATCHED_LIBYAML_VERSIONS = Set.new([
+    # http://people.canonical.com/~ubuntu-security/cve/2014/CVE-2014-2525.html
+    "0.1.4-2ubuntu0.12.04.3",
+    "0.1.4-2ubuntu0.12.10.3",
+    "0.1.4-2ubuntu0.13.10.3",
+    "0.1.4-3ubuntu3",
+
+    # https://security-tracker.debian.org/tracker/CVE-2014-2525
+    "0.1.3-1+deb6u4",
+    "0.1.4-2+deb7u4",
+    "0.1.4-3.2"
+  ]).freeze
+
+  def self.libyaml_patched?
+    return false if (`which dpkg` rescue '').empty?
+    libyaml_version = `dpkg -s libyaml-0-2`.match(/^Version: (.*)$/)
+    return false if libyaml_version.nil?
+    KNOWN_PATCHED_LIBYAML_VERSIONS.include?(libyaml_version[1])
+  end
 end
 
 SafeYAML.check_libyaml_version
 
-require "set"
 require "safe_yaml/deep"
 require "safe_yaml/parse/hexadecimal"
 require "safe_yaml/parse/sexagesimal"

@@ -36,6 +36,12 @@ describe YAML do
     REAL_YAML_ENGINE = SafeYAML::YAML_ENGINE
     REAL_LIBYAML_VERSION = SafeYAML::LIBYAML_VERSION
 
+    let(:libyaml_patched) { false }
+
+    before :each do
+      SafeYAML.stub(:libyaml_patched?).and_return(libyaml_patched)
+    end
+
     after :each do
       silence_warnings do
         SafeYAML::YAML_ENGINE = REAL_YAML_ENGINE
@@ -70,6 +76,18 @@ describe YAML do
 
     it "issues no warning if Psych::LIBYAML_VERSION is > 0.1.6" do
       test_check_libyaml_version(false, "psych", "1.0.0")
+    end
+
+    it "does a proper version comparison (not just a string comparison)" do
+      test_check_libyaml_version(false, "psych", "0.1.10")
+    end
+
+    context "when the system has a known patched libyaml version" do
+      let(:libyaml_patched) { true }
+
+      it "issues no warning, even when Psych::LIBYAML_VERSION < 0.1.6" do
+        test_check_libyaml_version(false, "psych", "0.1.4")
+      end
     end
   end
 
