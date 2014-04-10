@@ -172,6 +172,7 @@ Also be aware that some Ruby libraries, particularly those requiring inter-proce
   1. set the `:deserialize_symbols` option to `true`,
   2. whitelist some of the types in your serialized data via `SafeYAML.whitelist!` or the `:whitelisted_tags` option, or
   3. both
+- [**delayed_job**](https://github.com/collectiveidea/delayed_job): Uses YAML to serialize the objects on which delayed methods are invoked (with `delay`). The safest solution in this case is to use `SafeYAML.whitelist!` to whitelist the types you need to serialize.
 - [**Guard**](https://github.com/guard/guard): Uses YAML as a serialization format for notifications. The data serialized uses symbolic keys, so setting `SafeYAML::OPTIONS[:deserialize_symbols] = true` is necessary to allow Guard to work.
 - [**sidekiq**](https://github.com/mperham/sidekiq): Uses a YAML configiuration file with symbolic keys, so setting `SafeYAML::OPTIONS[:deserialize_symbols] = true` should allow it to work.
 
