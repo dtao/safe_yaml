@@ -2,7 +2,7 @@ require "set"
 
 module SafeYAML
   class LibyamlChecker
-    LIBYAML_VERSION = YAML_ENGINE == "psych" && Psych.const_defined?("LIBYAML_VERSION", false) ? Psych::LIBYAML_VERSION : nil
+    LIBYAML_VERSION = Psych::LIBYAML_VERSION rescue nil
 
     # Do proper version comparison (e.g. so 0.1.10 is >= 0.1.6)
     SAFE_LIBYAML_VERSION = Gem::Version.new("0.1.6")
@@ -21,13 +21,9 @@ module SafeYAML
     ]).freeze
 
     def self.libyaml_version_ok?
-      old_libyaml_version = YAML_ENGINE == "psych" && Gem::Version.new(LIBYAML_VERSION || "0") < SAFE_LIBYAML_VERSION
-
-      if old_libyaml_version && !defined?(JRUBY_VERSION) && !libyaml_patched?
-        return false
-      end
-
-      true
+      return true if YAML_ENGINE != "psych" || defined?(JRUBY_VERSION)
+      return true if Gem::Version.new(LIBYAML_VERSION || "0") >= SAFE_LIBYAML_VERSION
+      return libyaml_patched?
     end
 
     def self.libyaml_patched?
