@@ -20,29 +20,14 @@ module SafeYAML
       "0.1.4-3.2"
     ]).freeze
 
-    def self.check_libyaml_version
+    def self.libyaml_version_ok?
       old_libyaml_version = YAML_ENGINE == "psych" && Gem::Version.new(LIBYAML_VERSION || "0") < SAFE_LIBYAML_VERSION
 
       if old_libyaml_version && !defined?(JRUBY_VERSION) && !libyaml_patched?
-        Kernel.warn <<-EOWARNING.gsub(/^ +/, '  ')
-
-          \e[33mSafeYAML Warning\e[39m
-          \e[33m----------------\e[39m
-
-          \e[31mYou may have an outdated version of libyaml (#{LIBYAML_VERSION}) installed on your system.\e[39m
-
-          Prior to 0.1.6, libyaml is vulnerable to a heap overflow exploit from malicious YAML payloads.
-
-          For more info, see:
-          https://www.ruby-lang.org/en/news/2014/03/29/heap-overflow-in-yaml-uri-escape-parsing-cve-2014-2525/
-
-          The easiest thing to do right now is probably to update Psych to the latest version and enable
-          the 'bundled-libyaml' option, which will install a vendored libyaml with the vulnerability patched:
-
-          \e[32mgem install psych -- --enable-bundled-libyaml\e[39m
-
-        EOWARNING
+        return false
       end
+
+      true
     end
 
     def self.libyaml_patched?
