@@ -7,10 +7,6 @@ module SafeYAML
   YAML_ENGINE = defined?(YAML::ENGINE) ? YAML::ENGINE.yamler : "syck"
 end
 
-require "safe_yaml/libyaml_checker"
-
-SafeYAML::LibyamlChecker.check_libyaml_version
-
 require "safe_yaml/deep"
 require "safe_yaml/parse/hexadecimal"
 require "safe_yaml/parse/sexagesimal"
