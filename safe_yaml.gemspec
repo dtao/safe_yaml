@@ -13,6 +13,7 @@ Gem::Specification.new do |gem|
   gem.files         = `git ls-files`.split($\)
   gem.test_files    = gem.files.grep(%r{^spec/})
   gem.require_paths = ["lib"]
+  gem.executables   = ["safe_yaml"]
 
   gem.required_ruby_version = ">= 1.8.7"
 end

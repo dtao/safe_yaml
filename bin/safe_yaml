@@ -1,4 +1,20 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
+
+require 'optparse'
 require 'safe_yaml'
+
+options = {}
+option_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: safe_yaml [options]"
+
+  opts.on("--libyaml-check", "Check for the libyaml vulnerability on your system") do
+    options[:libyaml_check] = true
+  end
+end
+
+option_parser.parse!
 
 def report_libyaml_ok
   puts "\e[32mGood news! You definitely have either a patched or up-to-date libyaml version :)\e[39m"
@@ -7,6 +23,11 @@ end
 def check_for_overflow_bug
   YAML.load("--- !#{'%20' * 100}")
   report_libyaml_ok
+end
+
+if !options[:libyaml_check]
+  puts "Right now safe_yaml does nothing without the --libyaml-check option."
+  exit 0
 end
 
 if SafeYAML::LibyamlChecker.libyaml_version_ok?
