@@ -31,4 +31,12 @@ require "ostruct"
 require "hashie"
 require "heredoc_unindent"
 
+# Stolen from Rails:
+# https://github.com/rails/rails/blob/3-2-stable/activesupport/lib/active_support/core_ext/kernel/reporting.rb#L10-25
+def silence_warnings
+  $VERBOSE = nil; yield
+ensure
+  $VERBOSE = true
+end
+
 require File.join(HERE, "resolver_specs")

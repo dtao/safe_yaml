@@ -1,3 +1,5 @@
+require "spec_helper"
+
 describe SafeYAML::LibyamlChecker do
   describe "check_libyaml_version" do
     REAL_YAML_ENGINE = SafeYAML::YAML_ENGINE

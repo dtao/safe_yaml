@@ -1,14 +1,6 @@
 require "spec_helper"
 
 describe YAML do
-  # Essentially stolen from:
-  # https://github.com/rails/rails/blob/3-2-stable/activesupport/lib/active_support/core_ext/kernel/reporting.rb#L10-25
-  def silence_warnings
-    $VERBOSE = nil; yield
-  ensure
-    $VERBOSE = true
-  end
-
   def safe_load_round_trip(object, options={})
     yaml = object.to_yaml
     if SafeYAML::YAML_ENGINE == "psych"
