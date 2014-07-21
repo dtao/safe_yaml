@@ -8,7 +8,7 @@ describe SafeYAML::LibyamlChecker do
     let(:libyaml_patched) { false }
 
     before :each do
-      SafeYAML::LibyamlChecker.stub(:libyaml_patched?).and_return(libyaml_patched)
+      allow(SafeYAML::LibyamlChecker).to receive(:libyaml_patched?).and_return(libyaml_patched)
     end
 
     after :each do
@@ -22,7 +22,7 @@ describe SafeYAML::LibyamlChecker do
       silence_warnings do
         SafeYAML.const_set("YAML_ENGINE", yaml_engine)
         SafeYAML::LibyamlChecker.const_set("LIBYAML_VERSION", libyaml_version)
-        SafeYAML::LibyamlChecker.libyaml_version_ok?.should == expected_result
+        expect(SafeYAML::LibyamlChecker.libyaml_version_ok?).to eq(expected_result)
       end
     end
 
