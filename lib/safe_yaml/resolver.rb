@@ -52,7 +52,7 @@ module SafeYAML
       tag = get_and_check_node_tag(node)
       arr = @initializers.include?(tag) ? @initializers[tag].call : []
 
-      seq.inject(arr) { |array, node| array << resolve_node(node) }
+      seq.inject(arr) { |array, n| array << resolve_node(n) }
     end
 
     def resolve_scalar(node)
