@@ -28,18 +28,18 @@ describe YAML do
     if SafeYAML::YAML_ENGINE == "psych" && RUBY_VERSION >= "1.9.3"
       it "allows exploits through objects defined in YAML w/ !ruby/hash via custom :[]= methods" do
         backdoor = YAML.unsafe_load("--- !ruby/hash:ExploitableBackDoor\nfoo: bar\n")
-        backdoor.should be_exploited_through_setter
+        expect(backdoor).to be_exploited_through_setter
       end
 
       it "allows exploits through objects defined in YAML w/ !ruby/object via the :init_with method" do
         backdoor = YAML.unsafe_load("--- !ruby/object:ExploitableBackDoor\nfoo: bar\n")
-        backdoor.should be_exploited_through_init_with
+        expect(backdoor).to be_exploited_through_init_with
       end
     end
 
     it "allows exploits through objects w/ sensitive instance variables defined in YAML w/ !ruby/object" do
       backdoor = YAML.unsafe_load("--- !ruby/object:ExploitableBackDoor\nfoo: bar\n")
-      backdoor.should be_exploited_through_ivars
+      expect(backdoor).to be_exploited_through_ivars
     end
 
     context "with special whitelisted tags defined" do
@@ -55,8 +55,8 @@ describe YAML do
               foo: bar
         YAML
 
-        result.should be_a(OpenStruct)
-        result.backdoor.should be_exploited_through_ivars
+        expect(result).to be_a(OpenStruct)
+        expect(result.backdoor).to be_exploited_through_ivars
       end
     end
   end
@@ -64,12 +64,12 @@ describe YAML do
   describe "safe_load" do
     it "does NOT allow exploits through objects defined in YAML w/ !ruby/hash" do
       object = YAML.safe_load("--- !ruby/hash:ExploitableBackDoor\nfoo: bar\n")
-      object.should_not be_a(ExploitableBackDoor)
+      expect(object).not_to be_a(ExploitableBackDoor)
     end
 
     it "does NOT allow exploits through objects defined in YAML w/ !ruby/object" do
       object = YAML.safe_load("--- !ruby/object:ExploitableBackDoor\nfoo: bar\n")
-      object.should_not be_a(ExploitableBackDoor)
+      expect(object).not_to be_a(ExploitableBackDoor)
     end
 
     context "for YAML engine #{SafeYAML::YAML_ENGINE}" do
@@ -79,7 +79,7 @@ describe YAML do
 
         context "when no tags are whitelisted" do
           it "constructs a SafeYAML::PsychHandler to resolve nodes as they're parsed, for optimal performance" do
-            Psych::Parser.should_receive(:new).with an_instance_of(SafeYAML::PsychHandler)
+            expect(Psych::Parser).to receive(:new).with an_instance_of(SafeYAML::PsychHandler)
             # This won't work now; we just want to ensure Psych::Parser#parse was in fact called.
             YAML.safe_load(*arguments) rescue nil
           end
@@ -91,7 +91,7 @@ describe YAML do
           }
 
           it "instead uses Psych to construct a full tree before examining the nodes" do
-            Psych.should_receive(:parse)
+            expect(Psych).to receive(:parse)
             # This won't work now; we just want to ensure Psych::Parser#parse was in fact called.
             YAML.safe_load(*arguments) rescue nil
           end
@@ -100,7 +100,7 @@ describe YAML do
 
       if SafeYAML::YAML_ENGINE == "syck"
         it "uses Syck internally to parse YAML" do
-          YAML.should_receive(:parse).with("foo: bar")
+          expect(YAML).to receive(:parse).with("foo: bar")
           # This won't work now; we just want to ensure YAML::parse was in fact called.
           YAML.safe_load("foo: bar") rescue nil
         end
@@ -120,7 +120,7 @@ describe YAML do
             - bye
       YAML
 
-      result.should == {
+      expect(result).to eq({
         "foo" => {
           "number"   => 1,
           "boolean"  => true,
@@ -129,7 +129,7 @@ describe YAML do
           "symbol"   => ":blah",
           "sequence" => ["hi", "bye"]
         }
-      }
+      })
     end
 
     it "works for YAML documents with anchors and aliases" do
@@ -139,7 +139,7 @@ describe YAML do
         - *id001
       YAML
 
-      result.should == [{}, {}, {}]
+      expect(result).to eq([{}, {}, {}])
     end
 
     it "works for YAML documents with binary tagged keys" do
@@ -152,7 +152,7 @@ describe YAML do
         : "baz"
       YAML
 
-      result.should == {"foo" => "bar", "bar" => "baz"}
+      expect(result).to eq({"foo" => "bar", "bar" => "baz"})
     end
 
     it "works for YAML documents with binary tagged values" do
@@ -163,7 +163,7 @@ describe YAML do
           YmF6
       YAML
 
-      result.should == {"foo" => "bar", "bar" => "baz"}
+      expect(result).to eq({"foo" => "bar", "bar" => "baz"})
     end
 
     it "works for YAML documents with binary tagged array values" do
@@ -174,7 +174,7 @@ describe YAML do
           YmFy
       YAML
 
-      result.should == ["foo", "bar"]
+      expect(result).to eq(["foo", "bar"])
     end
 
     it "works for YAML documents with sections" do
@@ -191,7 +191,7 @@ describe YAML do
           host: localhost
       YAML
 
-      result.should == {
+      expect(result).to eq({
         "mysql" => {
           "adapter" => "mysql",
           "pool"    => 30
@@ -207,7 +207,7 @@ describe YAML do
           "password" => "password123",
           "host"     => "localhost"
         }
-      }
+      })
     end
 
     it "correctly prefers explicitly defined values over default values from included sections" do
@@ -225,11 +225,11 @@ describe YAML do
             baz: custom_baz
         YAML
 
-        result["custom"].should == {
+        expect(result["custom"]).to eq({
           "foo" => "foo",
           "bar" => "custom_bar",
           "baz" => "custom_baz"
-        }
+        })
       end
     end
 
@@ -247,26 +247,26 @@ describe YAML do
           <<: *custom
       YAML
 
-      result.should == {
+      expect(result).to eq({
         "defaults"    => { "foo" => "foo", "bar" => "bar", "baz" => "baz" },
         "custom"      => { "foo" => "foo", "bar" => "custom_bar", "baz" => "custom_baz" },
         "grandcustom" => { "foo" => "foo", "bar" => "custom_bar", "baz" => "custom_baz" }
-      }
+      })
     end
 
     it "returns false when parsing an empty document" do
-      [
+      expect([
         YAML.safe_load(""),
         YAML.safe_load("     "),
         YAML.safe_load("\n")
-      ].should == [false, false, false]
+      ]).to eq([false, false, false])
     end
 
     it "returns nil when parsing a single value representing nil" do
-      [
+      expect([
         YAML.safe_load("~"),
         YAML.safe_load("null")
-      ].should == [nil, nil]
+      ]).to eq([nil, nil])
     end
 
     context "with custom initializers defined" do
@@ -292,8 +292,8 @@ describe YAML do
           - 3
         YAML
 
-        result.should be_a(Set)
-        result.to_a.should =~ [1, 2, 3]
+        expect(result).to be_a(Set)
+        expect(result.to_a).to match_array([1, 2, 3])
       end
 
       it "will use a custom initializer to instantiate a hash-like class upon deserialization" do
@@ -302,8 +302,8 @@ describe YAML do
           foo: bar
         YAML
 
-        result.should be_a(Hashie::Mash)
-        result.to_hash.should == { "foo" => "bar" }
+        expect(result).to be_a(Hashie::Mash)
+        expect(result.to_hash).to eq({ "foo" => "bar" })
       end
     end
 
@@ -317,14 +317,14 @@ describe YAML do
 
       it "will allow objects to be deserialized for whitelisted tags" do
         result = YAML.safe_load("--- !ruby/object:OpenStruct\ntable:\n  foo: bar\n")
-        result.should be_a(OpenStruct)
-        result.instance_variable_get(:@table).should == { "foo" => "bar" }
+        expect(result).to be_a(OpenStruct)
+        expect(result.instance_variable_get(:@table)).to eq({ "foo" => "bar" })
       end
 
       it "will not deserialize objects without whitelisted tags" do
         result = YAML.safe_load("--- !ruby/hash:ExploitableBackDoor\nfoo: bar\n")
-        result.should_not be_a(ExploitableBackDoor)
-        result.should == { "foo" => "bar" }
+        expect(result).not_to be_a(ExploitableBackDoor)
+        expect(result).to eq({ "foo" => "bar" })
       end
 
       it "will not allow non-whitelisted objects to be embedded within objects with whitelisted tags" do
@@ -335,9 +335,9 @@ describe YAML do
               foo: bar
         YAML
 
-        result.should be_a(OpenStruct)
-        result.backdoor.should_not be_a(ExploitableBackDoor)
-        result.backdoor.should == { "foo" => "bar" }
+        expect(result).to be_a(OpenStruct)
+        expect(result.backdoor).not_to be_a(ExploitableBackDoor)
+        expect(result.backdoor).to eq({ "foo" => "bar" })
       end
 
       context "with the :raise_on_unknown_tag option enabled" do
@@ -350,23 +350,23 @@ describe YAML do
         end
 
         it "raises an exception if a non-nil, non-whitelisted tag is encountered" do
-          lambda {
+          expect {
             YAML.safe_load <<-YAML.unindent
               --- !ruby/object:Unknown
               foo: bar
             YAML
-          }.should raise_error
+          }.to raise_error
         end
 
         it "checks all tags, even those within objects with trusted tags" do
-          lambda {
+          expect {
             YAML.safe_load <<-YAML.unindent
               --- !ruby/object:OpenStruct
               table:
                 :backdoor: !ruby/object:Unknown
                   foo: bar
             YAML
-          }.should raise_error
+          }.to raise_error
         end
 
         it "does not raise an exception as long as all tags are whitelisted" do
@@ -383,8 +383,8 @@ describe YAML do
                 hash: {}
           YAML
 
-          result.should be_a(OpenStruct)
-          result.backdoor.should == {
+          expect(result).to be_a(OpenStruct)
+          expect(result.backdoor).to eq({
             "string"  => "foo",
             "integer" => 1,
             "float"   => 3.14,
@@ -392,13 +392,13 @@ describe YAML do
             "date"    => Date.parse("2013-02-20"),
             "array"   => [],
             "hash"    => {}
-          }
+          })
         end
 
         it "does not raise an exception on the non-specific '!' tag" do
           result = nil
           expect { result = YAML.safe_load "--- ! 'foo'" }.to_not raise_error
-          result.should == "foo"
+          expect(result).to eq("foo")
         end
 
         context "with whitelisted custom class" do
@@ -415,7 +415,7 @@ describe YAML do
           it "does not raise an exception on the non-specific '!' tag" do
             result = nil
             expect { result = YAML.safe_load(instance.to_yaml) }.to_not raise_error
-            result.foo.should == 'with trailing whitespace: '
+            expect(result.foo).to eq('with trailing whitespace: ')
           end
         end
       end
@@ -433,14 +433,14 @@ describe YAML do
 
         it "goes with the default option when it is not overridden" do
           silence_warnings do
-            YAML.load(":foo: bar").should == { :foo => "bar" }
+            expect(YAML.load(":foo: bar")).to eq({ :foo => "bar" })
           end
         end
 
         it "allows the default option to be overridden on a per-call basis" do
           silence_warnings do
-            YAML.load(":foo: bar", :deserialize_symbols => false).should == { ":foo" => "bar" }
-            YAML.load(":foo: bar", :deserialize_symbols => true).should == { :foo => "bar" }
+            expect(YAML.load(":foo: bar", :deserialize_symbols => false)).to eq({ ":foo" => "bar" })
+            expect(YAML.load(":foo: bar", :deserialize_symbols => true)).to eq({ :foo => "bar" })
           end
         end
       end
@@ -457,16 +457,16 @@ describe YAML do
 
         it "goes with the default option when it is not overridden" do
           result = safe_load_round_trip(OpenStruct.new(:foo => "bar"))
-          result.should be_a(OpenStruct)
-          result.foo.should == "bar"
+          expect(result).to be_a(OpenStruct)
+          expect(result.foo).to eq("bar")
         end
 
         it "allows the default option to be overridden on a per-call basis" do
           result = safe_load_round_trip(OpenStruct.new(:foo => "bar"), :whitelisted_tags => [])
-          result.should == { "table" => { :foo => "bar" } }
+          expect(result).to eq({ "table" => { :foo => "bar" } })
 
           result = safe_load_round_trip(OpenStruct.new(:foo => "bar"), :deserialize_symbols => false, :whitelisted_tags => [])
-          result.should == { "table" => { ":foo" => "bar" } }
+          expect(result).to eq({ "table" => { ":foo" => "bar" } })
         end
       end
     end
@@ -476,36 +476,36 @@ describe YAML do
     if SafeYAML::YAML_ENGINE == "psych" && RUBY_VERSION >= "1.9.3"
       it "allows exploits through objects defined in YAML w/ !ruby/hash via custom :[]= methods" do
         backdoor = YAML.unsafe_load_file "spec/exploit.1.9.3.yaml"
-        backdoor.should be_exploited_through_setter
+        expect(backdoor).to be_exploited_through_setter
       end
     end
 
     if SafeYAML::YAML_ENGINE == "psych" && RUBY_VERSION >= "1.9.2"
       it "allows exploits through objects defined in YAML w/ !ruby/object via the :init_with method" do
         backdoor = YAML.unsafe_load_file "spec/exploit.1.9.2.yaml"
-        backdoor.should be_exploited_through_init_with
+        expect(backdoor).to be_exploited_through_init_with
       end
     end
 
     it "allows exploits through objects w/ sensitive instance variables defined in YAML w/ !ruby/object" do
       backdoor = YAML.unsafe_load_file "spec/exploit.1.9.2.yaml"
-      backdoor.should be_exploited_through_ivars
+      expect(backdoor).to be_exploited_through_ivars
     end
   end
 
   describe "safe_load_file" do
     it "does NOT allow exploits through objects defined in YAML w/ !ruby/hash" do
       object = YAML.safe_load_file "spec/exploit.1.9.3.yaml"
-      object.should_not be_a(ExploitableBackDoor)
+      expect(object).not_to be_a(ExploitableBackDoor)
     end
 
     it "does NOT allow exploits through objects defined in YAML w/ !ruby/object" do
       object = YAML.safe_load_file "spec/exploit.1.9.2.yaml"
-      object.should_not be_a(ExploitableBackDoor)
+      expect(object).not_to be_a(ExploitableBackDoor)
     end
     
     it "returns false when parsing an empty file" do
-      YAML.safe_load_file("spec/issue49.yml").should == false
+      expect(YAML.safe_load_file("spec/issue49.yml")).to eq(false)
     end
   end
 
@@ -523,13 +523,13 @@ describe YAML do
     context "as long as a :default_mode has been specified" do
       it "doesn't issue a warning for safe mode, since an explicit mode has been set" do
         SafeYAML::OPTIONS[:default_mode] = :safe
-        Kernel.should_not_receive(:warn)
+        expect(Kernel).not_to receive(:warn)
         YAML.load(*arguments)
       end
 
       it "doesn't issue a warning for unsafe mode, since an explicit mode has been set" do
         SafeYAML::OPTIONS[:default_mode] = :unsafe
-        Kernel.should_not_receive(:warn)
+        expect(Kernel).not_to receive(:warn)
         YAML.load(*arguments)
       end
     end
@@ -539,12 +539,12 @@ describe YAML do
       let(:options) { { :safe => safe_mode } }
 
       it "doesn't issue a warning" do
-        Kernel.should_not_receive(:warn)
+        expect(Kernel).not_to receive(:warn)
         YAML.load(*arguments)
       end
 
       it "calls #safe_load if the :safe option is set to true" do
-        YAML.should_receive(:safe_load)
+        expect(YAML).to receive(:safe_load)
         YAML.load(*arguments)
       end
 
@@ -552,7 +552,7 @@ describe YAML do
         let(:safe_mode) { false }
 
         it "calls #unsafe_load if the :safe option is set to false" do
-          YAML.should_receive(:unsafe_load)
+          expect(YAML).to receive(:unsafe_load)
           YAML.load(*arguments)
         end
       end
@@ -560,21 +560,21 @@ describe YAML do
 
     it "issues a warning when the :safe option is omitted" do
       silence_warnings do
-        Kernel.should_receive(:warn)
+        expect(Kernel).to receive(:warn)
         YAML.load(*arguments)
       end
     end
 
     it "only issues a warning once (to avoid spamming an app's output)" do
       silence_warnings do
-        Kernel.should_receive(:warn).once
+        expect(Kernel).to receive(:warn).once
         2.times { YAML.load(*arguments) }
       end
     end
 
     it "defaults to safe mode if the :safe option is omitted" do
       silence_warnings do
-        YAML.should_receive(:safe_load)
+        expect(YAML).to receive(:safe_load)
         YAML.load(*arguments)
       end
     end
@@ -586,13 +586,13 @@ describe YAML do
 
       it "defaults to unsafe mode if the :safe option is omitted" do
         silence_warnings do
-          YAML.should_receive(:unsafe_load)
+          expect(YAML).to receive(:unsafe_load)
           YAML.load(*arguments)
         end
       end
 
       it "calls #safe_load if the :safe option is set to true" do
-        YAML.should_receive(:safe_load)
+        expect(YAML).to receive(:safe_load)
         YAML.load(*(arguments + [{ :safe => true }]))
       end
     end
@@ -603,30 +603,30 @@ describe YAML do
 
     it "issues a warning if the :safe option is omitted" do
       silence_warnings do
-        Kernel.should_receive(:warn)
+        expect(Kernel).to receive(:warn)
         YAML.load_file(filename)
       end
     end
 
     it "doesn't issue a warning as long as the :safe option is specified" do
-      Kernel.should_not_receive(:warn)
+      expect(Kernel).not_to receive(:warn)
       YAML.load_file(filename, :safe => true)
     end
 
     it "defaults to safe mode if the :safe option is omitted" do
       silence_warnings do
-        YAML.should_receive(:safe_load_file)
+        expect(YAML).to receive(:safe_load_file)
         YAML.load_file(filename)
       end
     end
 
     it "calls #safe_load_file if the :safe option is set to true" do
-      YAML.should_receive(:safe_load_file)
+      expect(YAML).to receive(:safe_load_file)
       YAML.load_file(filename, :safe => true)
     end
 
     it "calls #unsafe_load_file if the :safe option is set to false" do
-      YAML.should_receive(:unsafe_load_file)
+      expect(YAML).to receive(:unsafe_load_file)
       YAML.load_file(filename, :safe => false)
     end
 
@@ -637,30 +637,30 @@ describe YAML do
 
       it "defaults to unsafe mode if the :safe option is omitted" do
         silence_warnings do
-          YAML.should_receive(:unsafe_load_file)
+          expect(YAML).to receive(:unsafe_load_file)
           YAML.load_file(filename)
         end
       end
 
       it "calls #safe_load if the :safe option is set to true" do
-        YAML.should_receive(:safe_load_file)
+        expect(YAML).to receive(:safe_load_file)
         YAML.load_file(filename, :safe => true)
       end
     end
 
     it "handles files starting with --- (see issue #48)" do
-      YAML.load_file("spec/issue48.txt", :safe => true).should == {
+      expect(YAML.load_file("spec/issue48.txt", :safe => true)).to eq({
         "title" => "Blah",
         "key"   => "value"
-      }
+      })
     end
 
     it "handles content starting with --- (see issue #48)" do
       yaml = File.read("spec/issue48.txt")
-      YAML.load(yaml, :safe => true).should == {
+      expect(YAML.load(yaml, :safe => true)).to eq({
         "title" => "Blah",
         "key"   => "value"
-      }
+      })
     end
   end
 
@@ -668,21 +668,21 @@ describe YAML do
     context "not a class" do
       it "should raise" do
         expect { SafeYAML::whitelist! :foo }.to raise_error(/not a Class/)
-        SafeYAML::OPTIONS[:whitelisted_tags].should be_empty
+        expect(SafeYAML::OPTIONS[:whitelisted_tags]).to be_empty
       end
     end
 
     context "anonymous class" do
       it "should raise" do
         expect { SafeYAML::whitelist! Class.new }.to raise_error(/cannot be anonymous/)
-        SafeYAML::OPTIONS[:whitelisted_tags].should be_empty
+        expect(SafeYAML::OPTIONS[:whitelisted_tags]).to be_empty
       end
     end
 
     context "with a Class as its argument" do
       it "should configure correctly" do
         expect { SafeYAML::whitelist! OpenStruct }.to_not raise_error
-        SafeYAML::OPTIONS[:whitelisted_tags].grep(/OpenStruct\Z/).should_not be_empty
+        expect(SafeYAML::OPTIONS[:whitelisted_tags].grep(/OpenStruct\Z/)).not_to be_empty
       end
 
       it "successfully deserializes the specified class" do
@@ -692,23 +692,23 @@ describe YAML do
         SafeYAML::OPTIONS[:deserialize_symbols] = true
 
         result = safe_load_round_trip(OpenStruct.new(:foo => "bar"))
-        result.should be_a(OpenStruct)
-        result.foo.should == "bar"
+        expect(result).to be_a(OpenStruct)
+        expect(result.foo).to eq("bar")
       end
 
       it "works for ranges" do
         SafeYAML.whitelist!(Range)
-        safe_load_round_trip(1..10).should == (1..10)
+        expect(safe_load_round_trip(1..10)).to eq(1..10)
       end
 
       it "works for regular expressions" do
         SafeYAML.whitelist!(Regexp)
-        safe_load_round_trip(/foo/).should == /foo/
+        expect(safe_load_round_trip(/foo/)).to eq(/foo/)
       end
 
       it "works for multiple classes" do
         SafeYAML.whitelist!(Range, Regexp)
-        safe_load_round_trip([(1..10), /bar/]).should == [(1..10), /bar/]
+        expect(safe_load_round_trip([(1..10), /bar/])).to eq([(1..10), /bar/])
       end
 
       it "works for arbitrary Exception subclasses" do
@@ -723,8 +723,8 @@ describe YAML do
         SafeYAML.whitelist!(CustomException)
 
         ex = safe_load_round_trip(CustomException.new("blah"))
-        ex.should be_a(CustomException)
-        ex.custom_message.should == "blah"
+        expect(ex).to be_a(CustomException)
+        expect(ex.custom_message).to eq("blah")
       end
     end
   end

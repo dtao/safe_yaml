@@ -2,41 +2,41 @@ require "spec_helper"
 
 describe SafeYAML::Transform::ToFloat do
   it "returns true when the value matches a valid Float" do
-    subject.transform?("20.00").should == [true, 20.0]
+    expect(subject.transform?("20.00")).to eq([true, 20.0])
   end
 
   it "returns false when the value does not match a valid Float" do
-    subject.transform?("foobar").should be_false
+    expect(subject.transform?("foobar")).to be_falsey
   end
 
   it "returns false when the value spans multiple lines" do
-    subject.transform?("20.00\nNOT A FLOAT").should be_false
+    expect(subject.transform?("20.00\nNOT A FLOAT")).to be_falsey
   end
 
   it "correctly parses all formats in the YAML spec" do
     # canonical
-    subject.transform?("6.8523015e+5").should == [true, 685230.15]
+    expect(subject.transform?("6.8523015e+5")).to eq([true, 685230.15])
 
     # exponentioal
-    subject.transform?("685.230_15e+03").should == [true, 685230.15]
+    expect(subject.transform?("685.230_15e+03")).to eq([true, 685230.15])
 
     # fixed
-    subject.transform?("685_230.15").should == [true, 685230.15]
+    expect(subject.transform?("685_230.15")).to eq([true, 685230.15])
 
     # sexagesimal
-    subject.transform?("190:20:30.15").should == [true, 685230.15]
+    expect(subject.transform?("190:20:30.15")).to eq([true, 685230.15])
 
     # infinity
-    subject.transform?("-.inf").should == [true, (-1.0 / 0.0)]
+    expect(subject.transform?("-.inf")).to eq([true, (-1.0 / 0.0)])
 
     # not a number
     # NOTE: can't use == here since NaN != NaN
     success, result = subject.transform?(".NaN")
-    success.should be_true; result.should be_nan
+    expect(success).to be_truthy; expect(result).to be_nan
   end
 
   # issue 29
   it "returns false for the string '.'" do
-    subject.transform?(".").should be_false
+    expect(subject.transform?(".")).to be_falsey
   end
 end
