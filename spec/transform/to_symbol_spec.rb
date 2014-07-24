@@ -20,32 +20,32 @@ describe SafeYAML::Transform::ToSymbol do
   end
 
   it "returns true when the value matches a valid Symbol" do
-    with_symbol_deserialization { subject.transform?(":foo")[0].should be_true }
+    with_symbol_deserialization { expect(subject.transform?(":foo")[0]).to be_truthy }
   end
 
   it "returns true when the value matches a valid String+Symbol" do
-    with_symbol_deserialization { subject.transform?(':"foo"')[0].should be_true }
+    with_symbol_deserialization { expect(subject.transform?(':"foo"')[0]).to be_truthy }
   end
 
   it "returns true when the value matches a valid String+Symbol with 's" do
-    with_symbol_deserialization { subject.transform?(":'foo'")[0].should be_true }
+    with_symbol_deserialization { expect(subject.transform?(":'foo'")[0]).to be_truthy }
   end
 
   it "returns true when the value has special characters and is wrapped in a String" do
-    with_symbol_deserialization { subject.transform?(':"foo.bar"')[0].should be_true }
+    with_symbol_deserialization { expect(subject.transform?(':"foo.bar"')[0]).to be_truthy }
   end
 
   it "returns false when symbol deserialization is disabled" do
-    without_symbol_deserialization { subject.transform?(":foo").should be_false }
+    without_symbol_deserialization { expect(subject.transform?(":foo")).to be_falsey }
   end
 
   it "returns false when the value does not match a valid Symbol" do
-    with_symbol_deserialization { subject.transform?("foo").should be_false }
+    with_symbol_deserialization { expect(subject.transform?("foo")).to be_falsey }
   end
 
   it "returns false when the symbol does not begin the line" do
     with_symbol_deserialization do
-      subject.transform?("NOT A SYMBOL\n:foo").should be_false
+      expect(subject.transform?("NOT A SYMBOL\n:foo")).to be_falsey
     end
   end
 end
