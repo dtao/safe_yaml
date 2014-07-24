@@ -18,6 +18,15 @@ YAMLER=psych bundle exec rake spec
 rvm use 2.0.0
 bundle exec rake spec
 
+rvm use 2.1.0
+bundle exec rake spec
+
+rvm use 2.1.1
+bundle exec rake spec
+
+rvm use 2.1.2
+bundle exec rake spec
+
 rvm use ruby-head
 bundle exec rake spec
 

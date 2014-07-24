@@ -2,20 +2,10 @@
 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
 
-rvm use 1.8.7
-bundle install
+declare -a versions=("1.8.7" "1.9.2" "1.9.3" "2.0.0" "2.1.0" "2.1.1" "2.1.2" "ruby-head" "jruby")
 
-rvm use 1.9.2
-bundle install
-
-rvm use 1.9.3
-bundle install
-
-rvm use 2.0.0
-bundle install
-
-rvm use ruby-head
-bundle install
-
-rvm use jruby
-bundle install
+for i in "${versions[@]}"
+do
+  rvm use $i
+  bundle install
+done
