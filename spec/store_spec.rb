@@ -8,6 +8,8 @@ describe SafeYAML::Store do
   let(:content) { "--- \nfoo: 42\n:bar: \"party\"\n" }
 
   before do
+    # Rewrite file on every test, as its contents are potentially modified by
+    # SafeYAML::Store#transaction
     File.open(file, 'w') { |f| f.write(content) }
   end
 
