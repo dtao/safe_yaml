@@ -5,7 +5,7 @@ require 'safe_yaml/store'
 describe SafeYAML::Store do
 
   let(:file)    { 'spec/store.yaml' }
-  let(:content) { "--- \nfoo: 42\n" }
+  let(:content) { "--- \nfoo: 42\n:bar: \"party\"\n" }
 
   before do
     File.open(file, 'w') { |f| f.write(content) }
@@ -15,7 +15,7 @@ describe SafeYAML::Store do
     load_args = [content, options]
     load_args.insert(1, nil) if SafeYAML::YAML_ENGINE == 'psych'
 
-    expect(SafeYAML).to receive(:load).with(*load_args).and_return('foo' => 42)
+    expect(SafeYAML).to receive(:load).with(*load_args).and_call_original
     expect(YAML).not_to receive(:load)
   end
 
@@ -35,13 +35,19 @@ describe SafeYAML::Store do
     expect(subject.transaction { subject['foo'] }).to eq(42)
   end
 
+  it 'preserves default SafeYAML behavior' do
+    expect(subject.transaction { subject[:bar] }).to eq(nil)
+    expect(subject.transaction { subject[':bar'] }).to eq('party')
+  end
+
+
   describe 'with options' do
 
-    let(:init_args) { super().insert(2, :symbolize_keys => true) }
+    let(:init_args) { super().insert(2, :deserialize_symbols => true) }
 
     it 'should accept options for SafeYAML.load' do
-      expect_safe_load(:symbolize_keys => true)
-      expect(subject.transaction { subject['foo'] }).to eq(42)
+      expect_safe_load(:deserialize_symbols => true)
+      expect(subject.transaction { subject[:bar] }).to eq('party')
     end
 
   end
