@@ -1,3 +1,5 @@
+require "psych/nodes"
+
 module SafeYAML
   class PsychResolver < Resolver
     NODE_TYPES = {
