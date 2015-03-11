@@ -1,3 +1,16 @@
+1.0.4
+-----
+
+- added support for Ruby 2.2
+- converted specs to RSpec 3.0.2 syntax
+
+1.0.3
+-----
+
+- introduced bin/safe_yaml
+- stopped running libyaml check on load
+- corrected libyaml check implementation
+
 1.0.2
 -----
 
