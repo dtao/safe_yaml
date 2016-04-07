@@ -59,6 +59,10 @@ describe SafeYAML::Transform::ToInteger do
 
   # see https://github.com/dtao/safe_yaml/pull/51
   it "strips out underscores before parsing decimal values" do
-    expect(subject.transform?("_850_")).to eq([true, 850])
+    expect(subject.transform?("850_")).to eq([true, 850])
+  end
+
+  it "does not parse decimal values with leading underscores" do
+    expect(subject.transform?("_850")).to be_falsey
   end
 end
