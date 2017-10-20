@@ -97,6 +97,8 @@ The most important option is the `:safe` option (default: `true`), which control
 
 - `:raise_on_unknown_tag` (default: `false`): Represents the highest possible level of paranoia. If the YAML engine encounters any tag other than ones that are automatically trusted by SafeYAML or that you've explicitly whitelisted, it will raise an exception. This may be a good choice if you expect to always be dealing with perfectly safe YAML and want your application to fail loudly upon encountering questionable data.
 
+- `:transformers` (default: `nil`): Allows you to provide `Transformer`s to customize the parsing process. It can be used to ignore some data types or to parse something in a different way.
+
 All of the above options can be set at the global level via `SafeYAML::OPTIONS`. You can also set each one individually per call to `YAML.load`; an option explicitly passed to `load` will take precedence over an option specified globally.
 
 What if I don't *want* to patch `YAML`?
@@ -151,9 +153,9 @@ And in case you were wondering: no, this feature will *not* allow would-be attac
 
 ```ruby
 yaml = <<-EOYAML
---- !ruby/object:OpenStruct 
-table: 
-  :backdoor: !ruby/hash:ClassBuilder 
+--- !ruby/object:OpenStruct
+table:
+  :backdoor: !ruby/hash:ClassBuilder
     "foo; end; puts %(I'm in yr system!); def bar": "baz"
 EOYAML
 ```

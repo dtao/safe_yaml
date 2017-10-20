@@ -2,7 +2,7 @@ require 'base64'
 
 module SafeYAML
   class Transform
-    TRANSFORMERS = [
+    DEFAULT_TRANSFORMERS = [
       Transform::ToSymbol.new,
       Transform::ToInteger.new,
       Transform::ToFloat.new,
@@ -15,7 +15,8 @@ module SafeYAML
       return value if quoted
 
       if value.is_a?(String)
-        TRANSFORMERS.each do |transformer|
+        transformers = options[:transformers] || DEFAULT_TRANSFORMERS
+        transformers.each do |transformer|
           success, transformed_value = transformer.method(:transform?).arity == 1 ?
             transformer.transform?(value) :
             transformer.transform?(value, options)
