@@ -1,3 +1,5 @@
+require 'time'
+
 module SafeYAML
   class Parse
     class Date
