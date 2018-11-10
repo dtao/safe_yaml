@@ -1,3 +1,8 @@
+- Breaking change. Update terminologies.
+  * Replace `SafeYAML::whitelist!` with `SafeYAML::permit!`
+  * Replace `SafeYAML::whitelist_class!` with `SafeYAML::permit_class!`
+  * Option `whitelisted_tags` changed to `permitted_tags`
+
 1.0.2
 -----
 

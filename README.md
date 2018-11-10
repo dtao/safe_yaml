@@ -91,11 +91,11 @@ The most important option is the `:safe` option (default: `true`), which control
 
 - `:deserialize_symbols` (default: `false`): Controls whether or not YAML will deserialize symbols. It is probably best to only enable this option where necessary, e.g. to make trusted libraries work. Symbols receive special treatment in Ruby and are not garbage collected, which means deserializing them indiscriminately may render your site vulnerable to a DOS attack.
 
-- `:whitelisted_tags`: Accepts an array of YAML tags that designate trusted types, e.g., ones that can be deserialized without worrying about any resulting security vulnerabilities. When any of the given tags are encountered in a YAML document, the associated data will be parsed by the underlying YAML engine (Syck or Psych) for the version of Ruby you are using. See the "Whitelisting Trusted Types" section below for more information.
+- `:permitted_tags`: Accepts an array of YAML tags that designate trusted types, e.g., ones that can be deserialized without worrying about any resulting security vulnerabilities. When any of the given tags are encountered in a YAML document, the associated data will be parsed by the underlying YAML engine (Syck or Psych) for the version of Ruby you are using. See the "Permitting Trusted Types" section below for more information.
 
-- `:custom_initializers`: Similar to the `:whitelisted_tags` option, but allows you to provide your own initializers for specified tags rather than using Syck or Psyck. Accepts a hash with string tags for keys and lambdas for values.
+- `:custom_initializers`: Similar to the `:permitted_tags` option, but allows you to provide your own initializers for specified tags rather than using Syck or Psyck. Accepts a hash with string tags for keys and lambdas for values.
 
-- `:raise_on_unknown_tag` (default: `false`): Represents the highest possible level of paranoia. If the YAML engine encounters any tag other than ones that are automatically trusted by SafeYAML or that you've explicitly whitelisted, it will raise an exception. This may be a good choice if you expect to always be dealing with perfectly safe YAML and want your application to fail loudly upon encountering questionable data.
+- `:raise_on_unknown_tag` (default: `false`): Represents the highest possible level of paranoia. If the YAML engine encounters any tag other than ones that are automatically trusted by SafeYAML or that you've explicitly permitted, it will raise an exception. This may be a good choice if you expect to always be dealing with perfectly safe YAML and want your application to fail loudly upon encountering questionable data.
 
 All of the above options can be set at the global level via `SafeYAML::OPTIONS`. You can also set each one individually per call to `YAML.load`; an option explicitly passed to `load` will take precedence over an option specified globally.
 
@@ -126,25 +126,25 @@ The way that SafeYAML works is by restricting the kinds of objects that can be d
 
 Again, deserialization of symbols can be enabled globally by setting `SafeYAML::OPTIONS[:deserialize_symbols] = true`, or in a specific call to `YAML.load([some yaml], :deserialize_symbols => true)`.
 
-Whitelisting Trusted Types
+Permitting Trusted Types
 --------------------------
 
-SafeYAML supports whitelisting certain YAML tags for trusted types. This is handy when your application uses YAML to serialize and deserialize certain types not listed above, which you know to be free of any deserialization-related vulnerabilities.
+SafeYAML supports permitting certain YAML tags for trusted types. This is handy when your application uses YAML to serialize and deserialize certain types not listed above, which you know to be free of any deserialization-related vulnerabilities.
 
-The easiest way to whitelist types is by calling `SafeYAML.whitelist!`, which can accept a variable number of safe types, e.g.:
+The easiest way to permit types is by calling `SafeYAML.permit!`, which can accept a variable number of safe types, e.g.:
 
 ```ruby
-SafeYAML.whitelist!(Foo, Bar)
+SafeYAML.permit!(Foo, Bar)
 ```
 
-You can also whitelist YAML *tags* via the `:whitelisted_tags` option:
+You can also permit YAML *tags* via the `:permitted_tags` option:
 
 ```ruby
 # Using Syck
-SafeYAML::OPTIONS[:whitelisted_tags] = ["tag:ruby.yaml.org,2002:object:OpenStruct"]
+SafeYAML::OPTIONS[:permitted_tags] = ["tag:ruby.yaml.org,2002:object:OpenStruct"]
 
 # Using Psych
-SafeYAML::OPTIONS[:whitelisted_tags] = ["!ruby/object:OpenStruct"]
+SafeYAML::OPTIONS[:permitted_tags] = ["!ruby/object:OpenStruct"]
 ```
 
 And in case you were wondering: no, this feature will *not* allow would-be attackers to embed untrusted types within trusted types:
@@ -170,9 +170,9 @@ Also be aware that some Ruby libraries, particularly those requiring inter-proce
 
 - [**ActiveRecord**](https://github.com/rails/rails/tree/master/activerecord): uses YAML to control serialization of model objects using the `serialize` class method. If you find that accessing serialized properties on your ActiveRecord models is causing errors, chances are you may need to:
   1. set the `:deserialize_symbols` option to `true`,
-  2. whitelist some of the types in your serialized data via `SafeYAML.whitelist!` or the `:whitelisted_tags` option, or
+  2. permit some of the types in your serialized data via `SafeYAML.permit!` or the `:permitted_tags` option, or
   3. both
-- [**delayed_job**](https://github.com/collectiveidea/delayed_job): Uses YAML to serialize the objects on which delayed methods are invoked (with `delay`). The safest solution in this case is to use `SafeYAML.whitelist!` to whitelist the types you need to serialize.
+- [**delayed_job**](https://github.com/collectiveidea/delayed_job): Uses YAML to serialize the objects on which delayed methods are invoked (with `delay`). The safest solution in this case is to use `SafeYAML.permit!` to permit the types you need to serialize.
 - [**Guard**](https://github.com/guard/guard): Uses YAML as a serialization format for notifications. The data serialized uses symbolic keys, so setting `SafeYAML::OPTIONS[:deserialize_symbols] = true` is necessary to allow Guard to work.
 - [**sidekiq**](https://github.com/mperham/sidekiq): Uses a YAML configiuration file with symbolic keys, so setting `SafeYAML::OPTIONS[:deserialize_symbols] = true` should allow it to work.
 

@@ -2,14 +2,14 @@ module SafeYAML
   class Resolver
     def initialize(options)
       @options              = SafeYAML::OPTIONS.merge(options || {})
-      @whitelist            = @options[:whitelisted_tags] || []
+      @allowlist            = @options[:permitted_tags] || []
       @initializers         = @options[:custom_initializers] || {}
       @raise_on_unknown_tag = @options[:raise_on_unknown_tag]
     end
 
     def resolve_node(node)
       return node if !node
-      return self.native_resolve(node) if tag_is_whitelisted?(self.get_node_tag(node))
+      return self.native_resolve(node) if tag_is_permitted?(self.get_node_tag(node))
 
       case self.get_node_type(node)
       when :root
@@ -65,8 +65,8 @@ module SafeYAML
       tag
     end
 
-    def tag_is_whitelisted?(tag)
-      @whitelist.include?(tag)
+    def tag_is_permitted?(tag)
+      @allowlist.include?(tag)
     end
 
     def options

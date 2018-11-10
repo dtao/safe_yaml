@@ -42,12 +42,12 @@ describe YAML do
       expect(backdoor).to be_exploited_through_ivars
     end
 
-    context "with special whitelisted tags defined" do
+    context "with special permitted tags defined" do
       before :each do
-        SafeYAML::whitelist!(OpenStruct)
+        SafeYAML::permit!(OpenStruct)
       end
 
-      it "effectively ignores the whitelist (since everything is whitelisted)" do
+      it "effectively ignores those already been permitted" do
         result = YAML.unsafe_load <<-YAML.unindent
           --- !ruby/object:OpenStruct 
           table: 
@@ -77,7 +77,7 @@ describe YAML do
         let(:options) { nil }
         let(:arguments) { ["foo: bar", nil, options] }
 
-        context "when no tags are whitelisted" do
+        context "when no tags are permitted" do
           it "constructs a SafeYAML::PsychHandler to resolve nodes as they're parsed, for optimal performance" do
             expect(Psych::Parser).to receive(:new).with an_instance_of(SafeYAML::PsychHandler)
             # This won't work now; we just want to ensure Psych::Parser#parse was in fact called.
@@ -85,9 +85,9 @@ describe YAML do
           end
         end
 
-        context "when whitelisted tags are specified" do
+        context "when permitted tags are specified" do
           let(:options) {
-            { :whitelisted_tags => ["foo"] }
+            { :permitted_tags => ["foo"] }
           }
 
           it "instead uses Psych to construct a full tree before examining the nodes" do
@@ -307,27 +307,27 @@ describe YAML do
       end
     end
 
-    context "with special whitelisted tags defined" do
+    context "with special permitted tags defined" do
       before :each do
-        SafeYAML::whitelist!(OpenStruct)
+        SafeYAML::permit!(OpenStruct)
 
         # Necessary for deserializing OpenStructs properly.
         SafeYAML::OPTIONS[:deserialize_symbols] = true
       end
 
-      it "will allow objects to be deserialized for whitelisted tags" do
+      it "will allow objects to be deserialized for permitted tags" do
         result = YAML.safe_load("--- !ruby/object:OpenStruct\ntable:\n  foo: bar\n")
         expect(result).to be_a(OpenStruct)
         expect(result.instance_variable_get(:@table)).to eq({ "foo" => "bar" })
       end
 
-      it "will not deserialize objects without whitelisted tags" do
+      it "will not deserialize objects without permitted tags" do
         result = YAML.safe_load("--- !ruby/hash:ExploitableBackDoor\nfoo: bar\n")
         expect(result).not_to be_a(ExploitableBackDoor)
         expect(result).to eq({ "foo" => "bar" })
       end
 
-      it "will not allow non-whitelisted objects to be embedded within objects with whitelisted tags" do
+      it "will not allow non-permitted objects to be embedded within objects with permitted tags" do
         result = YAML.safe_load <<-YAML.unindent
           --- !ruby/object:OpenStruct 
           table: 
@@ -349,7 +349,7 @@ describe YAML do
           SafeYAML.restore_defaults!
         end
 
-        it "raises an exception if a non-nil, non-whitelisted tag is encountered" do
+        it "raises an exception if a non-nil, non-permitted tag is encountered" do
           expect {
             YAML.safe_load <<-YAML.unindent
               --- !ruby/object:Unknown
@@ -369,7 +369,7 @@ describe YAML do
           }.to raise_error
         end
 
-        it "does not raise an exception as long as all tags are whitelisted" do
+        it "does not raise an exception as long as all tags are permitted" do
           result = YAML.safe_load <<-YAML.unindent
             --- !ruby/object:OpenStruct
             table:
@@ -401,14 +401,14 @@ describe YAML do
           expect(result).to eq("foo")
         end
 
-        context "with whitelisted custom class" do
+        context "with permitted custom class" do
           class SomeClass
             attr_accessor :foo
           end
           let(:instance) { SomeClass.new }
 
           before do
-            SafeYAML::whitelist!(SomeClass)
+            SafeYAML::permit!(SomeClass)
             instance.foo = 'with trailing whitespace: '
           end
 
@@ -445,11 +445,11 @@ describe YAML do
         end
       end
 
-      context "(or, for example, when certain tags are whitelisted)" do
+      context "(or, for example, when certain tags are permitted)" do
         let(:default_options) {
           {
             :deserialize_symbols => true,
-            :whitelisted_tags => SafeYAML::YAML_ENGINE == "psych" ?
+            :permitted_tags => SafeYAML::YAML_ENGINE == "psych" ?
               ["!ruby/object:OpenStruct"] :
               ["tag:ruby.yaml.org,2002:object:OpenStruct"]
           }
@@ -462,10 +462,10 @@ describe YAML do
         end
 
         it "allows the default option to be overridden on a per-call basis" do
-          result = safe_load_round_trip(OpenStruct.new(:foo => "bar"), :whitelisted_tags => [])
+          result = safe_load_round_trip(OpenStruct.new(:foo => "bar"), :permitted_tags => [])
           expect(result).to eq({ "table" => { :foo => "bar" } })
 
-          result = safe_load_round_trip(OpenStruct.new(:foo => "bar"), :deserialize_symbols => false, :whitelisted_tags => [])
+          result = safe_load_round_trip(OpenStruct.new(:foo => "bar"), :deserialize_symbols => false, :permitted_tags => [])
           expect(result).to eq({ "table" => { ":foo" => "bar" } })
         end
       end
@@ -664,29 +664,29 @@ describe YAML do
     end
   end
 
-  describe "whitelist!" do
+  describe "permit!" do
     context "not a class" do
       it "should raise" do
-        expect { SafeYAML::whitelist! :foo }.to raise_error(/not a Class/)
-        expect(SafeYAML::OPTIONS[:whitelisted_tags]).to be_empty
+        expect { SafeYAML::permit! :foo }.to raise_error(/not a Class/)
+        expect(SafeYAML::OPTIONS[:permitted_tags]).to be_empty
       end
     end
 
     context "anonymous class" do
       it "should raise" do
-        expect { SafeYAML::whitelist! Class.new }.to raise_error(/cannot be anonymous/)
-        expect(SafeYAML::OPTIONS[:whitelisted_tags]).to be_empty
+        expect { SafeYAML::permit! Class.new }.to raise_error(/cannot be anonymous/)
+        expect(SafeYAML::OPTIONS[:permitted_tags]).to be_empty
       end
     end
 
     context "with a Class as its argument" do
       it "should configure correctly" do
-        expect { SafeYAML::whitelist! OpenStruct }.to_not raise_error
-        expect(SafeYAML::OPTIONS[:whitelisted_tags].grep(/OpenStruct\Z/)).not_to be_empty
+        expect { SafeYAML::permit! OpenStruct }.to_not raise_error
+        expect(SafeYAML::OPTIONS[:permitted_tags].grep(/OpenStruct\Z/)).not_to be_empty
       end
 
       it "successfully deserializes the specified class" do
-        SafeYAML.whitelist!(OpenStruct)
+        SafeYAML.permit!(OpenStruct)
 
         # necessary for properly assigning OpenStruct attributes
         SafeYAML::OPTIONS[:deserialize_symbols] = true
@@ -697,17 +697,17 @@ describe YAML do
       end
 
       it "works for ranges" do
-        SafeYAML.whitelist!(Range)
+        SafeYAML.permit!(Range)
         expect(safe_load_round_trip(1..10)).to eq(1..10)
       end
 
       it "works for regular expressions" do
-        SafeYAML.whitelist!(Regexp)
+        SafeYAML.permit!(Regexp)
         expect(safe_load_round_trip(/foo/)).to eq(/foo/)
       end
 
       it "works for multiple classes" do
-        SafeYAML.whitelist!(Range, Regexp)
+        SafeYAML.permit!(Range, Regexp)
         expect(safe_load_round_trip([(1..10), /bar/])).to eq([(1..10), /bar/])
       end
 
@@ -720,7 +720,7 @@ describe YAML do
           end
         end
 
-        SafeYAML.whitelist!(CustomException)
+        SafeYAML.permit!(CustomException)
 
         ex = safe_load_round_trip(CustomException.new("blah"))
         expect(ex).to be_a(CustomException)

@@ -1,5 +1,5 @@
 # This is, admittedly, pretty insane. Fundamentally the challenge here is this: if we want to allow
-# whitelisting of tags (while still leveraging Syck's internal functionality), then we have to
+# Permitting of tags (while still leveraging Syck's internal functionality), then we have to
 # change how Syck::Node#transform works. But since we (SafeYAML) do not control instantiation of
 # Syck::Node objects, we cannot, for example, subclass Syck::Node and override #tranform the "easy"
 # way. So the only choice is to monkeypatch, like this. And the only way to make this work
@@ -9,16 +9,16 @@
 monkeypatch = <<-EORUBY
   class Node
     @@safe_transform_depth     = 0
-    @@safe_transform_whitelist = nil
+    @@safe_transform_allowlist = nil
 
     def safe_transform(options={})
       begin
         @@safe_transform_depth += 1
-        @@safe_transform_whitelist ||= options[:whitelisted_tags]
+        @@safe_transform_allowlist ||= options[:permitted_tags]
 
         if self.type_id
           SafeYAML.tag_safety_check!(self.type_id, options)
-          return unsafe_transform if @@safe_transform_whitelist.include?(self.type_id)
+          return unsafe_transform if @@safe_transform_allowlist.include?(self.type_id)
         end
 
         SafeYAML::SyckResolver.new.resolve_node(self)
@@ -26,7 +26,7 @@ monkeypatch = <<-EORUBY
       ensure
         @@safe_transform_depth -= 1
         if @@safe_transform_depth == 0
-          @@safe_transform_whitelist = nil
+          @@safe_transform_allowlist = nil
         end
       end
     end

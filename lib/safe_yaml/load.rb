@@ -30,7 +30,7 @@ module SafeYAML
     :default_mode         => nil,
     :suppress_warnings    => false,
     :deserialize_symbols  => false,
-    :whitelisted_tags     => [],
+    :permitted_tags       => [],
     :custom_initializers  => {},
     :raise_on_unknown_tag => false
   })
@@ -65,27 +65,27 @@ module SafeYAML
 
   def tag_safety_check!(tag, options)
     return if tag.nil? || tag == "!"
-    if options[:raise_on_unknown_tag] && !options[:whitelisted_tags].include?(tag) && !tag_is_explicitly_trusted?(tag)
+    if options[:raise_on_unknown_tag] && !options[:permitted_tags].include?(tag) && !tag_is_explicitly_trusted?(tag)
       raise "Unknown YAML tag '#{tag}'"
     end
   end
 
-  def whitelist!(*classes)
+  def permit!(*classes)
     classes.each do |klass|
-      whitelist_class!(klass)
+      permit_class!(klass)
     end
   end
 
-  def whitelist_class!(klass)
+  def permit_class!(klass)
     raise "#{klass} not a Class" unless klass.is_a?(::Class)
 
     klass_name = klass.name
     raise "#{klass} cannot be anonymous" if klass_name.nil? || klass_name.empty?
 
-    # Whitelist any built-in YAML tags supplied by Syck or Psych.
+    # Permit any built-in YAML tags supplied by Syck or Psych.
     predefined_tag = PREDEFINED_TAGS[klass]
     if predefined_tag
-      OPTIONS[:whitelisted_tags] << predefined_tag
+      OPTIONS[:permitted_tags] << predefined_tag
       return
     end
 
@@ -97,7 +97,7 @@ module SafeYAML
                  when "syck"  then "tag:ruby.yaml.org,2002:#{tag_class}"
                  else raise "unknown YAML_ENGINE #{YAML_ENGINE}"
                  end
-    OPTIONS[:whitelisted_tags] << "#{tag_prefix}:#{klass_name}"
+    OPTIONS[:permitted_tags] << "#{tag_prefix}:#{klass_name}"
   end
 
   if YAML_ENGINE == "psych"
@@ -132,9 +132,9 @@ module SafeYAML
     require "safe_yaml/safe_to_ruby_visitor"
 
     def self.load(yaml, filename=nil, options={})
-      # If the user hasn't whitelisted any tags, we can go with this implementation which is
+      # If the user hasn't permitted any tags, we can go with this implementation which is
       # significantly faster.
-      if (options && options[:whitelisted_tags] || SafeYAML::OPTIONS[:whitelisted_tags]).empty?
+      if (options && options[:permitted_tags] || SafeYAML::OPTIONS[:permitted_tags]).empty?
         safe_handler = SafeYAML::PsychHandler.new(options) do |result|
           return result
         end
