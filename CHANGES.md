@@ -1,3 +1,8 @@
+1.0.5
+-----
+
+- fixed [#80](https://github.com/dtao/safe_yaml/issues/80): uninitialized constant DateTime
+
 1.0.2
 -----
 
