@@ -23,14 +23,16 @@ module SafeYAML
       # Before that we'll just need to convert DateTime to Time ourselves.
       TO_TIME_AVAILABLE = DateTime.instance_methods.include?(:to_time)
 
-      def self.value(value)
+      def self.value(value, preserve_timezone)
         d = DateTime.parse(value)
 
-        return d.to_time if TO_TIME_AVAILABLE
+        if TO_TIME_AVAILABLE
+          return preserve_timezone ? d.to_time.localtime(d.zone) : d.to_time
+        end
 
         usec = d.sec_fraction * SEC_FRACTION_MULTIPLIER
         time = Time.utc(d.year, d.month, d.day, d.hour, d.min, d.sec, usec) - (d.offset * SECONDS_PER_DAY)
-        time.getlocal
+        return preserve_timezone ? time : time.getlocal
       end
     end
   end

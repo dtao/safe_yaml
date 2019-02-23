@@ -32,7 +32,8 @@ module SafeYAML
     :deserialize_symbols  => false,
     :whitelisted_tags     => [],
     :custom_initializers  => {},
-    :raise_on_unknown_tag => false
+    :raise_on_unknown_tag => false,
+    :preserve_timezone    => false
   })
 
   OPTIONS = Deep.copy(DEFAULT_OPTIONS)
