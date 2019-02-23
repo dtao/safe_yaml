@@ -49,9 +49,9 @@ describe YAML do
 
       it "effectively ignores the whitelist (since everything is whitelisted)" do
         result = YAML.unsafe_load <<-YAML.unindent
-          --- !ruby/object:OpenStruct 
-          table: 
-            :backdoor: !ruby/object:ExploitableBackDoor 
+          --- !ruby/object:OpenStruct
+          table:
+            :backdoor: !ruby/object:ExploitableBackDoor
               foo: bar
         YAML
 
@@ -329,9 +329,9 @@ describe YAML do
 
       it "will not allow non-whitelisted objects to be embedded within objects with whitelisted tags" do
         result = YAML.safe_load <<-YAML.unindent
-          --- !ruby/object:OpenStruct 
-          table: 
-            :backdoor: !ruby/object:ExploitableBackDoor 
+          --- !ruby/object:OpenStruct
+          table:
+            :backdoor: !ruby/object:ExploitableBackDoor
               foo: bar
         YAML
 
@@ -503,7 +503,7 @@ describe YAML do
       object = YAML.safe_load_file "spec/exploit.1.9.2.yaml"
       expect(object).not_to be_a(ExploitableBackDoor)
     end
-    
+
     it "returns false when parsing an empty file" do
       expect(YAML.safe_load_file("spec/issue49.yml")).to eq(false)
     end
@@ -594,6 +594,110 @@ describe YAML do
       it "calls #safe_load if the :safe option is set to true" do
         expect(YAML).to receive(:safe_load)
         YAML.load(*(arguments + [{ :safe => true }]))
+      end
+    end
+
+    context "with custom transformers" do
+      let(:transformers) { [SafeYAML::Transform::ToInteger.new, SafeYAML::Transform::ToNil.new] }
+      let(:result) do
+        YAML.load <<-YAML
+          script_true: true
+          script_false: false
+          script_int: 3
+          script_nil: null
+        YAML
+      end
+
+      shared_examples "no default transformers" do
+        it "has no transformers by default" do
+          expect(SafeYAML::OPTIONS[:transformers]).to be_nil
+        end
+      end
+
+      shared_examples "default transformers" do
+        it "has transformers by default" do
+          expect(SafeYAML::OPTIONS[:transformers]).not_to be_empty
+        end
+      end
+
+      shared_examples "int values" do
+        it "considers int values" do
+          expect(result["script_int"]).to eq(3)
+        end
+      end
+
+      shared_examples "nil values" do
+        it "considers nil values" do
+          expect(result["script_nil"]).to be_nil
+        end
+      end
+
+      shared_examples "bool values as strings" do
+        it "ignores bool values" do
+          expect(result["script_true"]).to eq("true")
+          expect(result["script_false"]).to eq("false")
+        end
+      end
+
+      shared_examples "bool values" do
+        it "considers bool values" do
+          expect(result["script_true"]).to eq(true)
+          expect(result["script_false"]).to eq(false)
+        end
+      end
+
+      context "when transformers are not set" do
+        it_behaves_like "no default transformers"
+        it_behaves_like "bool values"
+        it_behaves_like "int values"
+        it_behaves_like "nil values"
+      end
+
+      context "when transformers are changed by default" do
+        before :each do
+          SafeYAML::OPTIONS[:transformers] = transformers
+        end
+
+        it_behaves_like "default transformers"
+        it_behaves_like "bool values as strings"
+        it_behaves_like "int values"
+        it_behaves_like "nil values"
+      end
+
+      context "when transformers are set in load" do
+        let(:result) do
+          YAML.load(<<-YAML, :transformers => transformers)
+            script_true: true
+            script_false: false
+            script_int: 3
+            script_nil: null
+          YAML
+        end
+
+        it_behaves_like "no default transformers"
+        it_behaves_like "bool values as strings"
+        it_behaves_like "int values"
+        it_behaves_like "nil values"
+      end
+
+      context "when transformers are changed by default but overriden" do
+        before :each do
+          SafeYAML::OPTIONS[:transformers] = [SafeYAML::Transform::ToNil.new]
+        end
+
+        let(:result) do
+          YAML.load(<<-YAML, :transformers => transformers)
+            script_true: true
+            script_false: false
+            script_int: 3
+            script_nil: null
+          YAML
+        end
+
+        it_behaves_like "default transformers"
+        it_behaves_like "bool values as strings"
+        it_behaves_like "int values"
+        it_behaves_like "nil values"
       end
     end
   end
