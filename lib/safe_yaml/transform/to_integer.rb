@@ -10,8 +10,10 @@ module SafeYAML
 
       def transform?(value)
         MATCHERS.each_with_index do |matcher, idx|
-          value = value.gsub(/[_,]/, "") if idx == 0
-          return true, Integer(value) if matcher.match(value)
+          if matcher.match(value)
+            value = value.gsub(/[_,]/, "") if idx == 0
+            return true, Integer(value)
+          end
         end
         try_edge_cases?(value)
       end
