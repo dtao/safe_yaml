@@ -16,4 +16,10 @@ Gem::Specification.new do |gem|
   gem.executables   = ["safe_yaml"]
 
   gem.required_ruby_version = ">= 1.8.7"
+
+  if gem.respond_to?(:metadata)
+    gem.metadata['changelog_uri'] = 'https://github.com/dtao/safe_yaml/blob/master/CHANGES.md'
+    gem.metadata['source_code_uri'] = 'https://github.com/dtao/safe_yaml'
+    gem.metadata['bug_tracker_uri'] = 'https://github.com/dtao/safe_yaml/issues'
+  end
 end
