@@ -7,11 +7,11 @@ module YAML
     arguments = [yaml]
 
     if safe_mode == :safe
-      arguments << filename if SafeYAML::YAML_ENGINE == "psych"
+      arguments << { filename: filename } if SafeYAML::YAML_ENGINE == "psych"
       arguments << options_for_safe_load(options)
       safe_load(*arguments)
     else
-      arguments << filename if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
+      arguments << { filename: filename } if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
       unsafe_load(*arguments)
     end
   end
@@ -36,7 +36,7 @@ module YAML
   if SafeYAML::MULTI_ARGUMENT_YAML_LOAD
     def self.unsafe_load_file(filename)
       # https://github.com/tenderlove/psych/blob/v1.3.2/lib/psych.rb#L296-298
-      File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load(f, filename) }
+      File.open(filename, 'r:bom|utf-8') { |f| self.unsafe_load(f, filename: filename) }
     end
 
   else
