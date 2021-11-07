@@ -4,7 +4,7 @@ module SafeYAML
 
     def initialize(resolver)
       case INITIALIZE_ARITY
-      when 2
+      when 2, -3
         # https://github.com/tenderlove/psych/blob/v2.0.0/lib/psych/visitors/to_ruby.rb#L14-L28
         loader  = Psych::ClassLoader.new
         scanner = Psych::ScalarScanner.new(loader)
