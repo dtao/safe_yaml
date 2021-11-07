@@ -32,11 +32,24 @@ describe SafeYAML::Transform::ToDate do
     end
   end
 
-  it "converts times to the local timezone" do
-    success, result = subject.transform?("2012-12-01 10:33:45 +11:00")
-    expect(success).to be_truthy
-    expect(result).to eq(Time.utc(2012, 11, 30, 23, 33, 45))
-    expect(result.gmt_offset).to eq(Time.local(2012, 11, 30).gmt_offset)
+  if RUBY_VERSION < "2.4"
+    # https://docs.ruby-lang.org/en/2.4.0/NEWS.html#label-Stdlib+compatibility+issues+-28excluding+feature+bug+fixes-29
+    # https://github.com/dtao/safe_yaml/pull/87
+    # https://github.com/jekyll/jekyll/issues/5963
+    # https://github.com/jekyll/jekyll/pull/6697
+    it "converts times to the local timezone" do
+      success, result = subject.transform?("2012-12-01 10:33:45 +11:00")
+      expect(success).to be_truthy
+      expect(result).to eq(Time.utc(2012, 11, 30, 23, 33, 45))
+      expect(result.gmt_offset).to eq(Time.local(2012, 11, 30).gmt_offset)
+    end
+  else
+    it "preserves times timezone" do
+      success, result = subject.transform?("2012-12-01 10:33:45 +11:00")
+      expect(success).to be_truthy
+      expect(result).to eq(Time.utc(2012, 11, 30, 23, 33, 45))
+      expect(result.gmt_offset).to eq(11*60*60)
+    end
   end
 
   it "returns strings for invalid dates" do
