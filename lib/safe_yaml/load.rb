@@ -146,7 +146,7 @@ module SafeYAML
       else
         safe_resolver = SafeYAML::PsychResolver.new(options)
         tree = SafeYAML::MULTI_ARGUMENT_YAML_LOAD ?
-          Psych.parse(yaml, filename) :
+          Psych.parse(yaml, filename: filename) :
           Psych.parse(yaml)
         return safe_resolver.resolve_node(tree)
       end
