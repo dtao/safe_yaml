@@ -1,3 +1,8 @@
+1.0.6
+-----
+
+- added support for Psych > 3.1.0 by using new syntax
+
 1.0.5
 -----
 
