@@ -318,7 +318,13 @@ describe YAML do
       it "will allow objects to be deserialized for whitelisted tags" do
         result = YAML.safe_load("--- !ruby/object:OpenStruct\ntable:\n  foo: bar\n")
         expect(result).to be_a(OpenStruct)
-        expect(result.instance_variable_get(:@table)).to eq({ "foo" => "bar" })
+        if RUBY_VERSION < '3.0'
+          expect(result.instance_variable_get(:@table)).to eq({ "foo" => "bar" })
+        else
+          # Ruby3.0's OpenStruct will now symbolize the hash key.
+          # Ref.: https://github.com/ruby/psych/issues/540
+          expect(result.instance_variable_get(:@table)).to eq({ :foo => "bar" })
+        end
       end
 
       it "will not deserialize objects without whitelisted tags" do
@@ -463,10 +469,24 @@ describe YAML do
 
         it "allows the default option to be overridden on a per-call basis" do
           result = safe_load_round_trip(OpenStruct.new(:foo => "bar"), :whitelisted_tags => [])
-          expect(result).to eq({ "table" => { :foo => "bar" } })
+          if RUBY_VERSION < '3.0'
+            expect(result).to eq({ "table" => { :foo => "bar" } })
+          else
+            # Ruby3.0's OpenStruct's to_yaml method doesn't output the
+            # 'table' entity anymore.
+            # Ref.: https://github.com/ruby/psych/issues/540
+            expect(result).to eq({ :foo => "bar" })
+          end
 
           result = safe_load_round_trip(OpenStruct.new(:foo => "bar"), :deserialize_symbols => false, :whitelisted_tags => [])
-          expect(result).to eq({ "table" => { ":foo" => "bar" } })
+          if RUBY_VERSION < '3.0'
+            expect(result).to eq({ "table" => { ":foo" => "bar" } })
+          else
+            # Ruby3.0's OpenStruct's to_yaml method doesn't output the
+            # 'table' entity anymore.
+            # Ref.: https://github.com/ruby/psych/issues/540
+            expect(result).to eq({ :foo => "bar" })
+          end
         end
       end
     end
