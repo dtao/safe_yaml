@@ -174,14 +174,14 @@ Also be aware that some Ruby libraries, particularly those requiring inter-proce
   3. both
 - [**delayed_job**](https://github.com/collectiveidea/delayed_job): Uses YAML to serialize the objects on which delayed methods are invoked (with `delay`). The safest solution in this case is to use `SafeYAML.whitelist!` to whitelist the types you need to serialize.
 - [**Guard**](https://github.com/guard/guard): Uses YAML as a serialization format for notifications. The data serialized uses symbolic keys, so setting `SafeYAML::OPTIONS[:deserialize_symbols] = true` is necessary to allow Guard to work.
-- [**sidekiq**](https://github.com/mperham/sidekiq): Uses a YAML configiuration file with symbolic keys, so setting `SafeYAML::OPTIONS[:deserialize_symbols] = true` should allow it to work.
+- [**sidekiq**](https://github.com/mperham/sidekiq): Uses a YAML configuration file with symbolic keys, so setting `SafeYAML::OPTIONS[:deserialize_symbols] = true` should allow it to work.
 
 The above list will grow over time, as more issues are discovered.
 
 Versioning
 ----------
 
-SafeYAML will follow [semantic versioning](http://semver.org/) so any updates to the first major version will maintain backwards compatability. So expect primarily bug fixes and feature enhancements (if anything!) from here on out... unless it makes sense to break the interface at some point and introduce a version 2.0, which I honestly think is unlikely.
+SafeYAML will follow [semantic versioning](http://semver.org/) so any updates to the first major version will maintain backwards compatibility. So expect primarily bug fixes and feature enhancements (if anything!) from here on out... unless it makes sense to break the interface at some point and introduce a version 2.0, which I honestly think is unlikely.
 
 Requirements
 ------------
