@@ -421,7 +421,7 @@ describe YAML do
       end
     end
 
-    context "when options are passed direclty to #load which differ from the defaults" do
+    context "when options are passed directly to #load which differ from the defaults" do
       let(:default_options) { {} }
 
       before :each do

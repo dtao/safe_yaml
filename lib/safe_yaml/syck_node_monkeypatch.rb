@@ -1,7 +1,7 @@
 # This is, admittedly, pretty insane. Fundamentally the challenge here is this: if we want to allow
 # whitelisting of tags (while still leveraging Syck's internal functionality), then we have to
 # change how Syck::Node#transform works. But since we (SafeYAML) do not control instantiation of
-# Syck::Node objects, we cannot, for example, subclass Syck::Node and override #tranform the "easy"
+# Syck::Node objects, we cannot, for example, subclass Syck::Node and override #transform the "easy"
 # way. So the only choice is to monkeypatch, like this. And the only way to make this work
 # recursively with potentially call-specific options (that my feeble brain can think of) is to set
 # pseudo-global options on the first call and unset them once the recursive stack has fully unwound.
