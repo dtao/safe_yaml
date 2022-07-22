@@ -131,6 +131,10 @@ module SafeYAML
     require "safe_yaml/psych_resolver"
     require "safe_yaml/safe_to_ruby_visitor"
 
+    # Rails 6.1.6.1 changes ActiveRecord::Coders::YAMLColumn default to safe_load.
+    # https://github.com/rails/rails/blob/v6.1.6.1/activerecord/CHANGELOG.md#rails-6161-july-12-2022
+    # however, the safe_load used the deprecated method cause ArgumentError `ArgumentError: unknown keywords` error
+    # https://github.com/dtao/safe_yaml/blob/0b4736d31e8880fec1be8521c5a95b43b46eef8c/lib/safe_yaml/load.rb#L134-L153
     def self.load(yaml, filename=nil, options={})
       # If the user hasn't whitelisted any tags, we can go with this implementation which is
       # significantly faster.
@@ -146,7 +150,10 @@ module SafeYAML
       else
         safe_resolver = SafeYAML::PsychResolver.new(options)
         tree = SafeYAML::MULTI_ARGUMENT_YAML_LOAD ?
-          Psych.parse(yaml, filename) :
+          # Passing filename with the 2nd argument of Psych.parse is deprecated.
+          # Use keyword argument like Psych.parse(yaml, filename: ...) instead.'
+          # https://github.com/ruby/psych/blob/0abce07b908fa0128223a3e11f2eeb4be0c191d6/lib/psych.rb#L386
+          Psych.parse(yaml, filename: filename) :
           Psych.parse(yaml)
         return safe_resolver.resolve_node(tree)
       end
